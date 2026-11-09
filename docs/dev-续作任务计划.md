@@ -1,6 +1,6 @@
 # dev 分支 · 续作任务计划（换机接手用）
 
-> 生成：2026-11-09 · 基线 `bf5e410`（main）· 适用分支 `dev` · **已推送 GitHub（main + dev）**
+> 生成：2026-11-09 · 基线分支 `main` · 适用分支 `dev` · **已推送 GitHub（main + dev）** · 历史已剔除示例 PNG
 > 本文自包含：**读完即可在另一台机器从 S3 接着做，不需要翻聊天记录。**
 > 完整设计依据见 `docs/分步开发路线-移除一键生成.md`（同一分支，已提交）。
 
@@ -14,7 +14,7 @@ docs/dev-续作任务计划.md 和 docs/分步开发路线-移除一键生成.md
 不要重新调研架构、不要重做已完成阶段、不要重新讨论已锁定的决策。
 
 【当前状态】
-- 代码已推送 GitHub：https://github.com/kevinzgai/ShortPlay-Studio.git，分支 dev（main 是基线 bf5e410）。
+- 代码已推送 GitHub：https://github.com/kevinzgai/ShortPlay-Studio.git，分支 dev（main 是基线分支）。
 - S0/S1/S2 已完成：engine.js 的稳定键（sceneStableKey / shotKeyOf / keyShots）、studio.js 的
   S.steps 状态机与旧存档迁移、移除「AI 一键分集 + 分镜」、工作区顺序翻转为
   ①改剧本 ②分集 ③分镜 ④定妆、stepV 存档迁移。全量回归 17/17 套 PASS。
@@ -189,7 +189,7 @@ Python 侧脚本（`verify_platform.py` 等）同样检查一次 playwright 路�
 | `llm-config.bat` / `llm-providers.json` / `.env*` | **含真实 API Key，禁止提交** | 在新机按 README 第 49 行说明重建；万相 key 走这里 |
 | `projects/`（29 个真实项目） | 本机运行数据 | 不迁移也能开发；要测旧存档迁移就拷几个 `project.json` |
 | `dist/` | 构建产物 | `npm run build` 重新生成 |
-| `examples/assets/`（71M 测试图） | 运行时出图产物、体积过大 | 不提交；新机跑出图时自动生成 |
+| `examples/assets/`（本机 71M 测试图） | 运行时出图产物、体积过大 | 已加入 `.gitignore`；历史里的 51 张示例图也已剔除，新机跑出图时自动生成 |
 | `screenshots/`、`.tts/`、`.workbuddy/` | 运行/个人数据 | 忽略 |
 | `MIGRATION.md` | 含本机绝对路径的运维记录 | 忽略 |
 | `~/.ssh/id_ed25519_github` | 本机 GitHub 专用私钥，禁止外传 | 新机另生成一对，把公钥加到 GitHub 账号 |
@@ -198,15 +198,16 @@ Python 侧脚本（`verify_platform.py` 等）同样检查一次 playwright 路�
 
 ## 7. 分支与提交状态
 
-- 本地分支 **`dev`**（从 `main@bf5e410` 新建），含 S0/S1/S2 全部代码改动、`README.md` 同步、`docs/` 两份文档、三份 `tools/baseline-*.txt`。
-- **✅ 已推送到 `github.com:kevinzgai/ShortPlay-Studio.git`**（2026-11-09）：`dev` → `7e3ca80`、`main` → `bf5e410`；`dev` 已设 upstream 跟踪 `origin/dev`。用 `git ls-remote --heads origin` 可自行核对。
+- 本地分支 **`dev`**（从基线分支 `main` 新建），含 S0/S1/S2 全部代码改动、`README.md` 同步、`docs/` 两份文档、三份 `tools/baseline-*.txt`。
+- **✅ 已推送到 `github.com:kevinzgai/ShortPlay-Studio.git`**（2026-11-09）：`dev` 与 `main` 均已推送，`dev` 已设 upstream 跟踪 `origin/dev`。用 `git ls-remote --heads origin` 核对。
+- **⚠️ 2026-11-09 做过一次历史重写**（剔除 51 张示例 PNG，仓库 47.6 MB → 约 1 MB）：**所有旧 commit hash 全部失效**，本文不再写死 hash，以远程当前值为准；桌面 bundle / patch 也已按新历史重导。
 - `origin` 使用 **SSH**：`git@github.com:kevinzgai/ShortPlay-Studio.git`。本机 `~/.ssh/config` 的 `Host github.com` 段指向专用密钥 `~/.ssh/id_ed25519_github`（`IdentitiesOnly yes`）。
 - **坑**：本机原有的 `~/.ssh/id_rsa` 是绑定 `wd-hub` 仓库的 Deploy Key，`ssh -T git@github.com` 会显示 `Hi kevinzgai/wd-hub!` 看似认证成功，但推这个仓库报 `Permission ... denied to deploy key`。GitHub 不允许同一把 deploy key 复用到别的仓库，别再拿旧密钥试。
 - 新机 clone 用 HTTPS 即可（免凭证）；要 push 就配自己的 SSH 公钥，或改用 HTTPS + PAT。
 
 ### 离线兜底：桌面交接包（仍保留，非必需）
 
-`Desktop/ShortPlay-dev-handoff/` 内有 3 个 patch + 1 个 bundle（含完整 dev 历史，`git bundle verify` 通过）。只有在不方便联网、想完全离线迁移时才需要：
+`Desktop/ShortPlay-dev-handoff/` 内有若干 patch + 1 个 bundle（含重写后的完整 dev 历史，`git bundle verify` 通过）。只有在不方便联网、想完全离线迁移时才需要：
 
 ```bash
 git clone /path/to/ShortPlay-dev.bundle ShortPlay-Studio -b dev
