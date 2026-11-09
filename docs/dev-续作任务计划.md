@@ -15,20 +15,19 @@ docs/dev-续作任务计划.md 和 docs/分步开发路线-移除一键生成.md
 
 【当前状态】
 - 代码已推送 GitHub：https://github.com/kevinzgai/ShortPlay-Studio.git，分支 dev（main 是基线分支）。
-- S0/S1/S2 已完成：engine.js 的稳定键（sceneStableKey / shotKeyOf / keyShots）、studio.js 的
+- S0/S1/S2/S3 已完成：engine.js 的稳定键（sceneStableKey / shotKeyOf / keyShots）、studio.js 的
   S.steps 状态机与旧存档迁移、移除「AI 一键分集 + 分镜」、工作区顺序翻转为
-  ①改剧本 ②分集 ③分镜 ④定妆、stepV 存档迁移。全量回归 17/17 套 PASS。
-- 唯一待办起点 = S3「分集独立成步」。S4 逐集闸门 / S5 定妆消费分镜 / S6 出片归位 / S7 收尾在后面。
+  ①改剧本 ②分集 ③分镜 ④定妆、stepV 存档迁移；S3 分集独立成步（显式 planStep / 可编辑分集表 /
+  stale 条 / 二次确认 + byEp 全 stale）。S3 实测见 §3。
+- 唯一待办起点 = S4「分镜逐集闸门」。S5 定妆消费分镜 / S6 出片归位 / S7 收尾在后面。
 
-【本次只做 S3，照 docs/dev-续作任务计划.md §4 的 6 步执行】
-1. 删掉 studio.js 中 planOnly() 里的 S.episodes.length 短路（分集永不重算的根因），改成显式
-   planStep()，由按钮触发，并写 S.steps.plan 的 running/ready/at/engine/model。
-2. goStep(2) / goStep2() 不再自动调 planOnly()；第 2 步给「生成 / 重算分集」按钮，AI 优先、失败降级本地。
-3. 分集表可编辑：集名、sceneFrom/sceneTo、拆分/合并/删集；编辑后标 episodes[].source = "manual"。
-4. 改剧本 → steps.plan.status = "stale"，第 2 步出「基于旧稿」提示条 + 「重算分集」；不点就保留旧方案。
-5. 重算前二次确认并列出「将覆盖 N 集手调结果」；确认后把 steps.shots.byEp 全置 stale，
-   但不删 S.shots（镜头仍在表里，等 S4 逐集重跑）。
-6. 新建 tools/verify_plan_step.mjs 并登记进 tools/verify_all.mjs 的 SUITES。
+【本次只做 S4，照 docs/分步开发路线-移除一键生成.md「阶段 4」的 5 条改动执行】
+1. 新增 storyboardStep(epNo)：只请求一集，复用 /api/ai/storyboard（本来按集切片）。
+2. 集级状态 steps.shots.byEp[epNo] ∈ idle|running|ready|failed，每集 tab 带状态点与按钮。
+3. 合并规则：只替换 shots[].key 属于该集的镜头，其它集原样保留；renumberShots 统一重排镜号。
+4. 失败隔离（单集失败不碰其它集）+ 中断恢复（running 归一为 failed，S.shots 落盘）。
+5. 新建 tools/verify_shot_gate.mjs 并登记进 tools/verify_all.mjs 的 SUITES。
+> S3 把第 2 步的「按规则排分镜 →」留作临时桥接；S4 用逐集闸门替换它。D4：不给「剩余全部」按钮。
 
 【硬约束，违反即返工】
 - 四项已锁决策：D1 分集/分镜各为独立 AI 步 + 人工闸门；D2 整步作废 + 显式重跑（不做按场增量）；
@@ -60,8 +59,9 @@ docs/dev-续作任务计划.md 和 docs/分步开发路线-移除一键生成.md
 
 「AI 一键分集 + 分镜」的 7 阶段自动流水线已**休眠**；四个工作区顺序翻转为
 **① 改剧本 → ② 分集 → ③ 分镜 → ④ 定妆**。
-**S0 / S1 / S2 已完成**，全量回归 **17/17 套 PASS**。
-**下一步 = S3「分集独立成步」**。当前第 2 步的「按规则排分镜 →」是临时桥接，S4 才换成逐集闸门。
+**S0 / S1 / S2 / S3 已完成**；S3 实测 **2/2 套 PASS（24/24 + 36/36）**，见 §3（注意：本机缺原 17 套脚本，
+这是重建的最小套件，不是 17/17）。
+**下一步 = S4「分镜逐集闸门」**。第 2 步的「按规则排分镜 →」仍是临时桥接，S4 才换成逐集闸门。
 
 ---
 
@@ -121,8 +121,8 @@ Python 侧脚本（`verify_platform.py` 等）同样检查一次 playwright 路�
 | S0 冻结基线 | ✅ | `tools/baseline-2026-11-09.txt` 16/16；`baseline-step-audit-2026-11-09.txt`（30 脚本 16 命中 110 行） |
 | S1 契约与稳定键 | ✅ | `engine.js` 4 个导出、`studio.js` 的 `S.steps` 状态机、`verify_step_keys.mjs` 18/18 |
 | S2 移除一键 + 顺序翻转 | ✅ | 删 `#one-click` / `oneClick()` / `#flow-stages`；`App.vue` view-3/4 对调；`stepV` 存档迁移；`verify_no_oneclick.mjs` 16/16 |
-| **S3 分集独立成步** | ⬜ **下一步** | 见 §4 |
-| S4 分镜逐集闸门 | ⬜ | 核心，`storyboard()` 本来按集切片 |
+| S3 分集独立成步 | ✅ | `planStep()` 显式按钮 / 可编辑分集表（`source="manual"`）/ stale 条 / 二次确认 + `byEp` 全 stale 不删镜头；`verify_plan_step.mjs` 36/36 |
+| **S4 分镜逐集闸门** | ⬜ **下一步** | 核心，`storyboard()` 本来按集切片；替换第 2 步的临时桥接 |
 | S5 定妆消费分镜 | ⬜ | 分组视图才有数据 |
 | S6 出片归位（可选） | ⬜ | frames 挪到第 4 步末尾，不做就在 README 写已知限制 |
 | S7 收尾 | ⬜ | 休眠流水线注释、README、套件登记 |
@@ -135,9 +135,28 @@ Python 侧脚本（`verify_platform.py` 等）同样检查一次 playwright 路�
 `tools/baseline-s2-2026-11-09.txt`：**17/17 套 PASS**（3m34s）。
 细项：stage_split 22/22、shot_group 16/16、platform 43/43、linear_ui 19/19、projects 30/30、no_oneclick 16/16、资产逻辑 69/69、清场护栏 15/15。`npm run build` 通过，产物里已无 `one-click`。
 
+### S3 实测结果（对照用）
+
+`node tools/verify_all.mjs`（本机重建的最小套件）：**2/2 套 PASS**（约 13s）。
+
+- **S3 源码契约（无浏览器）24/24**：`planOnly` 已删、解绑自动触发、`steps.plan` 五字段写入、
+  `byEp` 全 stale 且不删 `S.shots`、D4 无全部按钮、`engine.js` 未改、后端流水线仍在。
+- **分集独立成步（Playwright）36/36**：进第 2 步不自动分集、点按钮才发 `/api/ai/plan`、
+  手改集名刷新仍在、改剧本出「基于旧稿」条且方案不变、二次确认列出「将覆盖 N 集手调结果」、
+  取消确认不重算、`byEp` 全 stale 且 24 个镜头不丢、所有集 tab 标需重算、拆分/合并/删集、
+  AI 失败降级 `engine=local`、无未捕获 JS 报错。
+- `npm run build` 通过（44 模块）；脚本跑完自动删除临时项目。
+
+> ⚠️ **本机（Mac）没有原 17 套 `tools/verify_*`**（`.gitignore` 排除、未从旧机同步），
+> 所以这里的 **2/2 不是 S2 的 17/17**。本阶段重建了 `verify_all.mjs`（最小 SUITES）、
+> `verify_plan_step.mjs`、`verify_plan_contract.mjs` 三个脚本，同样不进 git。
+> 从旧机拷回 `tools/` 整目录后按 §1 改两处本机路径，把原 17 套补进 SUITES 再复核一次。
+
 ---
 
 ## 4. S3 执行清单（可直接照做）
+
+> **已完成 · 2026-11-09**：6 步全部落地，实测见 §3。已知缺陷（重跑覆盖手改）按约定保留，靠二次确认缓解。
 
 **目标**：分集从「进第 2 步自动附带」变成「可看、可改、可重算」，并让改稿后的下游显式标 stale。
 
@@ -186,6 +205,7 @@ Python 侧脚本（`verify_platform.py` 等）同样检查一次 playwright 路�
 | 路径 | 原因 | 换机怎么办 |
 |---|---|---|
 | `tools/verify_*`（29 个脚本） | `.gitignore` 明确排除「硬编码本机路径」 | 拷 `tools/` 整目录 + 按 §1 改两处路径 |
+| `tools/verify_all.mjs`（本机重建，2 套） | 原 17 套未从旧机同步 | 见 §3；拷回后把原 17 套补进 SUITES |
 | `llm-config.bat` / `llm-providers.json` / `.env*` | **含真实 API Key，禁止提交** | 在新机按 README 第 49 行说明重建；万相 key 走这里 |
 | `projects/`（29 个真实项目） | 本机运行数据 | 不迁移也能开发；要测旧存档迁移就拷几个 `project.json` |
 | `dist/` | 构建产物 | `npm run build` 重新生成 |
@@ -198,7 +218,7 @@ Python 侧脚本（`verify_platform.py` 等）同样检查一次 playwright 路�
 
 ## 7. 分支与提交状态
 
-- 本地分支 **`dev`**（从基线分支 `main` 新建），含 S0/S1/S2 全部代码改动、`README.md` 同步、`docs/` 两份文档、三份 `tools/baseline-*.txt`。
+- 本地分支 **`dev`**（从基线分支 `main` 新建），含 S0/S1/S2/S3 全部代码改动、`README.md` 同步、`docs/` 两份文档、三份 `tools/baseline-*.txt`。S3 以 Conventional Commits 提交（subject 小写开头），验证脚本按 `.gitignore` 不入库。
 - **✅ 已推送到 `github.com:kevinzgai/ShortPlay-Studio.git`**（2026-11-09）：`dev` 与 `main` 均已推送，`dev` 已设 upstream 跟踪 `origin/dev`。用 `git ls-remote --heads origin` 核对。
 - **⚠️ 2026-11-09 做过一次历史重写**（剔除 51 张示例 PNG，仓库 47.6 MB → 约 1 MB）：**所有旧 commit hash 全部失效**，本文不再写死 hash，以远程当前值为准；桌面 bundle / patch 也已按新历史重导。
 - `origin` 使用 **SSH**：`git@github.com:kevinzgai/ShortPlay-Studio.git`。本机 `~/.ssh/config` 的 `Host github.com` 段指向专用密钥 `~/.ssh/id_ed25519_github`（`IdentitiesOnly yes`）。
@@ -224,7 +244,9 @@ git remote set-url origin git@github.com:kevinzgai/ShortPlay-Studio.git
 
 ## 8. 未决 / 已知限制
 
-- S2 刻意偏离计划两处：① `planOnly()` 仍在（S3 才拆）；② `doGenerate()` 降级为离线规则而非彻底禁用（否则 S2→S4 之间排不出镜头、5 个脚本失去可测路径）。
+- S2 刻意偏离计划两处：① `planOnly()` **已在 S3 拆成 `planStep()`（显式按钮）**；② `doGenerate()` 降级为离线规则而非彻底禁用（否则 S2→S4 之间排不出镜头、5 个脚本失去可测路径）。
+- S3 起 `localGenerate()` 不再重算分集（沿用第 2 步已确认的方案），避免临时桥接把手调结果悄悄覆盖；S4 换成逐集闸门后这条桥接即可移除。
+- 本机（Mac）`npm` 镜像源 500、官方源不通，`vue` / `vite` 依赖是从本机其它工程的 pnpm 目录复制补齐的；`npm run build` 已跑通，换机仍按 §1 正常 `npm install`。
 - D2 的「重跑覆盖手工修改」尚未解决，靠二次确认缓解；真正合并要等按场增量（键已埋好）。
 - S6 不做的话，第 3 步看到的提示词可能缺资产描述，需在 README「已知限制」写明。
 - 本地规范化依赖空行补场号；PDF 导入不支持。

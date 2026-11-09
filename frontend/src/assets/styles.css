@@ -476,6 +476,22 @@ table.shots .detail-brief{min-width:210px;max-width:280px;font-size:11px;color:v
   h1{font-size:25px;letter-spacing:-.5px}
   .toolbar .spacer{display:none}
 }
+
+/* ---- S3 · 第 2 步分集独立成步 ---- */
+.plan-stale-bar{display:flex;align-items:center;gap:10px;background:var(--warn-soft);
+  border-color:var(--warn-line);margin-bottom:14px;font-size:13px;color:var(--warn)}
+.plan-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.ep-title{flex:1;min-width:90px;max-width:190px;background:transparent;border:0;
+  border-bottom:1px solid var(--line);color:var(--text);font-size:13.5px;font-weight:590;
+  padding:2px 0;outline:none}
+.ep-title:focus{border-bottom-color:var(--primary)}
+.ep-range{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text-3);margin-bottom:7px}
+.ep-num{width:54px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:5px;
+  color:var(--text);font:12px var(--mono);padding:2px 5px;outline:none}
+.ep-num:focus{border-color:var(--primary)}
+.ep-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.ep-actions .btn{padding:3px 8px;font-size:11px}
+.ep-tab.needs-recalc{border-color:var(--warn-line);color:var(--warn)}
 @media (max-width:1100px){ .episode-grid{grid-template-columns:1fr} }
 
 /* 打印 / 另存 PDF：强制回到浅色纸面 */

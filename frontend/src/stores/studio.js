@@ -319,6 +319,10 @@ export function hydrate(data, info) {
   if (!Array.isArray(S.shots)) S.shots = [];
   if (!Array.isArray(S.episodes)) S.episodes = [];
   S.steps = normalizeSteps(d.steps, S.stale);
+  // S3：running 是瞬时态，刷新后按是否已有方案归一，避免按钮永久卡住
+  if (S.steps.plan.status === "running") S.steps.plan.status = S.episodes.length ? "ready" : "idle";
+  // 旧存档已有分集方案却没有 steps，按「已就绪」归一，别让第 2 步显示「尚未分集」
+  if (S.steps.plan.status === "idle" && S.episodes.length) S.steps.plan.status = "ready";
   S.shots = E.keyShots(S.shots, S.episodes);   // 旧存档补稳定键，只加字段不改内容
   S.step = Number(S.step) || 1;
   // S2 起 3/4 语义对调（3 分镜 / 4 定妆）。旧存档没有 stepV，按旧含义（3 定妆 / 4 分镜）换回来，
@@ -620,10 +624,14 @@ function autoTitleProject() {
   S.projectName = t;
   mirrorCache(S.projectId, t, projectData());
 }
+/** S3：只要已有分集方案，上游一改就标成「基于旧稿」（idle 的旧存档同样算）。 */
+function stalePlanIfAny() {
+  if (S.episodes.length && S.steps.plan.status !== "running") S.steps.plan.status = "stale";
+}
 function markStale(reason) {
   S.stale = reason;
   const staleIfReady = (k) => { if (S.steps[k].status === "ready") S.steps[k].status = "stale"; };
-  if (reason === "script") { staleIfReady("plan"); staleIfReady("shots"); }
+  if (reason === "script") { staleIfReady("plan"); staleIfReady("shots"); stalePlanIfAny(); }
   else if (reason === "config") staleIfReady("shots");
   if (S.shots.length) save();
 }
@@ -649,7 +657,9 @@ export function localGenerate() {
   setTimeout(() => { ui.busyText = "正在编排镜头与景别…"; }, 260);
   setTimeout(() => {
     begin();
-    S.episodes = S.episodeMode === "none" ? [] : E.localEpisodes(S.parsed, S.episodeMode);
+    // S3：分集已是独立的第 2 步，排分镜时沿用已确认的方案，别把手调结果悄悄覆盖。
+    if (S.episodeMode === "none") S.episodes = [];
+    else if (!S.episodes.length) S.episodes = E.localEpisodes(S.parsed, S.episodeMode);
     const local = E.buildStoryboard(S.parsed, S.config, S.variant);
     S.shots = E.bindAssets(E.renumberShots(E.assignEpisodes(local, S.episodes), S.episodes), S.assets);
     S.shots.forEach((s) => { s.originCode = s.code; s.ai = false; });
@@ -895,23 +905,145 @@ export function resumeParseTask() {
 
 function renumber() { S.shots = E.renumberShots(S.shots, S.episodes); }
 
-/** 进入第 2 步时先让模型只做「分集」，用户能先看切法再决定要不要生成分镜 */
-export function planOnly() {
-  if (FORCE_LOCAL || !S.llmAvailable || !S.aiEnabled || S.aiBusy || S.planBusy || S.episodes.length) return;
+/* ---------------------- S3 · 分集独立成步 ----------------------
+   分集不再由「进第 2 步」自动附带：只认按钮。重算走 AI.plan，失败降级本地规则；
+   重算或手改后把 steps.shots.byEp 全标 stale（D2 整步作废），但绝不删 S.shots。 */
+
+/** 手调过的集数，二次确认文案用。 */
+export function manualEpisodeCount() {
+  return S.episodes.filter((ep) => ep && ep.source === "manual").length;
+}
+
+/** 只标 stale，不动 S.shots：镜头留在表里，等 S4 逐集重跑后归位。 */
+function invalidateShotsForPlan() {
+  const byEp = {};
+  S.episodes.forEach((ep) => { byEp[ep.no] = "stale"; });
+  if (!S.episodes.length) byEp.all = "stale";
+  S.steps.shots.byEp = byEp;
+  if (S.shots.length) S.steps.shots.status = "stale";
+}
+
+/** 显式重算分集：按钮触发；已有方案时先二次确认并列出将覆盖的手调结果。 */
+export function planStep(opts) {
+  const skipConfirm = !!(opts && opts.skipConfirm);
+  if (S.planBusy || S.aiBusy) { toast("分集正在生成，等这一轮结束再操作", "warn"); return Promise.resolve(false); }
+  if (!S.script.replace(/\s/g, "")) { toast("先放一段剧本文字进来", "warn"); return Promise.resolve(false); }
   if (!S.parsed) reparse();
+  if (!S.parsed || !S.parsed.scenes.length) { toast("剧本还没解析出场次，先整理稿子", "warn"); return Promise.resolve(false); }
+  const manual = manualEpisodeCount();
+  if (!skipConfirm && S.episodes.length) {
+    const msg = "重算分集会覆盖当前 " + S.episodes.length + " 集方案，其中 " + manual + " 集是你手调过的。\n"
+      + "将覆盖 " + manual + " 集手调结果；已排好的镜头不会删除，但会全部标记「需重算」。\n确定继续吗？";
+    if (!window.confirm(msg)) return Promise.resolve(false);
+  }
   S.planBusy = true;
-  AI.plan(S.script, S.parsed, S.episodeMode === "none" ? 1 : S.episodeMode)
+  S.steps.plan.status = "running";
+  S.steps.plan.at = Date.now();
+  const wanted = S.episodeMode === "none" ? 1 : S.episodeMode;
+  const useAI = !FORCE_LOCAL && S.llmAvailable && S.aiEnabled;
+  const apply = (episodes, engine, model) => {
+    begin();
+    S.episodes = episodes.map((ep, i) => Object.assign({}, ep, { no: i + 1 }));
+    S.episodes.forEach((ep) => { ep.source = engine === "ai" ? "ai" : "local"; });
+    S.episodeSource = engine === "ai" ? "ai" : "local";
+    if (model) S.aiModel = model;
+    S.steps.plan = { status: "ready", at: Date.now(), engine: engine, model: model || "" };
+    invalidateShotsForPlan();
+    S.activeEpisode = "all";
+    S.planBusy = false;
+    save();
+    toast((engine === "ai" ? "AI 已重新分成 " : "已按本地规则分成 ") + S.episodes.length + " 集；第 3 步需逐集重排镜头",
+      engine === "ai" ? "ok" : "warn");
+  };
+  if (!useAI) {
+    // 离线 / 无模型：本地规则兜底，第 2 步照样能出方案
+    setTimeout(() => {
+      try { apply(E.localEpisodes(S.parsed, wanted), "local", ""); }
+      catch (err) {
+        S.planBusy = false;
+        S.steps.plan.status = S.episodes.length ? "ready" : "idle";
+        toast("分集失败：" + err.message, "err");
+      }
+    }, 0);
+    return Promise.resolve(true);
+  }
+  return AI.plan(S.script, S.parsed, wanted)
     .then((p) => {
-      S.planBusy = false;
-      if (!p.episodes || !p.episodes.length || S.episodes.length) return;
-      begin();
-      S.episodes = p.episodes;
-      S.episodes.forEach((ep) => { ep.source = "ai"; });
-      S.episodeSource = "ai"; S.aiModel = p.model || S.llmModel || "";
-      save();
-      toast("AI 建议分成 " + S.episodes.length + " 集，点「生成分镜」就会逐集排好", "ok");
+      const eps = (p && p.episodes) || [];
+      if (!eps.length) throw new Error("AI 没有给出有效的分集方案");
+      apply(eps, "ai", (p && p.model) || S.llmModel || "");
+      return true;
     })
-    .catch(() => { S.planBusy = false; });  // 静默降级，一键生成时 AI.run 会再试一次
+    .catch((err) => {
+      // AI 失败降级本地规则：不发第二次请求，也不改引擎的分集规则
+      apply(E.localEpisodes(S.parsed, wanted), "local", "");
+      toast("AI 分集失败，已降级本地规则：" + ((err && err.message) || "未知原因"), "warn");
+      return false;
+    });
+}
+
+/** 分集表编辑：集号重排 + 作废下游；镜头一个不删、一个不改。 */
+function commitEpisodeEdit() {
+  S.episodes.forEach((ep, i) => { ep.no = i + 1; });
+  S.episodeSource = "manual";
+  invalidateShotsForPlan();
+  save();
+}
+export function editEpisode(no, patch) {
+  const ep = S.episodes.find((e) => Number(e.no) === Number(no));
+  if (!ep) return;
+  begin();
+  if (patch.title !== undefined) ep.title = String(patch.title).slice(0, 40);
+  if (patch.sceneFrom !== undefined) {
+    ep.sceneFrom = Math.max(1, Number(patch.sceneFrom) || 1);
+    if (ep.sceneFrom > Number(ep.sceneTo)) ep.sceneTo = ep.sceneFrom;
+  }
+  if (patch.sceneTo !== undefined) {
+    ep.sceneTo = Math.max(1, Number(patch.sceneTo) || 1);
+    if (ep.sceneTo < Number(ep.sceneFrom)) ep.sceneFrom = ep.sceneTo;
+  }
+  ep.source = "manual";
+  commitEpisodeEdit();
+}
+export function splitEpisode(no) {
+  const idx = S.episodes.findIndex((e) => Number(e.no) === Number(no));
+  if (idx < 0) return;
+  const ep = S.episodes[idx];
+  if (Number(ep.sceneTo) <= Number(ep.sceneFrom)) { toast("这一集只有一场，没法再拆", "warn"); return; }
+  const mid = Math.floor((Number(ep.sceneFrom) + Number(ep.sceneTo)) / 2);
+  begin();
+  const base = ep.title || ("第" + ep.no + "集");
+  const tail = Object.assign({}, ep, {
+    sceneFrom: mid + 1, sceneTo: Number(ep.sceneTo), title: (base + " · 后半").slice(0, 40)
+  });
+  ep.sceneTo = mid; ep.title = (base + " · 前半").slice(0, 40);
+  ep.source = "manual"; tail.source = "manual";
+  S.episodes.splice(idx + 1, 0, tail);
+  commitEpisodeEdit();
+  toast("已拆成两集；第 3 步镜头需重排", "ok");
+}
+export function mergeEpisode(no) {
+  const idx = S.episodes.findIndex((e) => Number(e.no) === Number(no));
+  if (idx < 0 || idx + 1 >= S.episodes.length) { toast("已经是最后一集了", "warn"); return; }
+  begin();
+  const a = S.episodes[idx], b = S.episodes[idx + 1];
+  a.sceneFrom = Math.min(Number(a.sceneFrom), Number(b.sceneFrom));
+  a.sceneTo = Math.max(Number(a.sceneTo), Number(b.sceneTo));
+  a.title = ((a.title || "第" + a.no + "集") + " + " + (b.title || "第" + b.no + "集")).slice(0, 40);
+  a.source = "manual";
+  S.episodes.splice(idx + 1, 1);
+  commitEpisodeEdit();
+  toast("已与下一集合并；第 3 步镜头需重排", "ok");
+}
+export function deleteEpisode(no) {
+  const idx = S.episodes.findIndex((e) => Number(e.no) === Number(no));
+  if (idx < 0) return;
+  if (S.episodes.length <= 1) { toast("至少保留一集", "warn"); return; }
+  begin();
+  S.episodes.splice(idx, 1);
+  S.episodes.forEach((ep) => { ep.source = "manual"; });
+  commitEpisodeEdit();
+  toast("已删掉一集；镜头仍在表里，第 3 步逐集重排后归位", "ok");
 }
 
 /* ------------------------------ 计算属性 ------------------------------ */
@@ -959,8 +1091,12 @@ export const hasFixable = computed(() => S.issues.some((i) => i.fix));
 export const aiEnabledUi = computed(() => S.llmAvailable && S.aiEnabled);
 export const episodeTabs = computed(() => S.episodes.map((ep) => ({
   no: ep.no, label: "E" + E.pad2(ep.no) + " · " + (ep.title || ("第" + ep.no + "集")),
-  count: S.shots.filter((s) => s.episode === ep.no).length
+  count: S.shots.filter((s) => s.episode === ep.no).length,
+  stale: S.steps.shots.byEp[ep.no] === "stale"
 })));
+/** S3：分集改过且已有镜头时，第 3 步给一条「全部需重算」的提示。 */
+export const shotsNeedRecalc = computed(() =>
+  S.shots.length > 0 && S.episodes.some((ep) => S.steps.shots.byEp[ep.no] === "stale"));
 
 /* ------------------------------ 资产 ------------------------------ */
 export const assetTabs = computed(() => [
@@ -1016,18 +1152,18 @@ export function goStep(n) {
   if (n >= 3 && !S.parsed) { toast("先在第 2 步完成 AI 拆解", "warn"); return; }
   if (n === 4 && !S.shots.length) { toast("还没有镜头，先在第 3 步排分镜，再来定妆", "warn"); return; }
   S.step = n; window.scrollTo(0, 0); save();
-  if (n === 2) planOnly();
+  // S3：进第 2 步不再自动附带分集，方案一律由「生成 / 重算分集」按钮显式产出。
 }
 export function goStep2() {
   if (!S.script.replace(/\s/g, "")) { toast("先放一段剧本文字进来", "warn"); return; }
-  reparse(); S.step = 2; window.scrollTo(0, 0); save(); planOnly();
+  reparse(); S.step = 2; window.scrollTo(0, 0); save();
 }
 export function setInputTab(tab) { S.inputTab = tab; }
 export function onScriptInput(e) {
   S.script = e.target.value;
   S.sourceKind = E.classifySource(S.script).kind;
   S.normReport = null;
-  reparse(); save();
+  reparse(); markStale("script"); save();
 }
 
 export function setScript(text, note) {
@@ -1184,8 +1320,8 @@ export function onConfigChange(e) {
   if (t.dataset.episodes !== undefined) {
     begin();
     S.episodeMode = t.value === "none" ? "none" : (Number(t.value) > 0 ? Number(t.value) : "auto");
-    markStale("config"); save();
-    toast("分集方式已更新，重新生成分镜时生效", "ok");
+    markStale("config"); stalePlanIfAny(); save();
+    toast("分集方式已更新，点「重算分集」后生效", "ok");
     return;
   }
   if (t.dataset.cfg !== undefined) {
@@ -2403,7 +2539,7 @@ function afterBoot() {
     .then((j) => {
       if (j && j.llm) {
         S.llmAvailable = true; S.llmModel = j.model || "";
-        if (S.step === 2) planOnly();
+        // S3：模型可用也不自动分集；刷新后保留旧方案，由用户显式点按钮重算。
       }
     }).catch(() => { /* 服务未启动：离线模式 */ });
 }

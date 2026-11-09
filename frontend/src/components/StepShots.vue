@@ -3,7 +3,7 @@
    资产定妆在下一步，这里只负责镜头本身：画面 / 景别 / 时长 / 台词 / 备注。 */
 import { computed } from "vue";
 import {
-  S, totalDuration, staleMsg, visibleShots, episodeTabs,
+  S, totalDuration, staleMsg, visibleShots, episodeTabs, shotsNeedRecalc,
   allSelected, someSelected, aiRedo, setActiveEpisode, setView, selectAll,
   printPage, doGenerate, goStep, regenBatch,
   delSelected, insertShot
@@ -50,6 +50,13 @@ const assetTip = computed(() => {
     <button class="btn sm quiet" id="to-assets" @click="goStep(4)">去定妆 / 改设定 →</button>
   </div>
 
+  <!-- S3：分集改过 → 所有集需重算，但镜头仍在表里 -->
+  <div v-if="shotsNeedRecalc" id="plan-recalc-bar" class="card pad"
+    style="margin-bottom:14px;background:var(--warn-soft);border-color:var(--warn-line)">
+    <div class="row"><span>⚠️ 分集方案已变更：全部 {{ S.episodes.length }} 集需重算；
+      已生成的 {{ S.shots.length }} 个镜头仍在表里，逐集重排后才会归位。</span></div>
+  </div>
+
   <div v-if="staleMsg" class="card pad" style="margin-bottom:14px;background:var(--warn-soft);border-color:#f0e2c4">
     <div class="row"><span>⚠️ {{ staleMsg }}</span><div class="spacer"></div>
       <button class="btn sm" id="regenerate-from-script" @click="doGenerate('force')">按当前剧本 / 设置重排</button></div>
@@ -80,7 +87,9 @@ const assetTip = computed(() => {
           全部<span class="ep-count">{{ S.shots.length }}</span>
         </button>
         <button v-for="ep in episodeTabs" :key="ep.no" class="ep-tab"
-          :class="{ active: String(S.activeEpisode) === String(ep.no) }" :data-episode="ep.no" @click="setActiveEpisode(ep.no)">
+          :class="{ active: String(S.activeEpisode) === String(ep.no), 'needs-recalc': ep.stale }"
+          :data-episode="ep.no" :data-recalc="ep.stale ? '1' : null"
+          :title="ep.stale ? '需重算' : ''" @click="setActiveEpisode(ep.no)">
           {{ ep.label }}<span class="ep-count">{{ ep.count }}</span>
         </button>
       </div>
