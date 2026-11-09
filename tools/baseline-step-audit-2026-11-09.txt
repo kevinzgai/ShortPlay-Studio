@@ -1,0 +1,114 @@
+# S0 步骤号 / 选择器引用清单 · 2026-11-09
+
+扫描范围: tools/*.mjs + tools/*.py，共 30 个文件
+用途: S2 顺序翻转(3<->4)、移除 #one-click 时，逐条核对，不许挂账。
+
+## verify_ai.py  (11 处)
+  38 | "() => (document.querySelector('#one-click')?.textContent || '').includes('AI')", timeout=20000)
+  41 | check("AI 一键按钮可见", "AI 一键分集" in page.inner_text("#one-click"))
+  43 | page.wait_for_selector(".ai-mode-box", timeout=10000)
+  44 | ai_box = page.locator(".ai-mode-box").first.text_content() or ""
+  46 | check("分集方式可选", page.locator("#episode-mode option").count() == 5)
+  51 | # ---------- 2. 第 2 步自动出分集方案 ----------
+  54 | page.click("#go-step2")
+  64 | page.click("#generate")
+  65 | # 进度现在走解析任务的浮层（.pp-running），不再是全局 busy-veil
+ 129 | page.wait_for_selector(".busy-veil.hidden", state="attached", timeout=40000)
+ 143 | page.wait_for_selector(".busy-veil.hidden", state="attached", timeout=200000)
+
+## verify_asset_layout.mjs  (1 处)
+  37 | await page.click("#go-step2");
+
+## verify_asset_ui.py  (3 处)
+  38 | # ---------- 1. 第 2 步的角色卡 ----------
+  40 | page.click("#go-step2")
+  86 | page.click("#generate")
+
+## verify_assets_panel.mjs  (1 处)
+  33 | await page.click("#go-step2");
+
+## verify_comfy_ui.mjs  (1 处)
+  35 | await page.click("#go-step2");
+
+## verify_copy_prompt.mjs  (1 处)
+ 104 | await page.evaluate(() => document.querySelector('.rail-step[data-step="2"]')?.click());
+
+## verify_linear_ui.mjs  (5 处)
+  62 | // 走完整流程：载入示例 → 第 2 步 → 生成分镜
+  65 | await page.click("#go-step2");
+  66 | await page.waitForSelector("#view-2:not(.hidden) .stat-grid", { timeout: 30000 });
+  72 | await page.click("#generate");
+  91 | check("已生成分镜且分镜表（第 4 步）激活", ws.shotCount > 0 && ws.activeStep === "4", `${ws.shotCount} 镜 / step ${ws.activeStep}`);
+
+## verify_parse_progress.mjs  (5 处)
+  59 | await page.click("#one-click");
+ 107 | // 结果真的落到第 3 步
+ 110 | step3: !document.querySelector("#view-3")?.classList.contains("hidden"),
+ 112 | stats: document.querySelector("#view-3 .stat .v")?.textContent || ""
+ 114 | check("生成完自动进入第 3 步", landed.step3, JSON.stringify(landed));
+
+## verify_parse_resume.mjs  (8 处)
+  48 | await page.click("#one-click");
+  78 | check("跑完后自动进第 3 步", await page.evaluate(() =>
+  79 | !document.querySelector("#view-3")?.classList.contains("hidden")));
+  88 | // ---- 取消：回到第 1 步再开一轮，5 秒后点 × ----
+  89 | await page.click(".rail-step[data-step='1']");
+  93 | await page.click("#one-click");
+ 113 | check("取消不写入结果、不跳第 3 步", await page.evaluate(() =>
+ 114 | document.querySelector("#view-3")?.classList.contains("hidden") === true));
+
+## verify_platform.py  (10 处)
+  72 | check("默认停在第 1 步", "active" in (page.locator('.rail-step[data-step="1"]').get_attribute("class") or ""))
+  73 | check("一键生成入口存在", page.locator("#one-click").count() == 1)
+  84 | page.click("#go-step2")
+  94 | page.click("#generate")
+ 104 | check("统计显示约 100 秒", "100" in page.inner_text("#view-4 .view-head"), page.inner_text("#view-4 .view-head")[:120])
+ 154 | page.click('[data-step="1"]')
+ 157 | page.click("#go-step2")
+ 174 | fixed = page.inner_text("#view-2")
+ 185 | page.click('[data-step="1"]')
+ 195 | page.click('[data-step="4"]')
+
+## verify_projects.mjs  (5 处)
+  33 | const stepNow = () => page.evaluate(() => document.querySelector(".rail-step.active")?.dataset.step || "");
+  66 | await page.click("#one-click");
+  70 | check("生成后停在分镜表（第 4 步）", (await stepNow()) === "4", await stepNow());
+  81 | check("刷新后仍在分镜表（第 4 步）", (await stepNow()) === "4", await stepNow());
+ 101 | check("新项目是空项目", (await shotCount()) === 0 && (await stepNow()) === "1", await stepNow());
+
+## verify_ref_lightbox.mjs  (1 处)
+  52 | await page.click("#go-step2");
+
+## verify_ref_original.mjs  (4 处)
+  77 | await page.click("#go-step2");
+ 142 | await page.click('.rail-step[data-step="2"]').catch(() => {});
+ 184 | // 老项目得有剧本才停在第 2 步（没有剧本会被退回第 1 步，那里没有资产面板）
+ 202 | await page.click('.rail-step[data-step="2"]').catch(() => {});
+
+## verify_ref_upload.mjs  (1 处)
+  78 | await page.click("#go-step2");
+
+## verify_stage_split.mjs  (18 处)
+  37 | const stepNos = await page.locator(".rail-step").evaluateAll((els) => els.map((e) => e.dataset.step));
+  38 | check("四个工作区且顺序 1-4", JSON.stringify(stepNos) === JSON.stringify(["1", "2", "3", "4"]), stepNos.join(","));
+  42 | // ---------- 2. 制作阶段 · 资产定妆（第 3 步） ----------
+  43 | await page.click('[data-step="3"]');
+  44 | await page.waitForSelector("#view-3:not(.hidden)", { timeout: 15000 });
+  46 | const h3 = await page.locator("#view-3 h1").innerText();
+  47 | check("第 3 步 = 资产定妆", h3 === "资产定妆", h3);
+  48 | const strip = await page.locator("#view-3 .asset-strip-item").count();
+  53 | check("本页无分镜表工具栏（职责已分开）", (await page.locator("#view-3 #view-tabs").count()) === 0);
+  56 | // ---------- 3. 制作阶段 · 分镜表（第 4 步） ----------
+  57 | await page.click('[data-step="4"]');
+  58 | await page.waitForSelector("#view-4:not(.hidden) #view-tabs", { timeout: 15000 });
+  60 | check("第 4 步有分镜卡", shots === data.shots.length, `${shots} / ${data.shots.length}`);
+  62 | check("本页不再塞资产面板", (await page.locator("#view-4 #asset-panel").count()) === 0);
+  67 | const before = document.querySelector('.rail-step[data-step="4"]').classList.contains("active");
+  73 | await page.click('[data-step="2"]');
+  74 | await page.waitForSelector("#view-2:not(.hidden)", { timeout: 15000 });
+  75 | check("回到拆解确认页", (await page.locator("#view-2 h1").innerText()).includes("剧本拆好了"));
+
+## verify_step1_script.mjs  (3 处)
+  46 | const h1 = await page.locator("#view-1 h1").innerText();
+  48 | check("左侧导航第 1 步叫「改剧本」",
+  49 | (await page.locator('.rail-step[data-step="1"]').innerText()).includes("改剧本"));
