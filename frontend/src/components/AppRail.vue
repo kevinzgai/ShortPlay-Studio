@@ -48,6 +48,7 @@ const stageProg = (key) => stepsOf(key).filter((s) => stepNo.value >= s.no).leng
     <div class="rail-label">工具</div>
     <div class="rail-tools">
       <button class="rail-tool" id="settings-btn" @click="openModal('settings')"><span class="ico">⚙</span>生成设置</button>
+      <button class="rail-tool" id="system-settings-btn" @click="openModal('system')"><span class="ico">⛭</span>系统设置</button>
       <button class="rail-tool" id="agents-btn" @click="openModal('agents')"><span class="ico">◈</span>Agent 工作台</button>
       <button class="rail-tool" id="help-btn" @click="openModal('help')"><span class="ico">?</span>使用说明</button>
     </div>

@@ -3,7 +3,7 @@ import {
   ui, S, runToastAction, closeModal, closeExport, doGenerate
 } from "../stores/studio.js";
 import SettingsFields from "./SettingsFields.vue";
-import ModelSettings from "./ModelSettings.vue";
+import SystemSettings from "./SystemSettings.vue";
 import AgentWorkbench from "./AgentWorkbench.vue";
 import ProjectPanel from "./ProjectPanel.vue";
 
@@ -23,9 +23,10 @@ function regenerateFromSettings() {
 
   <div id="modal-root">
     <div v-if="ui.modal" class="modal-veil" @click.self="closeModal">
-      <div class="modal" :class="{ 'aw-modal': ui.modal.type === 'agents', 'pp-modal': ui.modal.type === 'projects', 'st-modal': ui.modal.type === 'settings' }">
+      <div class="modal" :class="{ 'aw-modal': ui.modal.type === 'agents', 'pp-modal': ui.modal.type === 'projects', 'st-modal': ui.modal.type === 'settings' || ui.modal.type === 'system' }">
         <div class="m-head">
-          <h2>{{ ui.modal.type === "settings" ? "生成设置"
+          <h2>{{ ui.modal.type === "settings" ? "生成设置 · 只影响本项目"
+            : ui.modal.type === "system" ? "系统设置 · 全局生效"
             : ui.modal.type === "agents" ? "Agent 工作台 · 角色与技能注册表"
             : ui.modal.type === "projects" ? "项目 · 创建 / 打开 / 管理" : "怎么用 · 两阶段出片" }}</h2>
           <button class="x" data-close @click="closeModal">×</button>
@@ -36,12 +37,16 @@ function regenerateFromSettings() {
             <ProjectPanel />
           </template>
           <template v-else-if="ui.modal.type === 'settings'">
-            <div class="st-wrap">
-              <ModelSettings />
-            </div>
+            <p class="modal-scope">
+              这里只影响<b>当前项目</b>的分集与分镜编排，随项目一起保存。
+              换模型 / 换出图引擎请到「系统设置」（全局，不随项目变化）。
+            </p>
             <div class="settings-body" style="display:grid;padding:0 20px;border:none">
               <SettingsFields />
             </div>
+          </template>
+          <template v-else-if="ui.modal.type === 'system'">
+            <SystemSettings />
           </template>
           <template v-else-if="ui.modal.type === 'agents'">
             <AgentWorkbench />
@@ -58,14 +63,18 @@ function regenerateFromSettings() {
             <h3>快捷键与安全</h3>
             <p><code>Ctrl+Z</code> 撤销、<code>Ctrl+Shift+Z</code> 重做。内容按项目存在本机 <code>projects/</code> 目录，改完自动保存，刷新或重开浏览器都会回到上次打开的项目与步骤。顶栏项目胶囊可以新建 / 切换 / 重命名 / 复制 / 删除，删除的项目会移到 <code>projects/.trash/</code>。导出的 CSV / Markdown / 视频提示词都会带上集信息。</p>
             <h3>关于 AI</h3>
-            <p>双击 <code>start.bat</code> 启动本机服务并配好模型后，AI 会自动分集、逐集分镜；模型只做创作决策，服务端负责校验与纠正（非法景别、超长时长、场次越界、重复镜头），台词不在原文里会明确标注待核对。没配 Key、断网或模型失败时自动降级到内置规则引擎，核心功能照常可用。</p>
+            <p>启动本机服务后，到 <b>系统设置 · 文字模型</b> 配一条 Key，AI 就会接手分集与分镜；模型只做创作决策，服务端负责校验与纠正（非法景别、超长时长、场次越界、重复镜头），台词不在原文里会明确标注待核对。没配 Key、断网或模型失败时自动降级到内置规则引擎，核心功能照常可用。</p>
           </template>
         </div>
 
         <div class="m-foot">
           <template v-if="ui.modal.type === 'settings'">
             <button class="btn" data-close @click="closeModal">关闭</button>
-            <button class="btn primary" id="modal-regenerate" @click="regenerateFromSettings">按当前设置重排分镜</button>
+            <button class="btn primary" id="modal-regenerate" @click="regenerateFromSettings">按当前参数重排分镜（本地规则）</button>
+          </template>
+          <template v-else-if="ui.modal.type === 'system'">
+            <span class="inline-note">这里是全局配置，改完立即生效 · 不进撤销栈</span>
+            <button class="btn primary" data-close @click="closeModal">关闭</button>
           </template>
           <template v-else-if="ui.modal.type === 'projects'">
             <span class="inline-note">切换项目前会自动保存当前项目 · 删除移到 projects/.trash</span>

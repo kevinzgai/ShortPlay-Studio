@@ -1,6 +1,7 @@
 # ---- 本机私密配置（含真实 API Key，禁止提交）----
 llm-config.bat
 llm-providers.json
+engine-config.json
 .env
 .env.*
 !.env.example

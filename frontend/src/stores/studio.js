@@ -107,6 +107,11 @@ export const ui = reactive({
     list: [], active: "", env: null, loaded: false,
     busy: "", testing: "", result: null
   },
+  // 出图引擎配置（全局单例，与语言模型的分条列表不同）：纯界面态，不进撤销
+  engine: {
+    loaded: false, busy: "", testing: "", result: null,
+    config: {}, models: [], modelsBusy: false, modelsHost: ""
+  },
   // 后端拆解任务的实时进度（纯界面态：不进撤销快照、不落盘，刷新后由 /api/parse/latest 接回）
   parse: {
     visible: false, id: "", project: "", status: "queued", percent: 0, done: 0, total: 7,
@@ -2440,6 +2445,64 @@ export function refreshLlmConfig() {
       return j;
     })
     .catch(() => null);
+}
+
+/** 读取出图引擎配置：每项带 source（file / env / default），界面据此提示从哪生效。 */
+export function loadEngine(force) {
+  if (location.protocol === "file:") return Promise.resolve(null);
+  if (ui.engine.loaded && !force) return Promise.resolve(null);
+  ui.engine.busy = "load";
+  return AI.engineConfig()
+    .then((j) => { ui.engine.config = j || {}; ui.engine.loaded = true; return j; })
+    .catch((e) => { toast("读取引擎配置失败：" + e.message, "err"); return null; })
+    .finally(() => { ui.engine.busy = ""; });
+}
+
+/** 保存引擎配置：Key 留空 = 不改已存的；顺手刷新 ComfyUI 在线状态。 */
+export function saveEngine(draft) {
+  const body = {
+    comfyHost: draft.comfyHost || "", comfyModel: draft.comfyModel || "",
+    qwenUrl: draft.qwenUrl || "", qwenModel: draft.qwenModel || "",
+    qwenSize: draft.qwenSize || ""
+  };
+  if (draft.clearQwenKey) body.clearQwenKey = true;
+  else if (draft.qwenKey) body.qwenKey = draft.qwenKey;
+  ui.engine.busy = "save";
+  return AI.engineSave(body)
+    .then((j) => {
+      ui.engine.config = j || {};
+      ui.engine.loaded = true;
+      toast("出图引擎配置已保存，立即生效", "ok");
+      return comfyCheck().then(() => j);
+    })
+    .catch((e) => { toast("保存失败：" + e.message, "err"); return null; })
+    .finally(() => { ui.engine.busy = ""; });
+}
+
+/** 探测某个引擎。ComfyUI 会真连一次并核对 unet 是否真的存在。 */
+export function testEngine(kind) {
+  const k = kind || "comfy";
+  ui.engine.testing = k;
+  ui.engine.result = null;
+  return AI.engineTest(k)
+    .then((r) => { ui.engine.result = Object.assign({ at: Date.now() }, r); return r; })
+    .catch((e) => { ui.engine.result = { ok: false, kind: k, detail: e.message }; return null; })
+    .finally(() => { ui.engine.testing = ""; });
+}
+
+/** 拉 ComfyUI 里实际可用的 unet：换 Flux 版本时直接选，不用猜文件名。 */
+export function loadComfyModels(force) {
+  if (ui.engine.modelsBusy) return Promise.resolve(ui.engine.models);
+  if (ui.engine.models.length && !force) return Promise.resolve(ui.engine.models);
+  ui.engine.modelsBusy = true;
+  return AI.comfyModels()
+    .then((j) => {
+      ui.engine.models = j.models || [];
+      ui.engine.modelsHost = j.host || "";
+      return ui.engine.models;
+    })
+    .catch(() => [])
+    .finally(() => { ui.engine.modelsBusy = false; });
 }
 
 export function loadModels(force) {

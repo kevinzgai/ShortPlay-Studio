@@ -30,6 +30,22 @@ import E from "./engine.js";
     });
   }
 
+  /* ---------------- 出图引擎配置（全局单例：文件优先、env 兜底） ---------------- */
+  function engineConfig() {
+    return fetch(url("engine/config"), { cache: "no-store" }).then(function (r) {
+      if (!r.ok) throw new Error("读取引擎配置失败 " + r.status);
+      return r.json();
+    });
+  }
+  function engineSave(p) { return post("engine/config", p, 20000); }
+  function engineTest(kind) { return post("engine/test", { kind: kind }, 60000); }
+  function comfyModels() {
+    return fetch(url("comfy/models"), { cache: "no-store" }).then(function (r) {
+      if (!r.ok) throw new Error("读取 ComfyUI 模型列表失败 " + r.status);
+      return r.json();
+    });
+  }
+
   /* ---------------- 语言模型接入（可存多条，切换一条生效） ---------------- */
   function llmProviders() {
     return fetch(url("llm/providers"), { cache: "no-store" }).then(function (r) {
@@ -400,6 +416,8 @@ export const AIStudio = {
   setBase: setBase, checkConfig: checkConfig, plan: plan,
   llmProviders: llmProviders, llmSave: llmSave, llmActivate: llmActivate,
   llmRemove: llmRemove, llmTest: llmTest,
+  engineConfig: engineConfig, engineSave: engineSave,
+  engineTest: engineTest, comfyModels: comfyModels,
   storyboard: storyboard, toShots: toShots, run: run,
   assets: assets, frames: frames, exportZip: exportZip,
   fillAsset: fillAsset, comfyStatus: comfyStatus,

@@ -83,7 +83,9 @@ def load_local_config():
         return
     for m in re.finditer(r'(?im)^\s*set\s+"?([A-Z0-9_]+)=([^"\r\n]*)"?\s*$', text):
         k, v = m.group(1).strip(), m.group(2).strip().strip('"')
-        if (k.startswith("SHORTPLAY_LLM_") or k == "SHORTPLAY_DASHSCOPE_API_KEY") and v and not os.environ.get(k):
+        ok = (k.startswith("SHORTPLAY_LLM_") or k.startswith("SHORTPLAY_QWEN_IMAGE_")
+              or k in ("SHORTPLAY_DASHSCOPE_API_KEY", "SHORTPLAY_COMFY", "SHORTPLAY_COMFY_MODEL"))
+        if ok and v and not os.environ.get(k):
             os.environ[k] = v
 
 
@@ -150,6 +152,104 @@ def _llm_doc_write(doc):
     tmp.write_text(json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8")
     os.replace(tmp, LLM_FILE)
     _LLM_CACHE["mtime"], _LLM_CACHE["doc"] = None, None
+
+
+# --------------------------------------------------------------------------
+# 出图引擎配置：engine-config.json（本机文件，已在 .gitignore 里）
+#   为什么独立文件：llm-providers.json 的语义是「多条同类选一条生效」，
+#   而引擎是「每类一份单例」，混在一起会让 active 的含义变糊。
+#   读取优先级与 llm-providers.json 一致：文件非空值 → 环境变量 / bat → 内置默认。
+#   Key 只在服务端使用，回前端一律打码。
+# --------------------------------------------------------------------------
+ENGINE_FILE = ROOT / "engine-config.json"
+ENGINE_LOCK = threading.Lock()
+_ENGINE_CACHE = {"mtime": None, "doc": None}
+ENGINE_DEFAULTS = {
+    "comfyHost": "http://127.0.0.1:8188",
+    "comfyModel": "flux1-schnell-fp8.safetensors",
+    "qwenUrl": ("https://cn-beijing.maas.qianwenaiapi.com/api/v1/"
+                "services/aigc/multimodal-generation/generation"),
+    "qwenModel": "wan2.7-image-pro",
+    "qwenSize": "2K",
+}
+ENGINE_ENV = {
+    "comfyHost": "SHORTPLAY_COMFY",
+    "comfyModel": "SHORTPLAY_COMFY_MODEL",
+    "qwenUrl": "SHORTPLAY_QWEN_IMAGE_URL",
+    "qwenModel": "SHORTPLAY_QWEN_IMAGE_MODEL",
+    "qwenSize": "SHORTPLAY_QWEN_IMAGE_SIZE",
+    "qwenKey": "SHORTPLAY_DASHSCOPE_API_KEY",
+}
+
+
+def _engine_doc():
+    """只收已知键、统一裁剪；坏文件按空配置处理，不让它把服务带崩。"""
+    try:
+        mtime = ENGINE_FILE.stat().st_mtime_ns
+    except OSError:
+        mtime = -1
+    if mtime == _ENGINE_CACHE["mtime"] and _ENGINE_CACHE["doc"] is not None:
+        return _ENGINE_CACHE["doc"]
+    try:
+        raw = json.loads(ENGINE_FILE.read_text(encoding="utf-8")) if mtime >= 0 else {}
+    except (OSError, ValueError):
+        raw = {}
+    raw = raw if isinstance(raw, dict) else {}
+    doc = {}
+    for k, limit in (("comfyHost", 300), ("comfyModel", 160), ("qwenUrl", 300),
+                     ("qwenModel", 120), ("qwenSize", 20), ("qwenKey", 200)):
+        doc[k] = str(raw.get(k) or "").strip()[:limit]
+    _ENGINE_CACHE["mtime"], _ENGINE_CACHE["doc"] = mtime, doc
+    return doc
+
+
+def _engine_doc_write(doc):
+    tmp = ENGINE_FILE.with_name(ENGINE_FILE.name + ".tmp")
+    tmp.write_text(json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8")
+    os.replace(tmp, ENGINE_FILE)
+    _ENGINE_CACHE["mtime"], _ENGINE_CACHE["doc"] = None, None
+
+
+def _engine_get(key):
+    """文件优先 → 环境变量 → 内置默认；顺带把来源告诉界面，省得猜。"""
+    v = _engine_doc().get(key) or ""
+    if v:
+        return v, "file"
+    env = (os.environ.get(ENGINE_ENV.get(key, "")) or "").strip()
+    if env:
+        return env, "env"
+    return ENGINE_DEFAULTS.get(key, ""), "default"
+
+
+def comfy_host():
+    return _engine_get("comfyHost")[0].rstrip("/")
+
+
+def comfy_model():
+    return _engine_get("comfyModel")[0]
+
+
+def qwen_image_url():
+    return _engine_get("qwenUrl")[0]
+
+
+def qwen_image_model():
+    return _engine_get("qwenModel")[0]
+
+
+def qwen_image_size():
+    return _engine_get("qwenSize")[0]
+
+
+def engine_config_public():
+    """给前端看：只回打码后的 Key 与每项来源，绝不回传明文。"""
+    out = {}
+    for k in ("comfyHost", "comfyModel", "qwenUrl", "qwenModel", "qwenSize"):
+        v, src = _engine_get(k)
+        out[k] = {"value": v, "source": src}
+    key, key_src = _engine_get("qwenKey")
+    out["qwenKey"] = {"mask": _mask_key(key), "source": key_src, "set": bool(key)}
+    return out
 
 
 def _mask_key(k):
@@ -2159,19 +2259,12 @@ def normalize_shots(data, scenes, config, index=None):
 # --------------------------------------------------------------------------
 # 云端出图引擎：通义万相 wan2.7-image-pro（组图 / 一致性序列）
 #   · 与本地 ComfyUI 共用同一套任务队列、进度、缩略图、灯箱与导出链路
-#   · Key 只从本机 llm-config.bat 注入环境变量，绝不回传前端 / 写日志 / 进导出包
+#   · Key 存在 engine-config.json（界面可改）或环境变量里，绝不回传前端 / 写日志 / 进导出包
 #   · 接口同步返回带签名的 OSS 图片 URL，必须立刻下载落盘（URL 会过期）
 # --------------------------------------------------------------------------
-QWEN_IMAGE_URL = os.environ.get(
-    "SHORTPLAY_QWEN_IMAGE_URL",
-    "https://cn-beijing.maas.qianwenaiapi.com/api/v1/services/aigc/multimodal-generation/generation")
-QWEN_IMAGE_MODEL = os.environ.get("SHORTPLAY_QWEN_IMAGE_MODEL", "wan2.7-image-pro")
-QWEN_IMAGE_SIZE = os.environ.get("SHORTPLAY_QWEN_IMAGE_SIZE", "2K")
-
-
 def qwen_image_key():
-    """动态读环境变量：改 llm-config.bat 后重启服务即生效，不缓存明文。"""
-    return (os.environ.get("SHORTPLAY_DASHSCOPE_API_KEY") or "").strip()
+    """文件优先 → 环境变量：界面上填的 Key 立即生效，不改 bat、不用重启。"""
+    return _engine_get("qwenKey")[0]
 
 
 def qwen_image_status():
@@ -2179,11 +2272,74 @@ def qwen_image_status():
     key = qwen_image_key()
     return {
         "online": bool(key),
-        "model": QWEN_IMAGE_MODEL,
-        "size": QWEN_IMAGE_SIZE,
-        "host": QWEN_IMAGE_URL.split("/api/")[0],
-        "detail": "" if key else "没配置 SHORTPLAY_DASHSCOPE_API_KEY（写进本机 llm-config.bat）",
+        "model": qwen_image_model(),
+        "size": qwen_image_size(),
+        "host": qwen_image_url().split("/api/")[0],
+        "detail": "" if key else "没配置通义万相 API Key：到「系统设置 · 出图引擎」填一条即可",
     }
+
+
+def comfy_unet_names():
+    """从 /object_info 拉可用 unet 列表：换 Flux 版本时让用户直接选，不猜文件名。"""
+    try:
+        with urllib.request.urlopen(comfy_host() + "/object_info/UNETLoader", timeout=6) as r:
+            info = json.loads(r.read().decode("utf-8"))
+        inp = (((info or {}).get("UNETLoader") or {}).get("input") or {})
+        # 实测结构是 {"required": {"unet_name": [["a.safetensors", ...]]}}：
+        # 列表首元素才是候选；也兼容 {"unet_name": {"options": [...]}} 的老写法
+        spec = (inp.get("required") or {}).get("unet_name") or \
+               (inp.get("optional") or {}).get("unet_name")
+        names = []
+        if isinstance(spec, list) and spec:
+            head = spec[0]
+            names = head if isinstance(head, list) else (head.get("options") if isinstance(head, dict) else [])
+        elif isinstance(spec, dict):
+            names = spec.get("options") or []
+        return [str(x)[:160] for x in (names or []) if str(x).strip()][:60]
+    except Exception:
+        return []
+
+
+def engine_config_save(payload):
+    """保存引擎配置：只写本机文件，mtime 缓存失效即生效，不用重启。"""
+    if not isinstance(payload, dict):
+        raise ValueError("参数格式不对")
+    with ENGINE_LOCK:
+        doc = dict(_engine_doc())
+        for k, limit in (("comfyHost", 300), ("comfyModel", 160), ("qwenUrl", 300),
+                         ("qwenModel", 120), ("qwenSize", 20)):
+            if k in payload:
+                doc[k] = str(payload.get(k) or "").strip()[:limit]
+        # Key 留空 = 不改已存的（与 llm-providers 的编辑约定一致）
+        if payload.get("clearQwenKey"):
+            doc["qwenKey"] = ""
+        elif str(payload.get("qwenKey") or "").strip():
+            doc["qwenKey"] = str(payload.get("qwenKey")).strip()[:200]
+        _engine_doc_write(doc)
+    return engine_config_public()
+
+
+def engine_probe(kind):
+    """连通性探测。ComfyUI 真连一次；万相只校验 Key 是否配好，不空跑计费请求。"""
+    kind = str(kind or "comfy").strip()
+    if kind == "qwen":
+        key = qwen_image_key()
+        return {"ok": bool(key), "kind": "qwen", "model": qwen_image_model(),
+                "mask": _mask_key(key),
+                "detail": ("Key 已保存（%s），实际出图才会产生调用与计费" % _mask_key(key))
+                          if key else "没配置 API Key"}
+    st = comfy_status()
+    if not st.get("online"):
+        return {"ok": False, "kind": "comfy", "host": st.get("host", ""),
+                "detail": st.get("detail") or "连不上 ComfyUI"}
+    want = comfy_model()
+    names = comfy_unet_names()
+    match = None if not names else (want in names)
+    return {"ok": True, "kind": "comfy", "host": st.get("host"),
+            "version": st.get("version"), "model": want,
+            "modelMatch": match, "models": names[:40],
+            "detail": "" if match is not False else
+                      ("ComfyUI 里没有 %s，从下面换一个可用的" % want)}
 
 
 def _to_png(raw):
@@ -2217,18 +2373,18 @@ def qwen_image_generate(prompt, n=1, size="", timeout=300):
     if not key:
         raise RuntimeError("未配置通义万相 API Key")
     n = max(1, min(int(n or 1), 4))
-    sz = str(size or QWEN_IMAGE_SIZE).strip()
+    sz = str(size or qwen_image_size()).strip()
     if not re.match(r"^(1K|2K|4K|[0-9]{3,4}\*[0-9]{3,4})$", sz, re.I):
-        sz = QWEN_IMAGE_SIZE
+        sz = qwen_image_size()
     body = {
-        "model": QWEN_IMAGE_MODEL,
+        "model": qwen_image_model(),
         "input": {"messages": [
             {"role": "user", "content": [{"text": str(prompt or "")[:4000]}]}
         ]},
         "parameters": {"enable_sequential": n > 1, "n": n, "size": sz},
     }
     req = urllib.request.Request(
-        QWEN_IMAGE_URL, data=json.dumps(body, ensure_ascii=False).encode("utf-8"),
+        qwen_image_url(), data=json.dumps(body, ensure_ascii=False).encode("utf-8"),
         headers={"Content-Type": "application/json", "Authorization": "Bearer " + key})
     with urllib.request.urlopen(req, timeout=timeout) as r:
         out = json.load(r)
@@ -2265,8 +2421,8 @@ def qwen_image_generate(prompt, n=1, size="", timeout=300):
 #   · 原图落 examples/assets/，回给前端的是 512px JPEG 缩略 dataURI，
 #     直接复用现有 refImage / 撤销栈 / localStorage / zip 导出链路
 # --------------------------------------------------------------------------
-COMFY_HOST = os.environ.get("SHORTPLAY_COMFY", "http://127.0.0.1:8188")
-COMFY_MODEL = "flux1-schnell-fp8.safetensors"
+# 地址与 unet 名不再是模块常量：由 comfy_host() / comfy_model() 现读
+# （界面改完立即生效，换 Flux 版本不用改代码）
 ASSET_IMG_DIR = ROOT / "examples" / "assets"
 ASSET_IMG_NAME = re.compile(r"^[A-Za-z0-9_.\-]+\.png$")
 
@@ -2347,21 +2503,21 @@ COMFY_SUFFIX_OBJECT = ("highly detailed, sharp focus, no text, no watermark, "
 def comfy_status():
     """探测本机 ComfyUI；不在线时前端把出图按钮置灰并给出明确原因。"""
     try:
-        with urllib.request.urlopen(COMFY_HOST + "/system_stats", timeout=4) as r:
+        with urllib.request.urlopen(comfy_host() + "/system_stats", timeout=4) as r:
             st = json.load(r)
         dev = (st.get("devices") or [{}])[0]
         return {
-            "online": True, "host": COMFY_HOST,
+            "online": True, "host": comfy_host(),
             "version": ((st.get("system") or {}).get("comfyui_version") or ""),
             "device": dev.get("name", ""),
             "vramFreeMB": int(dev.get("vram_free", 0) / (1024 * 1024)),
-            "model": COMFY_MODEL,
+            "model": comfy_model(),
             "qwen": qwen_image_status(),
             "variants": {k: [{"key": v["key"], "label": v["label"], "w": v["w"], "h": v["h"]}
                              for v in vs] for k, vs in COMFY_VARIANTS.items()},
         }
     except Exception as exc:
-        return {"online": False, "host": COMFY_HOST, "detail": str(exc)[:160],
+        return {"online": False, "host": comfy_host(), "detail": str(exc)[:160],
                 "qwen": qwen_image_status()}
 
 
@@ -2466,7 +2622,7 @@ def comfy_workflow(prompt, w, h, seed):
     """与 tools/gen_first_frame.py 完全一致：Flux.1-schnell fp8 / 4 步 / euler。"""
     return {
         "1": {"class_type": "UNETLoader",
-              "inputs": {"unet_name": COMFY_MODEL, "weight_dtype": "default"}},
+              "inputs": {"unet_name": comfy_model(), "weight_dtype": "default"}},
         "2": {"class_type": "DualCLIPLoader",
               "inputs": {"clip_name1": "clip_l.safetensors",
                          "clip_name2": "t5xxl_fp8_e4m3fn_scaled.safetensors",
@@ -2493,7 +2649,7 @@ def comfy_workflow(prompt, w, h, seed):
 def comfy_submit(prompt, w, h, seed):
     body = json.dumps({"prompt": comfy_workflow(prompt, w, h, seed),
                        "client_id": "shortplay-assets"}).encode("utf-8")
-    req = urllib.request.Request(COMFY_HOST + "/prompt", data=body,
+    req = urllib.request.Request(comfy_host() + "/prompt", data=body,
                                  headers={"Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=30) as r:
         out = json.load(r)
@@ -2507,7 +2663,7 @@ def comfy_wait(pid, timeout=300):
     while True:
         time.sleep(1.2)
         try:
-            with urllib.request.urlopen(COMFY_HOST + "/history/" + pid, timeout=20) as r:
+            with urllib.request.urlopen(comfy_host() + "/history/" + pid, timeout=20) as r:
                 hist = json.load(r)
         except Exception:
             if time.time() - t0 > timeout:
@@ -2530,7 +2686,7 @@ def comfy_download(info):
     q = urllib.parse.urlencode({"filename": info["filename"],
                                 "subfolder": info.get("subfolder", ""),
                                 "type": info.get("type", "output")})
-    with urllib.request.urlopen(COMFY_HOST + "/view?" + q, timeout=60) as r:
+    with urllib.request.urlopen(comfy_host() + "/view?" + q, timeout=60) as r:
         return r.read()
 
 
@@ -2598,7 +2754,7 @@ def comfy_job_start(assets, variants, style_en="", fixed_seed=0, engine="comfy",
         job = {"id": jid, "status": "running", "total": total_images, "done": 0,
                "current": "", "items": [], "errors": [], "startedAt": time.time(),
                "finishedAt": 0, "engine": engine,
-               "model": COMFY_MODEL if engine == "comfy" else QWEN_IMAGE_MODEL}
+               "model": comfy_model() if engine == "comfy" else qwen_image_model()}
         COMFY_JOBS[jid] = job
         # 只保留最近 10 个任务，避免长时间运行内存堆积
         if len(COMFY_JOBS) > 10:
@@ -3924,6 +4080,10 @@ class Handler(SimpleHTTPRequestHandler):
             })
         if path == "/api/llm/providers":
             return self._json(llm_providers_public())
+        if path == "/api/engine/config":
+            return self._json(engine_config_public())
+        if path == "/api/comfy/models":
+            return self._json({"models": comfy_unet_names(), "host": comfy_host()})
         if path == "/api/comfy/status":
             return self._json(comfy_status())
         if path == "/api/comfy/job":
@@ -3998,6 +4158,7 @@ class Handler(SimpleHTTPRequestHandler):
                         "/api/parse/start", "/api/parse/cancel", "/api/import/docx",
                         "/api/llm/providers/save", "/api/llm/providers/activate",
                         "/api/llm/providers/delete", "/api/llm/test",
+                        "/api/engine/config", "/api/engine/test",
                         "/api/export/zip") + self.AGENT_POST_PATHS + self.PROJECT_POST_PATHS:
             return self._json({"detail": "不支持的接口"}, 404)
         try:
@@ -4083,6 +4244,16 @@ class Handler(SimpleHTTPRequestHandler):
                 return self._json(llm_test(payload))
             except ValueError as exc:
                 return self._json({"detail": str(exc)[:200]}, 400)
+        if path == "/api/engine/config":
+            try:
+                return self._json(engine_config_save(payload))
+            except ValueError as exc:
+                return self._json({"detail": str(exc)[:200]}, 400)
+        if path == "/api/engine/test":
+            try:
+                return self._json(engine_probe(payload.get("kind")))
+            except Exception as exc:
+                return self._json({"detail": "探测失败：" + str(exc)[:160]}, 502)
         if path == "/api/comfy/prompt":
             # 只拼提示词，不依赖 ComfyUI 在线：没装模型也能先对稿
             try:
@@ -4108,7 +4279,7 @@ class Handler(SimpleHTTPRequestHandler):
                 st = comfy_status()
                 if not st.get("online"):
                     return self._json({"detail": "本地 ComfyUI 没连上（%s）：%s" %
-                                                 (COMFY_HOST, st.get("detail", "未知原因"))}, 503)
+                                                 (comfy_host(), st.get("detail", "未知原因"))}, 503)
             try:
                 # _alist 只收字符串，这里 assets 是对象数组，必须自己取
                 raw_assets = payload.get("assets")

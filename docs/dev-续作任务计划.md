@@ -18,8 +18,11 @@ docs/dev-续作任务计划.md 和 docs/分步开发路线-移除一键生成.md
 - S0/S1/S2/S3 已完成：engine.js 的稳定键（sceneStableKey / shotKeyOf / keyShots）、studio.js 的
   S.steps 状态机与旧存档迁移、移除「AI 一键分集 + 分镜」、工作区顺序翻转为
   ①改剧本 ②分集 ③分镜 ④定妆、stepV 存档迁移；S3 分集独立成步（显式 planStep / 可编辑分集表 /
-  stale 条 / 二次确认 + byEp 全 stale）。S3 实测见 §3。
-- 唯一待办起点 = S4「分镜逐集闸门」。S5 定妆消费分镜 / S6 出片归位 / S7 收尾在后面。
+  stale 条 / 二次确认 + byEp 全 stale）。
+- S3.5 设置分层（S4 之前插入）：文字模型 / 出图引擎从「生成设置」移出，独立为全局「系统设置」，
+  三栏 = 文字模型 / 出图引擎 / 连接与诊断；出图引擎可在界面改并立即生效（engine-config.json）。
+  S3 / S3.5 实测见 §3。
+- 下一步 = S4「分镜逐集闸门」。S5 定妆消费分镜 / S6 出片归位 / S7 收尾在后面。
 
 【本次只做 S4，照 docs/分步开发路线-移除一键生成.md「阶段 4」的 5 条改动执行】
 1. 新增 storyboardStep(epNo)：只请求一集，复用 /api/ai/storyboard（本来按集切片）。
@@ -39,7 +42,7 @@ docs/dev-续作任务计划.md 和 docs/分步开发路线-移除一键生成.md
 
 【环境与容易踩的坑】
 - 服务是 Python 标准库后端 8177：py server.py --no-browser；改 frontend/src 必须 npm run build，
-  改 server.py 必须重启 8177。回归：node tools/verify_all.mjs（串行约 3-4 分钟）。
+  改 server.py 必须重启 8177。回归：node tools/verify_all.mjs（21 套串行，实测 4m26s）。
 - .gitignore 排除 tools/verify_*：这些回归脚本不随仓库走，若新机没有，先从旧机拷 tools/ 整目录，
   并把脚本头部的 playwright-core file:/// 路径与 Chromium executablePath 换成新机实际路径。
   本机（Mac）还额外改了 py→python3、verify_all.mjs 的 py→python3、stage_split 的 fixture 项目 ID，
@@ -61,9 +64,9 @@ docs/dev-续作任务计划.md 和 docs/分步开发路线-移除一键生成.md
 
 「AI 一键分集 + 分镜」的 7 阶段自动流水线已**休眠**；四个工作区顺序翻转为
 **① 改剧本 → ② 分集 → ③ 分镜 → ④ 定妆**。
-**S0 / S1 / S2 / S3 已完成**。旧机 `tools/` 已整目录同步到本机，`verify_all.mjs` 的 SUITES 恢复为
-**19 套（原 17 + S3 新增 2）**，本机实测 **16/19 套 PASS**：S3 新增 2 套全绿（24/24 + 36/36），
-余 3 套因本机未配大模型 Key 被按钮闸门挡住（环境阻塞，非代码回归），逐项结果见 §3。
+**S0 / S1 / S2 / S3 / S3.5 已完成**。`verify_all.mjs` 的 SUITES 为 **21 套（原 17 + S3 的 2 + S3.5 的 2）**，
+本机实测 **21/21 套全绿**（4m26s）。此前因未配 Key 而红的 3 套，在 `llm-providers.json` 补上后全部转绿，
+确认它们确实是环境阻塞而非代码回归。逐项结果见 §3。
 **下一步 = S4「分镜逐集闸门」**。第 2 步的「按规则排分镜 →」仍是临时桥接，S4 才换成逐集闸门。
 
 ---
@@ -88,11 +91,11 @@ curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8177/   # 期望 200
 ### 回归（重要：脚本不在 git）
 
 ```bash
-node tools/verify_all.mjs        # 19 套串行（原 17 + S3 新增 2），约 5–6 分钟
+node tools/verify_all.mjs        # 21 套串行（原 17 + S3 的 2 + S3.5 的 2），实测 4m26s
 node tools/verify_all.mjs assets # 只跑名字含 assets 的
 ```
 
-`.gitignore` 有 `tools/verify_*`，**全部 29 个回归脚本不随仓库走**。换机后从旧机器拷整个 `tools/` 目录，并替换其中两处本机绝对路径（脚本头部）：
+`.gitignore` 有 `tools/verify_*`，**全部 31 个回归脚本不随仓库走**。换机后从旧机器拷整个 `tools/` 目录，并替换其中两处本机绝对路径（脚本头部）：
 
 | 原值 | 改成 |
 |---|---|
@@ -127,6 +130,7 @@ Python 侧脚本（`verify_platform.py` 等）同样检查一次 playwright 路�
 | D2 | 上游改了下游怎么办 | **整步作废 + 显式重跑**（不做按场增量）；但 `sceneStableKey` / `shotKeyOf` 已在 S1 埋进数据，将来做增量不必迁移历史存档 |
 | D3 | 分镜与定妆顺序 | **翻转**：先分镜后定妆；`S.step` 3=分镜、4=定妆 |
 | D4 | 分镜粒度 | **只有单集闸门**，第一版不给「剩余全部」按钮——否则一键换名字复活 |
+| D5 | 配置分几层（S3.5） | **作用域分层**：模型与引擎是**全局**（`系统设置`），镜头节奏 / 视别 / 画幅 / AI 开关是**项目级**（`生成设置`，存 `project.data.config`）。系统设置内只配置不执行 |
 
 **已知且已接受的缺陷**：重算会覆盖手改的镜头文字与镜号。缓解是重跑前二次确认并列出「将影响 N 个镜头、其中 M 个改过」。
 
@@ -139,13 +143,15 @@ Python 侧脚本（`verify_platform.py` 等）同样检查一次 playwright 路�
 | S0 冻结基线 | ✅ | `tools/baseline-2026-11-09.txt` 16/16；`baseline-step-audit-2026-11-09.txt`（30 脚本 16 命中 110 行） |
 | S1 契约与稳定键 | ✅ | `engine.js` 4 个导出、`studio.js` 的 `S.steps` 状态机、`verify_step_keys.mjs` 18/18 |
 | S2 移除一键 + 顺序翻转 | ✅ | 删 `#one-click` / `oneClick()` / `#flow-stages`；`App.vue` view-3/4 对调；`stepV` 存档迁移；`verify_no_oneclick.mjs` 16/16 |
-| S3 分集独立成步 | ✅ | `planStep()` 显式按钮 / 可编辑分集表（`source="manual"`）/ stale 条 / 二次确认 + `byEp` 全 stale 不删镜头；`verify_plan_step.mjs` 36/36；全量 16/19（3 套缺 Key 环境阻塞） |
+| S3 分集独立成步 | ✅ | `planStep()` 显式按钮 / 可编辑分集表（`source="manual"`）/ stale 条 / 二次确认 + `byEp` 全 stale 不删镜头；`verify_plan_step.mjs` 36/36 |
+| S3.5 设置分层（插队） | ✅ | 双入口（生成设置 / 系统设置）、三栏（文字模型 / 出图引擎 / 连接与诊断）、引擎可配且热生效（`engine-config.json`）、修 `SHORTPLAY_COMFY` 白名单 bug；契约 48/48 + 三栏 30/30；全量 **21/21** |
 | **S4 分镜逐集闸门** | ⬜ **下一步** | 核心，`storyboard()` 本来按集切片；替换第 2 步的临时桥接 |
 | S5 定妆消费分镜 | ⬜ | 分组视图才有数据 |
 | S6 出片归位（可选） | ⬜ | frames 挪到第 4 步末尾，不做就在 README 写已知限制 |
 | S7 收尾 | ⬜ | 休眠流水线注释、README、套件登记 |
 
 **依赖严格串行**：S2 定死步骤号 → S3 定死集号 → S4 依赖集号 → S5 依赖镜头。不许跳步。
+**S3.5 是正交层**：只动 UI 与配置读写，不参与上面这条依赖链，也不改 `engine.js` 与生成逻辑。
 **门槛规则**：本阶段新增脚本全绿才进下一阶段；旧脚本因步骤号变红必须**同阶段内修完，不许挂账**。
 
 ### S2 实测结果（对照用）
@@ -172,7 +178,32 @@ Python 侧脚本（`verify_platform.py` 等）同样检查一次 playwright 路�
 - `npm run build` 通过（44 模块）；脚本跑完自动删除临时项目。
 
 > ✅ `tools/` 已从旧机整目录同步（26 个 `verify_*.mjs`），`verify_all.mjs` 的 SUITES 恢复原 17 套
-> 并登记 S3 新增 2 套；脚本仍按 `.gitignore` 不入库，本机路径 / 命令 / fixture 适配见 §1。
+### S3.5 实测结果（对照用）
+
+`node tools/verify_all.mjs`：**21/21 套全绿（4m26s）**。
+
+- **S3.5 新增 2 套全绿**：
+  - `verify_system_settings_contract.mjs` **48/48**（无浏览器）：引擎配置独立落盘 + mtime 缓存、
+    「文件 → env → 默认」优先级、`COMFY_HOST`/`COMFY_MODEL` 已函数化且无裸常量残留、
+    `SHORTPLAY_COMFY` 进白名单、四个新接口齐备、Key 出站打码、双入口、三栏、
+    生成设置不再挂 `ModelSettings`、系统设置无执行动作、诊断三态口径。
+  - `verify_system_settings.mjs` **30/30**（Playwright）：生成设置里没有模型列表、
+    系统设置里没有重排按钮、引擎地址与 unet 预填且可编辑、每项标明生效来源、
+    能列出 ComfyUI 真实 unet、保存后 `source` 由 `default` 变 `file`、
+    诊断四行齐备、万相未配置只算 `warn`、诊断标题与 tab 徽章口径一致、tab 记忆、无 JS 报错。
+- **原 19 套全部保持全绿**，此前 3 套缺 Key 的红灯（资产清单密度 13/13、资产面板 11/11、
+  道具提示词界面口径 12/12）在补 `llm-providers.json` 后转绿，**证实是环境阻塞而非回归**。
+- 本轮唯一一次红灯是「两阶段结构」：脚本按「第一个含分镜的项目」挑 fixture，
+  回归留下的临时项目（10 镜、`step=1`）把它顶掉了。已改为**优先 `p_fixture_stage_split`**，
+  再退到「≥20 镜且 step≥3」，恢复 22/22。这属于脚本 fixture 选择问题，与 S3.5 代码无关。
+
+#### 这轮修掉的既存 bug
+
+`load_local_config()` 的白名单只放行 `SHORTPLAY_LLM_*` 和 `SHORTPLAY_DASHSCOPE_API_KEY`，
+**`SHORTPLAY_COMFY` 不在其中**——按旧代码把 ComfyUI 地址写进 `llm-config.bat` 是 silently 无效的，
+只能改系统环境变量。已补进白名单（同时放行 `SHORTPLAY_QWEN_IMAGE_*`）。
+
+> 并登记 S3 / S3.5 各新增 2 套；脚本仍按 `.gitignore` 不入库，本机路径 / 命令 / fixture 适配见 §1。
 > 旧机 S2 基线 17/17 与本机 16/19 的差异**只**是上述 3 套缺 Key，**没有出现「因步骤号变化而红」的用例**；
 > 门槛规则「旧脚本因步骤号变红必须同阶段内修完」已在本机复核确认无挂账。
 

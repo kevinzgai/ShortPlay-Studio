@@ -88,7 +88,7 @@ const qualities = [["fast", "快速 · 小画幅（先看节奏）"], ["standard
       <span class="desc">切集只落在场次之间，不拆散一场；没有网络或模型失败时自动降级到本地规则，核心功能不受影响。</span>
     </div>
     <div v-else class="inline-note">
-      当前是 <b>离线模式</b>：分集与分镜由内置规则引擎完成。想要 <b>AI 自动分集 + AI 分镜</b>，请双击 <code>start.bat</code> 启动本机服务并配置模型 Key。
+      当前是 <b>离线模式</b>：分集与分镜由内置规则引擎完成。想要 <b>AI 自动分集 + AI 分镜</b>，请到左侧 <b>系统设置 · 文字模型</b> 配一条模型 Key（配好立即生效，不用重启）。
     </div>
   </div>
 </template>
