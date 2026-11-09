@@ -6,6 +6,56 @@
 
 ---
 
+## 续作提示词（换电脑后直接复制给 AI）
+
+```text
+你在 ShortPlay-Studio 项目的 dev 分支上继续开发。开工前先完整读
+docs/dev-续作任务计划.md 和 docs/分步开发路线-移除一键生成.md，
+不要重新调研架构、不要重做已完成阶段、不要重新讨论已锁定的决策。
+
+【当前状态】
+- 代码已推送 GitHub：https://github.com/kevinzgai/ShortPlay-Studio.git，分支 dev（main 是基线 bf5e410）。
+- S0/S1/S2 已完成：engine.js 的稳定键（sceneStableKey / shotKeyOf / keyShots）、studio.js 的
+  S.steps 状态机与旧存档迁移、移除「AI 一键分集 + 分镜」、工作区顺序翻转为
+  ①改剧本 ②分集 ③分镜 ④定妆、stepV 存档迁移。全量回归 17/17 套 PASS。
+- 唯一待办起点 = S3「分集独立成步」。S4 逐集闸门 / S5 定妆消费分镜 / S6 出片归位 / S7 收尾在后面。
+
+【本次只做 S3，照 docs/dev-续作任务计划.md §4 的 6 步执行】
+1. 删掉 studio.js 中 planOnly() 里的 S.episodes.length 短路（分集永不重算的根因），改成显式
+   planStep()，由按钮触发，并写 S.steps.plan 的 running/ready/at/engine/model。
+2. goStep(2) / goStep2() 不再自动调 planOnly()；第 2 步给「生成 / 重算分集」按钮，AI 优先、失败降级本地。
+3. 分集表可编辑：集名、sceneFrom/sceneTo、拆分/合并/删集；编辑后标 episodes[].source = "manual"。
+4. 改剧本 → steps.plan.status = "stale"，第 2 步出「基于旧稿」提示条 + 「重算分集」；不点就保留旧方案。
+5. 重算前二次确认并列出「将覆盖 N 集手调结果」；确认后把 steps.shots.byEp 全置 stale，
+   但不删 S.shots（镜头仍在表里，等 S4 逐集重跑）。
+6. 新建 tools/verify_plan_step.mjs 并登记进 tools/verify_all.mjs 的 SUITES。
+
+【硬约束，违反即返工】
+- 四项已锁决策：D1 分集/分镜各为独立 AI 步 + 人工闸门；D2 整步作废 + 显式重跑（不做按场增量）；
+  D3 顺序 剧本→分集→分镜→定妆；D4 只有单集闸门，第一版不给「剩余全部」按钮。
+- 阶段严格串行，S3 没验收完不许碰 S4；不改 engine.js 的解析/体检/buildStoryboard 规则；
+  不新建 AI 接口，复用 /api/ai/plan、/api/ai/storyboard；后端 7 阶段流水线保持休眠不删。
+- 本阶段新增脚本必须全绿才进下一阶段；旧脚本若因步骤号变化而红，必须在同阶段内修完，不许挂账。
+- 已知缺陷允许保留：重跑会覆盖手工修改，靠二次确认缓解。
+
+【环境与容易踩的坑】
+- 服务是 Python 标准库后端 8177：py server.py --no-browser；改 frontend/src 必须 npm run build，
+  改 server.py 必须重启 8177。回归：node tools/verify_all.mjs（串行约 3-4 分钟）。
+- .gitignore 排除 tools/verify_*：这 29 个回归脚本不随仓库走，若新机没有，先从旧机拷 tools/ 整目录，
+  并把脚本头部的 playwright-core file:/// 路径与 Chromium executablePath 换成新机实际路径。
+- engine.js / studio.js / .vue 都是 CRLF，改 .vue 用 Python io.open(..., newline='') + assert count==1
+  精确替换；engine.js:918 早有同名 sceneKey(intExt,time,name)，新函数只能叫 sceneStableKey。
+- Playwright 用 JS API（allTextContents/innerText），默认有窗口模式 headless:false。
+- verify_ai.py 与 verify_parse_progress/resume 已标 PAUSED 并移出 SUITES，别跑旧断言。
+
+【交付要求】
+- 先报 3-5 行计划再动手；验证强度默认从简，只有交互/时序/跨层状态才上浏览器脚本。
+- 改完跑 verify_all.mjs 并给出逐项结果，用 Conventional Commits 提交（subject 不大写开头）。
+- 完成后更新 docs/dev-续作任务计划.md 的阶段进度表，再告诉我下一阶段是什么。
+```
+
+---
+
 ## 0. 一句话现状
 
 「AI 一键分集 + 分镜」的 7 阶段自动流水线已**休眠**；四个工作区顺序翻转为
