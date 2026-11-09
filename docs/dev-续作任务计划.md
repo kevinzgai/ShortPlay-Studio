@@ -147,13 +147,29 @@ Python 侧脚本（`verify_platform.py` 等）同样检查一次 playwright 路�
 ## 7. 分支与提交状态
 
 - 当前从 `main@bf5e410` 新建本地分支 **`dev`**，包含：S0/S1/S2 全部代码改动、`README.md` 同步、`docs/` 两份文档、三份 `tools/baseline-*.txt`。
-- **远程 `origin` 没有 dev 分支**（`git ls-remote --heads origin dev` 返回空）。HTTPS 推送需要 GitHub PAT，非交互执行会卡住，因此**本次只本地提交，不推送**。换机前请自行：
+- **远程 `origin` 没有 dev 分支**（`git ls-remote --heads origin dev` 返回空）。已用非交互方式试推，失败：
+  `fatal: unable to get password from user` —— HTTPS 推送需要 GitHub PAT，**本次只本地提交，未推送**。
+  在有凭证的机器上执行 `git push -u origin dev` 即可，之后新机直接 `git clone` + `git fetch origin dev`。
+
+### 等不及配 PAT：用交接包（已导出到桌面）
+
+旧机桌面目录 `Desktop/ShortPlay-dev-handoff/` 内含 2 个 patch + 1 个 bundle（含完整 dev 历史，已 `git bundle verify`）：
 
 ```bash
-git push -u origin dev     # 需要 PAT；或在有凭证的机器上执行
+# 方案 A（推荐，单文件、保历史）：把 .bundle 拷到新机后
+git clone /path/to/ShortPlay-dev.bundle ShortPlay-Studio -b dev
+cd ShortPlay-Studio
+git remote set-url origin https://github.com/kevinzgai/ShortPlay-Studio.git
+
+# 方案 B：仅当 clone 下来的 main 已含基线 bf5e410 时可用（本机 main 的提交此前未推送过，多半不含）
+git checkout -b dev bf5e410
+git am 0001-*.patch 0002-*.patch 0003-*.patch     # 按编号顺序，有几个打几个
+# 若报「does not apply / 找不到基线提交」，直接用方案 A
 ```
 
-- 若新机拉不到 dev，可在本机导出补丁兜底：`git format-patch main..dev -o <U盘目录>`，新机 `git am *.patch`。
+> 交接包是**提交完成后重新导出**的，含 dev 上全部提交。若在旧机又追加了提交，重跑
+> `git format-patch main..dev -o <目录>` 与 `git bundle create <目录>/ShortPlay-dev.bundle dev`。
+> 补丁/bundle 只含 git 跟踪的文件，`tools/verify_*` 回归脚本仍需按 §1 单独拷贝。
 - `.gitignore` 的 `tools/verify_*` 策略**未改动**：脚本继续留在本机，理由见 §6。这意味 S3 起新增的验收脚本也要按 §1 手工同步到新机。
 
 ---
