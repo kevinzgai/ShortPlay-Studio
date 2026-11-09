@@ -40,8 +40,10 @@ docs/dev-续作任务计划.md 和 docs/分步开发路线-移除一键生成.md
 【环境与容易踩的坑】
 - 服务是 Python 标准库后端 8177：py server.py --no-browser；改 frontend/src 必须 npm run build，
   改 server.py 必须重启 8177。回归：node tools/verify_all.mjs（串行约 3-4 分钟）。
-- .gitignore 排除 tools/verify_*：这 29 个回归脚本不随仓库走，若新机没有，先从旧机拷 tools/ 整目录，
+- .gitignore 排除 tools/verify_*：这些回归脚本不随仓库走，若新机没有，先从旧机拷 tools/ 整目录，
   并把脚本头部的 playwright-core file:/// 路径与 Chromium executablePath 换成新机实际路径。
+  本机（Mac）还额外改了 py→python3、verify_all.mjs 的 py→python3、stage_split 的 fixture 项目 ID，
+  且 8177 要带 NO_PROXY=127.0.0.1,localhost 启动（详见 §1 的 Mac 适配清单）。
 - engine.js / studio.js / .vue 都是 CRLF，改 .vue 用 Python io.open(..., newline='') + assert count==1
   精确替换；engine.js:918 早有同名 sceneKey(intExt,time,name)，新函数只能叫 sceneStableKey。
 - Playwright 用 JS API（allTextContents/innerText），默认有窗口模式 headless:false。
@@ -59,8 +61,9 @@ docs/dev-续作任务计划.md 和 docs/分步开发路线-移除一键生成.md
 
 「AI 一键分集 + 分镜」的 7 阶段自动流水线已**休眠**；四个工作区顺序翻转为
 **① 改剧本 → ② 分集 → ③ 分镜 → ④ 定妆**。
-**S0 / S1 / S2 / S3 已完成**；S3 实测 **2/2 套 PASS（24/24 + 36/36）**，见 §3（注意：本机缺原 17 套脚本，
-这是重建的最小套件，不是 17/17）。
+**S0 / S1 / S2 / S3 已完成**。旧机 `tools/` 已整目录同步到本机，`verify_all.mjs` 的 SUITES 恢复为
+**19 套（原 17 + S3 新增 2）**，本机实测 **16/19 套 PASS**：S3 新增 2 套全绿（24/24 + 36/36），
+余 3 套因本机未配大模型 Key 被按钮闸门挡住（环境阻塞，非代码回归），逐项结果见 §3。
 **下一步 = S4「分镜逐集闸门」**。第 2 步的「按规则排分镜 →」仍是临时桥接，S4 才换成逐集闸门。
 
 ---
@@ -85,7 +88,7 @@ curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8177/   # 期望 200
 ### 回归（重要：脚本不在 git）
 
 ```bash
-node tools/verify_all.mjs        # 17 套串行，约 3–4 分钟
+node tools/verify_all.mjs        # 19 套串行（原 17 + S3 新增 2），约 5–6 分钟
 node tools/verify_all.mjs assets # 只跑名字含 assets 的
 ```
 
@@ -98,6 +101,21 @@ node tools/verify_all.mjs assets # 只跑名字含 assets 的
 
 Python 侧脚本（`verify_platform.py` 等）同样检查一次 playwright 路径。脚本默认**有窗口模式** `headless: false`，截图落 `screenshots/`。
 `tools/baseline-*.txt` 三份基线报告**已提交**，可作为对照物。
+
+**Mac 本机适配清单（2026-11-09 实测；脚本不进 git，换机照做）**：
+
+| 项 | 旧机（Windows） | 本机实际值 / 处理 |
+|---|---|---|
+| playwright-core | `file:///C:/Users/Administrator/.workbuddy/binaries/node/workspace/node_modules/playwright-core/index.mjs` | `file:///Users/kevin/.npm/_npx/dea9475797100b20/node_modules/playwright-core/index.mjs` |
+| Chrome | `chromium-1243/chrome-win64/chrome.exe` | `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome` |
+| 生成测试图 | `py -c ...` | `python3 -c ...`（`verify_ref_original.mjs` 3 处、`verify_ref_upload.mjs` 1 处），另需 `Pillow` |
+| 离线主流程 | `py tools/verify_platform.py` | SUITES 改 `python3` + `pip install playwright`（PyPI 直连慢时直接下 wheel 安装） |
+| `verify_stage_split.mjs` | 硬编码旧机项目 ID `p_20261109_141839_fc63` | 改为动态挑 `projects/` 下 `shots` 非空的项目；本机另造 `p_fixture_stage_split` |
+| ComfyUI 探测 | 无系统代理 | macOS 有 `127.0.0.1:7877` 代理时，8177 必须带 `NO_PROXY=127.0.0.1,localhost` 启动，否则 `/api/comfy/status` 报 502 |
+
+> fixture 项目要点：**23 镜**、`view: "card"`（写 `3` 会渲染成表格、没有 `.shot` 卡）、
+> `activeEpisode: "all"`（写集号会被 `visibleShots` 过滤空）、`createdAt/updatedAt` 用 ISO 字符串
+> （写数字会让 `/api/projects` 排序抛异常、接口直接断开）。
 
 ---
 
@@ -121,7 +139,7 @@ Python 侧脚本（`verify_platform.py` 等）同样检查一次 playwright 路�
 | S0 冻结基线 | ✅ | `tools/baseline-2026-11-09.txt` 16/16；`baseline-step-audit-2026-11-09.txt`（30 脚本 16 命中 110 行） |
 | S1 契约与稳定键 | ✅ | `engine.js` 4 个导出、`studio.js` 的 `S.steps` 状态机、`verify_step_keys.mjs` 18/18 |
 | S2 移除一键 + 顺序翻转 | ✅ | 删 `#one-click` / `oneClick()` / `#flow-stages`；`App.vue` view-3/4 对调；`stepV` 存档迁移；`verify_no_oneclick.mjs` 16/16 |
-| S3 分集独立成步 | ✅ | `planStep()` 显式按钮 / 可编辑分集表（`source="manual"`）/ stale 条 / 二次确认 + `byEp` 全 stale 不删镜头；`verify_plan_step.mjs` 36/36 |
+| S3 分集独立成步 | ✅ | `planStep()` 显式按钮 / 可编辑分集表（`source="manual"`）/ stale 条 / 二次确认 + `byEp` 全 stale 不删镜头；`verify_plan_step.mjs` 36/36；全量 16/19（3 套缺 Key 环境阻塞） |
 | **S4 分镜逐集闸门** | ⬜ **下一步** | 核心，`storyboard()` 本来按集切片；替换第 2 步的临时桥接 |
 | S5 定妆消费分镜 | ⬜ | 分组视图才有数据 |
 | S6 出片归位（可选） | ⬜ | frames 挪到第 4 步末尾，不做就在 README 写已知限制 |
@@ -137,20 +155,26 @@ Python 侧脚本（`verify_platform.py` 等）同样检查一次 playwright 路�
 
 ### S3 实测结果（对照用）
 
-`node tools/verify_all.mjs`（本机重建的最小套件）：**2/2 套 PASS**（约 13s）。
+`node tools/verify_all.mjs`（旧机 `tools/` 同步后，19 套串行约 6 分钟）：**16/19 套 PASS**。
 
-- **S3 源码契约（无浏览器）24/24**：`planOnly` 已删、解绑自动触发、`steps.plan` 五字段写入、
-  `byEp` 全 stale 且不删 `S.shots`、D4 无全部按钮、`engine.js` 未改、后端流水线仍在。
-- **分集独立成步（Playwright）36/36**：进第 2 步不自动分集、点按钮才发 `/api/ai/plan`、
-  手改集名刷新仍在、改剧本出「基于旧稿」条且方案不变、二次确认列出「将覆盖 N 集手调结果」、
-  取消确认不重算、`byEp` 全 stale 且 24 个镜头不丢、所有集 tab 标需重算、拆分/合并/删集、
-  AI 失败降级 `engine=local`、无未捕获 JS 报错。
+- **S3 新增 2 套全绿**：源码契约 24/24（`planOnly` 已删、解绑自动触发、`steps.plan` 五字段写入、
+  `byEp` 全 stale 且不删 `S.shots`、D4 无全部按钮、`engine.js` 未改、后端流水线仍在）；
+  分集独立成步 36/36（进第 2 步不自动分集、点按钮才发 `/api/ai/plan`、手改集名刷新仍在、
+  改剧本出「基于旧稿」条且方案不变、二次确认列出「将覆盖 N 集手调结果」、取消确认不重算、
+  `byEp` 全 stale 且镜头不丢、所有集 tab 标需重算、拆分/合并/删集、AI 失败降级 `engine=local`、无 JS 报错）。
+- **原 17 套中 14 套全绿**：清场护栏 15/15、稳定键 18/18、资产逻辑 69/69、复制提示词、
+  道具提示词不再画人 13/13、参考图原图不压缩 16/16、参考图落盘 11/11、项目管理 30/30、
+  Linear 三栏、两阶段结构 22/22、第一步改剧本 23/23、移除一键 16/16、离线主流程 43/43、
+  ComfyUI 出图 UI 26/26（含真实出图 1 张，12.4s）。
+- **3 套环境阻塞（非代码回归）**：`资产清单密度` / `资产面板 + 整包导出` / `道具提示词界面口径`
+  都卡在 `#build-assets` 或 `.ap-fill` 的 `!aiReady` 闸门——本机没有 `llm-providers.json`，
+  `/api/config` 返回 `llm:false`。补齐模型 Key 后重跑即可，**不需要改 S3 代码**。
 - `npm run build` 通过（44 模块）；脚本跑完自动删除临时项目。
 
-> ⚠️ **本机（Mac）没有原 17 套 `tools/verify_*`**（`.gitignore` 排除、未从旧机同步），
-> 所以这里的 **2/2 不是 S2 的 17/17**。本阶段重建了 `verify_all.mjs`（最小 SUITES）、
-> `verify_plan_step.mjs`、`verify_plan_contract.mjs` 三个脚本，同样不进 git。
-> 从旧机拷回 `tools/` 整目录后按 §1 改两处本机路径，把原 17 套补进 SUITES 再复核一次。
+> ✅ `tools/` 已从旧机整目录同步（26 个 `verify_*.mjs`），`verify_all.mjs` 的 SUITES 恢复原 17 套
+> 并登记 S3 新增 2 套；脚本仍按 `.gitignore` 不入库，本机路径 / 命令 / fixture 适配见 §1。
+> 旧机 S2 基线 17/17 与本机 16/19 的差异**只**是上述 3 套缺 Key，**没有出现「因步骤号变化而红」的用例**；
+> 门槛规则「旧脚本因步骤号变红必须同阶段内修完」已在本机复核确认无挂账。
 
 ---
 
@@ -204,9 +228,10 @@ Python 侧脚本（`verify_platform.py` 等）同样检查一次 playwright 路�
 
 | 路径 | 原因 | 换机怎么办 |
 |---|---|---|
-| `tools/verify_*`（29 个脚本） | `.gitignore` 明确排除「硬编码本机路径」 | 拷 `tools/` 整目录 + 按 §1 改两处路径 |
-| `tools/verify_all.mjs`（本机重建，2 套） | 原 17 套未从旧机同步 | 见 §3；拷回后把原 17 套补进 SUITES |
-| `llm-config.bat` / `llm-providers.json` / `.env*` | **含真实 API Key，禁止提交** | 在新机按 README 第 49 行说明重建；万相 key 走这里 |
+| `tools/verify_*`（26 个 `verify_*.mjs`） | `.gitignore` 明确排除「硬编码本机路径」 | 拷 `tools/` 整目录 + 按 §1 的 Mac 适配清单改路径 / 命令 / fixture |
+| `tools/verify_all.mjs`（19 套 SUITES） | 原 17 套已从旧机同步，另登记 S3 新增 2 套 | 见 §3；换机后同样把新增脚本一起拷 |
+| `projects/p_fixture_stage_split` | `verify_stage_split.mjs` 需要「含分镜的既有项目」，旧机 fixture 未随仓库迁移 | 用 `engine.js` 造一个 23 镜项目，字段要点见 §1 |
+| `llm-config.bat` / `llm-providers.json` / `.env*` | **含真实 API Key，禁止提交** | 在新机按 README 第 49 行说明重建；万相 key 走这里。**本机缺这个 → 3 套 AI 资产用例被按钮闸门挡住** |
 | `projects/`（29 个真实项目） | 本机运行数据 | 不迁移也能开发；要测旧存档迁移就拷几个 `project.json` |
 | `dist/` | 构建产物 | `npm run build` 重新生成 |
 | `examples/assets/`（本机 71M 测试图） | 运行时出图产物、体积过大 | 已加入 `.gitignore`；历史里的 51 张示例图也已剔除，新机跑出图时自动生成 |
@@ -247,6 +272,8 @@ git remote set-url origin git@github.com:kevinzgai/ShortPlay-Studio.git
 - S2 刻意偏离计划两处：① `planOnly()` **已在 S3 拆成 `planStep()`（显式按钮）**；② `doGenerate()` 降级为离线规则而非彻底禁用（否则 S2→S4 之间排不出镜头、5 个脚本失去可测路径）。
 - S3 起 `localGenerate()` 不再重算分集（沿用第 2 步已确认的方案），避免临时桥接把手调结果悄悄覆盖；S4 换成逐集闸门后这条桥接即可移除。
 - 本机（Mac）`npm` 镜像源 500、官方源不通，`vue` / `vite` 依赖是从本机其它工程的 pnpm 目录复制补齐的；`npm run build` 已跑通，换机仍按 §1 正常 `npm install`。
+- 本机 macOS 有 `127.0.0.1:7877` 系统代理，8177 不带 `NO_PROXY=127.0.0.1,localhost` 启动时，Python `urllib` 会把 ComfyUI 8188 探测带成 502；带 `NO_PROXY` 重启后 `/api/comfy/status` online=true（ComfyUI 0.34.2），`verify_comfy_ui.mjs` 26/26 全绿。
+- 本机未配 `llm-providers.json`，`/api/config` 的 `llm:false` 使 `#build-assets` / `.ap-fill` 置灰，3 套 AI 资产用例无法跑（环境阻塞，非 S3 代码回归）；补齐模型 Key 后重跑即可，见 §3。
 - D2 的「重跑覆盖手工修改」尚未解决，靠二次确认缓解；真正合并要等按场增量（键已埋好）。
 - S6 不做的话，第 3 步看到的提示词可能缺资产描述，需在 README「已知限制」写明。
 - 本地规范化依赖空行补场号；PDF 导入不支持。
