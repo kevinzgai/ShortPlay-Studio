@@ -1,7 +1,13 @@
 <script setup>
-import { S, ui, goStep, openModal } from "../stores/studio.js";
+import { computed } from "vue";
+import { S, ui, goStep, openModal, STEPS, STAGES } from "../stores/studio.js";
 
-const steps = [["1", "导入剧本", "粘贴或上传原文"], ["2", "AI 自动拆解", "场次 · 角色 · 体检"], ["3", "分镜表", "改字段 · 导出"]];
+const stepNo = computed(() => Number(S.step) || 1);
+const stageOf = (n) => (Number(n) <= 2 ? "script" : "production");
+const stepsOf = (key) => STEPS.filter((s) => s.stage === key);
+const isDone = (no) => stepNo.value > no;
+const stageDone = (key) => stepsOf(key).every((s) => stepNo.value > s.no);
+const stageProg = (key) => stepsOf(key).filter((s) => stepNo.value >= s.no).length;
 </script>
 
 <template>
@@ -15,18 +21,29 @@ const steps = [["1", "导入剧本", "粘贴或上传原文"], ["2", "AI 自动�
     </div>
 
     <div class="rail-label">工作流</div>
-    <nav class="rail-steps" id="stepper" aria-label="制作步骤">
-      <button
-        v-for="s in steps" :key="s[0]"
-        class="rail-step"
-        :class="{ active: Number(s[0]) === S.step, done: Number(s[0]) < S.step }"
-        :data-step="s[0]"
-        @click="goStep(Number(s[0]))"
-      >
-        <span class="num">{{ Number(s[0]) < S.step ? "✓" : s[0] }}</span>
-        <span class="txt"><b>{{ s[1] }}</b><em>{{ s[2] }}</em></span>
-      </button>
-    </nav>
+    <div
+      v-for="st in STAGES" :key="st.key"
+      class="rail-stage"
+      :class="{ on: stageOf(stepNo) === st.key, done: stageDone(st.key) }"
+    >
+      <div class="rail-stage-h">
+        <b>{{ st.name }}</b>
+        <em>{{ stageProg(st.key) }} / {{ st.steps.length }}</em>
+        <span class="rail-stage-note">{{ st.note }}</span>
+      </div>
+      <nav class="rail-steps" :aria-label="st.name">
+        <button
+          v-for="s in stepsOf(st.key)" :key="s.no"
+          class="rail-step"
+          :class="{ active: s.no === stepNo, done: isDone(s.no) }"
+          :data-step="s.no"
+          @click="goStep(s.no)"
+        >
+          <span class="num">{{ isDone(s.no) ? "✓" : s.no }}</span>
+          <span class="txt"><b>{{ s.label }}</b><em>{{ s.hint }}</em></span>
+        </button>
+      </nav>
+    </div>
 
     <div class="rail-label">工具</div>
     <div class="rail-tools">

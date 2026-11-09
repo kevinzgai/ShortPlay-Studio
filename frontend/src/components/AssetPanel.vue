@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch, onMounted, onUnmounted } from "vue";
+import { computed, ref, watch, nextTick, onMounted, onUnmounted } from "vue";
 import {
   S, ui, assetTabs, assetSummary, staleAssetCount, refreshAssets, setAssetTab,
   onAssetFocusin, onAssetChange, toggleAssetLock, uploadAssetRef, clearAssetRef,
@@ -11,6 +11,152 @@ import {
 } from "../stores/studio.js";
 
 const props = defineProps({ collapsible: { type: Boolean, default: false } });
+
+/* ---------------------- 视图：按分镜分组 / 全部资产 ----------------------
+   资产实体仍是全片共享（改一次外观全片同步），这里只按 shot.charIds /
+   sceneId / propIds 的绑定关系过滤展示，不再跨镜混排。
+   默认仍是「全部资产」：tools/verify_* 的 .ap-row / [data-asset-tab] 全靠它。
+   用户切换只记本机 localStorage，回归脚本用全新 context，不受影响。 */
+const VIEW_KEY = "shortplay.ap.view";
+function loadView() {
+  try { return localStorage.getItem(VIEW_KEY) === "shot" ? "shot" : "all"; }
+  catch (e) { return "all"; }
+}
+const viewMode = ref(loadView());
+function setViewMode(v) {
+  viewMode.value = v === "shot" ? "shot" : "all";
+  try { localStorage.setItem(VIEW_KEY, viewMode.value); } catch (e) { /* 隐私模式忽略 */ }
+  q.value = "";
+  if (viewMode.value === "all" && ui.comfy.scope === "shot") comfySetScope("one");
+  closePreview();
+}
+const shotId = ref("");
+const shotQuery = ref("");
+const epFilter = ref("all");
+const detailEl = ref(null);
+const shotList = computed(() => S.shots || []);
+const episodes = computed(() => [...new Set(shotList.value
+  .map((s) => String(s.episode ?? "")).filter(Boolean))].sort((a, b) => Number(a) - Number(b)));
+watch(() => shotList.value.map((s) => s.id).join(","), () => {
+  if (!shotList.value.some((s) => s.id === shotId.value)) shotId.value = shotList.value[0]?.id || "";
+}, { immediate: true });
+const curShot = computed(() => shotList.value.find((s) => s.id === shotId.value) || shotList.value[0] || null);
+const curShotNo = computed(() => Math.max(1, shotList.value.findIndex((s) => s.id === curShot.value?.id) + 1));
+const assetIndex = computed(() => {
+  const m = {};
+  [].concat(S.assets.characters, S.assets.scenes, S.assets.props)
+    .forEach((a) => { if (a && a.id) m[a.id] = a; });
+  return m;
+});
+function groupsOf(shot) {
+  const m = assetIndex.value;
+  const pick = (ids) => (ids || []).map((id) => m[id]).filter(Boolean);
+  return {
+    character: pick(shot && shot.charIds),
+    scene: pick(shot && shot.sceneId ? [shot.sceneId] : []),
+    prop: pick(shot && shot.propIds)
+  };
+}
+const curGroups = computed(() => groupsOf(curShot.value));
+const curShotAssets = computed(() => [].concat(
+  curGroups.value.character, curGroups.value.scene, curGroups.value.prop));
+function hasImage(a) { return !!(a && (a.refImage || (a.genImages || []).length)); }
+function shotState(s) {
+  const g = groupsOf(s);
+  const all = [].concat(g.character, g.scene, g.prop);
+  const miss = all.filter((a) => !hasImage(a)).length;
+  return { total: all.length, miss, ready: all.length > 0 && !miss, empty: !all.length,
+           n: { character: g.character.length, scene: g.scene.length, prop: g.prop.length } };
+}
+const navStats = computed(() => {
+  let ready = 0;
+  shotList.value.forEach((s) => { if (shotState(s).ready) ready++; });
+  return { total: shotList.value.length, ready, pending: shotList.value.length - ready };
+});
+const curShotState = computed(() => shotState(curShot.value));
+const curFrame = computed(() => (S.frames || []).find((f) => f.code === curShot.value?.code) || null);
+const shotRows = computed(() => {
+  const k = shotQuery.value.trim().toLowerCase();
+  return shotList.value.map((s, i) => ({ shot: s, no: i + 1, st: shotState(s) })).filter((r) => {
+    if (epFilter.value !== "all" && String(r.shot.episode) !== epFilter.value) return false;
+    if (!k) return true;
+    return [r.shot.code, r.shot.visual, r.shot.dialogue, r.shot.speaker, r.shot.sceneLabel, r.shot.notes]
+      .join(" ").toLowerCase().includes(k);
+  });
+});
+function stepShot(n) {
+  const i = shotRows.value.findIndex((r) => r.shot.id === curShot.value?.id);
+  const t = shotRows.value[i + n];
+  if (t) { shotId.value = t.shot.id; closePreview(); }
+}
+function shotLabel(s) { return s.code || ("#" + (s.no ?? "")); }
+function shotSub(s) {
+  return [s.episode ? "第" + s.episode + "集" : "",
+    s.sceneLabel ? String(s.sceneLabel).slice(0, 14) : (s.sceneNo ? "场次" + s.sceneNo : ""),
+    s.size, (s.duration || 0) + "s"].filter(Boolean).join(" · ");
+}
+function shotText(s) { return String(s.visual || s.detail || "（暂无画面描述）"); }
+function heroNotes(s) {
+  const bits = [s.speaker ? s.speaker + "：" + (s.dialogue || "（无台词内容）") : (s.dialogue || "（无台词）")];
+  if (s.notes) bits.push("备注：" + s.notes);
+  bits.push("风格锚：" + currentStyle().anchor);
+  return bits.join(String.fromCharCode(10));
+}
+function shotThumb(s) {
+  const g = groupsOf(s);
+  const a = g.scene[0] || g.character[0] || g.prop[0];
+  if (!a) return "";
+  return a.refImage ? refSrc(a, 128) : ((a.genImages || [])[0] || {}).dataUri || "";
+}
+const GROUPS = [
+  { kind: "character", label: "角色", cap: "本镜出场角色 · 顺序即参考图槽位" },
+  { kind: "scene", label: "场景", cap: "本镜所在场地" },
+  { kind: "prop", label: "道具", cap: "本镜出现的关键物件" }
+];
+function groupItems(kind) {
+  const list = (curGroups.value[kind] || []).slice();
+  return onlyP0.value ? list.filter((a) => (a.priority || "P1") === "P0") : list;
+}
+function cardSub(a) {
+  if (a.kind === "character") return String(a.role || a.age || "").split(/[，,。;；]/)[0].slice(0, 12) || "角色";
+  if (a.kind === "scene") return [metaText(a.intExt), metaText(a.time)].filter(Boolean).join(" · ") || "场景";
+  return (a.boundTo || []).join(" / ") || "道具";
+}
+function cardDesc(a) {
+  const t = String(a.keyword || a.appearance || a.wardrobe || a.role || a.name || "").replace(/\s+/g, " ");
+  return t.slice(0, 56) || "由剧本分解自动提取设定";
+}
+function cardVariant(a) {
+  const p = a.prompts || {};
+  if (p.turnaround) return "三视图";
+  if (p.faceSheet) return "面部四视图";
+  if (p.concept) return "场景概念图";
+  if (p.wide) return "宽幕建立镜";
+  return ((a.genImages || [])[0] || {}).label || "设定图";
+}
+function pickShotAsset(a) {
+  if (S.assetTab !== a.kind) setAssetTab(a.kind);
+  pick(a.id);
+  nextTick(() => detailEl.value?.scrollIntoView({ behavior: "smooth", block: "start" }));
+}
+function redrawShotAsset(a) {
+  if (S.assetTab !== a.kind) setAssetTab(a.kind);
+  pick(a.id);
+  comfySetScope("one");
+  comfyGenerateImages(a.id);
+}
+function doGenerate() {
+  comfyGenerateImages(sel.value && sel.value.id,
+    viewMode.value === "shot" && ui.comfy.scope === "shot"
+      ? (curGroups.value[S.assetTab] || []).map((a) => a.id) : null);
+}
+function focusPropDraft() {
+  if (S.assetTab !== "prop") setAssetTab("prop");
+  nextTick(() => {
+    const el = document.getElementById("prop-draft");
+    if (el) { el.focus(); el.scrollIntoView({ behavior: "smooth", block: "nearest" }); }
+  });
+}
 
 const cur = computed(() => assetTabs.value.find((t) => t.kind === S.assetTab) || assetTabs.value[0]);
 const open = computed(() => !props.collapsible || ui.assetOpen);
@@ -25,10 +171,11 @@ function toggleOpen() { ui.assetOpen = !ui.assetOpen; }
 
 /** P0 是「必须先出图定基准」的那批，筛出来就是生成顺序的前半段。 */
 const items = computed(() => {
-  const list = cur.value.items || [];
+  const list = viewMode.value === "shot" ? curShotAssets.value : (cur.value.items || []);
   return onlyP0.value ? list.filter((a) => (a.priority || "P1") === "P0") : list;
 });
-const p0Count = computed(() => (cur.value.items || []).filter((a) => (a.priority || "P1") === "P0").length);
+const p0Count = computed(() => (viewMode.value === "shot" ? curShotAssets.value : (cur.value.items || []))
+  .filter((a) => (a.priority || "P1") === "P0").length);
 
 /** 列表里的搜索：名称 / 编号 / 别名 / 固定关键词串都能命中 */
 const shown = computed(() => {
@@ -65,7 +212,8 @@ function stepBy(n) {
   if (t) selId.value = t.id;
 }
 /** 换 tab / 改筛选后选中项可能不在列表里了，自动落到第一项 */
-watch([() => S.assetTab, () => shown.value.map((a) => a.id).join(",")], () => {
+watch([() => S.assetTab, () => viewMode.value, () => shotId.value,
+  () => shown.value.map((a) => a.id).join(",")], () => {
   if (!shown.value.some((a) => a.id === selId.value)) selId.value = shown.value[0]?.id || "";
 }, { immediate: true });
 
@@ -160,15 +308,18 @@ const genVariants = computed(() => {
   return (v && v.length) ? v : (FALLBACK_VARIANTS[S.assetTab] || []);
 });
 const TAB_NAME = { character: "角色", scene: "场景", prop: "道具" };
-const SCOPES = [
-  { k: "one", t: "当前资产", h: "只出左侧详情里选中的这一个" },
+const SCOPES = computed(() => [
+  { k: "one", t: "当前资产", h: "只出详情里选中的这一个" },
+  ...(viewMode.value === "shot"
+    ? [{ k: "shot", t: "本镜资产", h: "只出当前分镜绑定的这一类资产" }] : []),
   { k: "p0", t: "P0 资产", h: "只出标了 P0 的核心资产" },
   { k: "all", t: "本栏全部", h: "这个标签页里的全部资产都出" }
-];
+]);
 /* 范围 → 具体要出图的资产清单（张数 = 资产数 × 选中的画幅数） */
 const scopeList = computed(() => {
   const key = { character: "characters", scene: "scenes", prop: "props" }[S.assetTab] || "characters";
   const all = S.assets[key] || [];
+  if (viewMode.value === "shot" && ui.comfy.scope === "shot") return curGroups.value[S.assetTab] || [];
   if (ui.comfy.scope === "one") return all.filter((a) => a.id === (sel.value && sel.value.id));
   if (ui.comfy.scope === "p0") return all.filter((a) => (a.priority || "P1") === "P0");
   return all;
@@ -182,7 +333,8 @@ const genSummary = computed(() => {
   const k = (ui.comfy.picked[S.assetTab] || []).length;
   const tab = TAB_NAME[S.assetTab] || "资产";
   if (!k) return "至少选一种画幅";
-  if (!n) return ui.comfy.scope === "p0" ? "本栏没有 P0 " + tab : "先在左侧选一个" + tab;
+  if (!n) return ui.comfy.scope === "p0" ? "本栏没有 P0 " + tab
+    : ui.comfy.scope === "shot" ? "本镜没有" + tab + "资产" : "先在左侧选一个" + tab;
   const seq = ui.comfy.engine === "qwen" ? " × " + (ui.comfy.seqN || 1) + " 张/组" : "";
   const total = n * k * (ui.comfy.engine === "qwen" ? (ui.comfy.seqN || 1) : 1);
   return n + " 个" + tab + " × " + k + " 种画幅" + seq + " = " + total + " 张";
@@ -362,7 +514,7 @@ watch(() => sel.value && sel.value.id, () => { closePreview(); ui.comfy.preview 
         <div class="ap-gen-act">
           <span class="ap-gen-sum" :class="{ warn: !genCount }">{{ genSummary }}</span>
           <button class="btn sm primary" id="comfy-generate"
-            :disabled="ui.comfy.busy || !genCount" @click="comfyGenerateImages(sel && sel.id)">
+            :disabled="ui.comfy.busy || !genCount" @click="doGenerate">
             {{ ui.comfy.busy ? "生成中…" : "✦ 一键生成 " + genCount + " 张" }}
           </button>
         </div>
@@ -460,19 +612,76 @@ watch(() => sel.value && sel.value.id, () => { closePreview(); ui.comfy.preview 
       </div>
 
       <div class="ap-tabs">
-        <button v-for="t in assetTabs" :key="t.kind" class="ap-tab"
+        <div class="ap-views" title="切换资产浏览方式">
+          <button :class="{ on: viewMode === 'shot' }" @click="setViewMode('shot')">▦ 按分镜</button>
+          <button :class="{ on: viewMode === 'all' }" @click="setViewMode('all')">☰ 全部资产</button>
+        </div>
+        <span class="ap-views-sep"></span>
+        <button v-for="t in assetTabs" :key="t.kind" class="ap-tab" v-show="viewMode === 'all'"
           :class="{ active: S.assetTab === t.kind }" :data-asset-tab="t.kind" @click="setAssetTab(t.kind)">
           {{ t.label }}<span>{{ t.items.length }}</span>
         </button>
         <div class="spacer"></div>
+        <span v-if="viewMode === 'shot'" class="ap-view-note">共 {{ navStats.total }} 镜 · 资产按绑定关系独立分组</span>
         <button v-if="p0Count" class="ap-filter" :class="{ on: onlyP0 }" @click="onlyP0 = !onlyP0">
           只看 P0 · {{ p0Count }}
         </button>
       </div>
 
       <!-- 左：密排清单（一屏看全） / 右：当前资产的编辑区 -->
-      <div v-if="items.length" class="ap-body">
+      <div v-if="items.length || viewMode === 'shot'" class="ap-body" :class="{ 'is-shot': viewMode === 'shot' }">
         <aside class="ap-side">
+          <template v-if="viewMode === 'shot'">
+            <div class="ap-shot-nav-h">
+              <b>分镜任务列表</b><span>{{ navStats.total }} 镜</span>
+              <div class="ap-shot-nav-stats">
+                <span class="ok">● {{ navStats.ready }} 已就绪</span>
+                <span class="warn">● {{ navStats.pending }} 待补图</span>
+              </div>
+              <select v-if="episodes.length > 1" v-model="epFilter" class="ap-input ap-shot-ep" aria-label="按集筛选">
+                <option value="all">全部集</option>
+                <option v-for="ep in episodes" :key="ep" :value="ep">第 {{ ep }} 集</option>
+              </select>
+            </div>
+            <div class="ap-search">
+              <input v-model="shotQuery" class="ap-input" placeholder="搜镜号 / 画面描述" aria-label="搜索分镜">
+              <button v-if="shotQuery" class="ap-q-x" title="清空搜索" @click="shotQuery = ''">×</button>
+            </div>
+            <div class="ap-shot-rows">
+              <div v-for="r in shotRows" :key="r.shot.id" class="ap-shot-row"
+                :class="{ on: r.shot.id === curShot?.id }" :data-shot="r.shot.id"
+                role="button" tabindex="0" @click="shotId = r.shot.id"
+                @keydown.enter.prevent="shotId = r.shot.id">
+                <span class="ap-shot-row-th">
+                  <img v-if="shotThumb(r.shot)" :src="shotThumb(r.shot)" :alt="shotLabel(r.shot)" loading="lazy">
+                  <template v-else>🎬</template>
+                </span>
+                <div class="ap-shot-row-b">
+                  <div class="ap-shot-row-t">
+                    <b>#{{ String(r.no).padStart(2, "0") }}</b>
+                    <span>{{ shotLabel(r.shot) }}</span>
+                    <em>{{ r.shot.duration || 0 }}s</em>
+                  </div>
+                  <div class="ap-shot-row-d">{{ shotText(r.shot) }}</div>
+                  <div class="ap-shot-row-f">
+                    <span>角 {{ r.st.n.character }}</span><span>景 {{ r.st.n.scene }}</span><span>物 {{ r.st.n.prop }}</span>
+                    <i :class="r.st.empty ? 'empty' : (r.st.ready ? 'ok' : 'warn')">
+                      {{ r.st.empty ? "无绑定" : (r.st.ready ? "已就绪" : "待补 " + r.st.miss) }}
+                    </i>
+                  </div>
+                </div>
+              </div>
+              <div v-if="!shotRows.length" class="ap-row-none">
+                {{ navStats.total ? "没有匹配的分镜" : "还没有生成分镜，先完成「AI 自动拆解」" }}
+              </div>
+            </div>
+            <div class="ap-side-f">
+              <span>{{ curShotNo }} / {{ navStats.total }} 镜</span>
+              <button class="ap-side-cp" @click="stepShot(-1)">‹ 上一镜</button>
+              <button class="ap-side-cp" @click="stepShot(1)">下一镜 ›</button>
+            </div>
+          </template>
+          <template v-else>
           <div class="ap-search">
             <input v-model="q" class="ap-input" placeholder="搜名称 / 编号 / 关键词" aria-label="搜索资产">
             <button v-if="q" class="ap-q-x" title="清空搜索" @click="q = ''">×</button>
@@ -504,7 +713,102 @@ watch(() => sel.value && sel.value.id, () => { closePreview(); ui.comfy.preview 
               :title="'把本栏 ' + shown.length + ' 个资产的提示词复制成一份文本（先出图前对稿用）'"
               @click="copyAllAssetPrompts(S.assetTab, 'all')">⧉ 全部复制</button>
           </div>
+          </template>
         </aside>
+
+        <div class="ap-right">
+        <template v-if="viewMode === 'shot'">
+          <div v-if="curShot" class="ap-shot-main">
+            <div class="ap-shot-hero">
+              <div class="ap-shot-hero-h">
+                <b>分镜 {{ String(curShotNo).padStart(2, "0") }}</b>
+                <span class="ap-shot-hero-code">{{ shotLabel(curShot) }}</span>
+                <span class="ap-shot-hero-sub">{{ shotSub(curShot) }}</span>
+                <span class="ap-shot-hero-state" :class="curShotState.ready ? 'ok' : 'warn'">
+                  {{ curShotState.empty ? "未绑定资产" : (curShotState.ready ? "资产已就绪" : "待补 " + curShotState.miss + " 张") }}
+                </span>
+              </div>
+              <div class="ap-shot-hero-grid">
+                <div class="ap-shot-hero-box">
+                  <h4>画面描述</h4>
+                  <p>{{ shotText(curShot) }}</p>
+                </div>
+                <div class="ap-shot-hero-box muted">
+                  <h4>台词 · 备注 · 氛围</h4>
+                  <p>{{ heroNotes(curShot) }}</p>
+                </div>
+              </div>
+              <div class="ap-shot-hero-sum">
+                <span>本镜资产 <b>{{ curShotState.total }}</b></span>
+                <span>角色 <b>{{ curShotState.n.character }}</b></span>
+                <span>场景 <b>{{ curShotState.n.scene }}</b></span>
+                <span>道具 <b>{{ curShotState.n.prop }}</b></span>
+                <span>已有图 <b>{{ curShotState.total - curShotState.miss }}</b></span>
+                <span>点卡片进下方详情编辑，改一次全片同步</span>
+              </div>
+            </div>
+
+            <div v-for="g in GROUPS" :key="g.kind" class="ap-shot-group">
+              <div class="ap-shot-group-h">
+                <b>{{ g.label }}</b>
+                <span class="ap-shot-group-n">{{ groupItems(g.kind).length }}</span>
+                <span class="ap-shot-group-cap">{{ g.cap }}</span>
+                <button v-if="g.kind === 'prop'" class="mini" @click="focusPropDraft">+ 新增</button>
+              </div>
+              <div v-if="groupItems(g.kind).length" class="ap-shot-cards">
+                <div v-for="a in groupItems(g.kind)" :key="a.id" class="ap-shot-card"
+                  :class="{ on: sel?.id === a.id }" :data-shot-asset="a.id"
+                  role="button" tabindex="0" @click="pickShotAsset(a)"
+                  @keydown.enter.prevent="pickShotAsset(a)">
+                  <div class="ap-shot-card-img">
+                    <img v-if="a.refImage" :src="refSrc(a, 320)" :alt="a.name" loading="lazy" decoding="async">
+                    <div v-else class="ap-shot-card-ph">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+                        <circle cx="12" cy="8" r="3.2"/><path d="M5.5 20c.6-3.8 3.1-5.8 6.5-5.8s5.9 2 6.5 5.8"/>
+                      </svg>
+                    </div>
+                    <span class="ap-shot-card-badge" :class="hasImage(a) ? 'ok' : 'off'">
+                      {{ a.refImage ? "已定妆" : (hasImage(a) ? "已生成" : "待生成") }}
+                    </span>
+                    <button v-if="a.refImage" class="ap-shot-card-zoom" title="看参考图原图"
+                      @click.stop="openRefLb(a)">⤢</button>
+                  </div>
+                  <div class="ap-shot-card-b">
+                    <div class="ap-shot-card-t"><b>{{ a.name }}</b><span>{{ cardSub(a) }}</span></div>
+                    <div class="ap-shot-card-m">{{ a.code || "—" }} · {{ a.priority || "P1" }}</div>
+                    <div class="ap-shot-card-d">最终提示词 · {{ cardVariant(a) }}<br>{{ cardDesc(a) }}</div>
+                  </div>
+                  <div class="ap-shot-card-act">
+                    <button class="mini" title="只重绘这一个资产" @click.stop="redrawShotAsset(a)">重绘</button>
+                    <label class="mini" title="上传参考图（原图不压缩）" @click.stop>
+                      上传<input type="file" class="ap-file"
+                        accept="image/png,image/jpeg,image/webp,image/gif,image/bmp,image/avif"
+                        :data-ref-for="a.id" @change="uploadAssetRef($event, a.id)">
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="ap-shot-group-empty">
+                本镜没有绑定{{ g.label }}{{ onlyP0 ? "（已开启只看 P0）" : "" }}，切到其他分镜或回「全部资产」查看
+              </div>
+            </div>
+
+            <div v-if="curFrame" class="ap-shot-frame">
+              <details>
+                <summary>起始帧提示词 · {{ curFrame.code }}（点开查看，供出图工具复用）</summary>
+                <pre>{{ curFrame.prompt }}</pre>
+              </details>
+            </div>
+          </div>
+          <div v-else class="ap-shot-none">
+            还没有生成分镜，先在第 2 步完成「AI 自动拆解」。<br>
+            <button class="btn sm quiet" @click="setViewMode('all')">切到全部资产视图</button>
+          </div>
+          <div v-if="sel" ref="detailEl" class="ap-shot-detail-h">
+            资产详情 · {{ sel.name }}
+            <span>沿用原有编辑 / 提示词 / 出图 / 灯箱功能，改动对本片所有引用它的分镜同时生效</span>
+          </div>
+        </template>
 
         <article v-if="sel" class="ap-item ap-detail" :class="'k-' + sel.kind" :data-asset="sel.id"
           @focusin="onAssetFocusin" @change="onAssetChange">
@@ -682,6 +986,10 @@ watch(() => sel.value && sel.value.id, () => { closePreview(); ui.comfy.preview 
             </div>
           </div>
         </article>
+        <div v-else-if="viewMode === 'shot'" class="ap-empty">
+          本镜还没有可编辑的资产。切到其他分镜，或回「全部资产」视图新增 / 分解资产。
+        </div>
+        </div>
       </div>
       <div v-else class="ap-empty">
         {{ onlyP0 ? "这一栏没有 P0 资产，取消筛选看全部。" :

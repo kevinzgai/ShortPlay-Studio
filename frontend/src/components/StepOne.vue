@@ -111,10 +111,10 @@ function onDrop(e) {
 
     <aside class="step1-side">
       <div class="how">
-        <div class="how-item"><div class="n">01 · 导入</div><p>小说、散文、场次剧本都能直接粘进来；小说体会先自动转写成场次剧本。</p></div>
-        <div class="how-item"><div class="n">02 · 体检</div><p>自动找出缺场景、角色名不统一、场号重复等问题，给补全入口。</p></div>
-        <div class="how-item"><div class="n">03 · 成表</div><p>按剧情顺序排出镜号、画面、景别、时长、台词、备注，随时可改。</p></div>
-        <div class="how-item"><div class="n">04 · 参数</div><p>模型 / 节奏 / 画幅已按默认配好，不改也能直接出片；要改点左下角<b>「生成设置」</b>。</p></div>
+        <div class="how-item"><div class="n">阶段一 · 剧本</div><p>小说、散文、场次剧本都能直接粘进来；小说体会先自动转写成场次剧本。</p></div>
+        <div class="how-item"><div class="n">阶段一 · 拆解</div><p>自动找出缺场景、角色名不统一、场号重复等问题，再列出分集 / 场次 / 角色给你确认。</p></div>
+        <div class="how-item"><div class="n">阶段二 · 定妆</div><p>角色 / 场景 / 道具先出参考图定妆，分镜的参考图槽位都从这一层取，改一次全片同步。</p></div>
+        <div class="how-item"><div class="n">阶段二 · 分镜</div><p>按剧情排出镜号、画面、景别、时长、台词、备注，随时可改、可导出。</p></div>
       </div>
     </aside>
   </div>

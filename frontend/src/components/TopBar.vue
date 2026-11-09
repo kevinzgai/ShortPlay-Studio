@@ -1,9 +1,10 @@
 <script setup>
 import { computed } from "vue";
-import { S, ui, PROJECT, canUndo, canRedo, undo, redo, openModal } from "../stores/studio.js";
+import { S, ui, PROJECT, canUndo, canRedo, undo, redo, openModal, STEPS } from "../stores/studio.js";
 
-const steps = [["1", "导入剧本"], ["2", "AI 自动拆解"], ["3", "分镜表"]];
-const cur = computed(() => steps.find((s) => Number(s[0]) === S.step) || steps[0]);
+const cur = computed(() => STEPS.find((s) => s.no === Number(S.step)) || STEPS[0]);
+const siblings = computed(() => STEPS.filter((s) => s.stage === cur.value.stage));
+const subNo = computed(() => siblings.value.findIndex((s) => s.no === cur.value.no) + 1);
 const projName = computed(() => S.projectName || "未命名项目");
 const saveTitle = computed(() => (PROJECT.server
   ? "项目保存在本机 projects/ 目录，改动自动落盘"
@@ -26,9 +27,11 @@ const saveTitle = computed(() => (PROJECT.server
     </div>
 
     <div class="crumb">
-      <span class="crumb-step">STEP 0{{ cur[0] }} / 03</span>
+      <span class="crumb-stage">{{ cur.stageName }}</span>
+      <span class="crumb-sep">·</span>
+      <span class="crumb-step">0{{ subNo }} / 0{{ siblings.length }}</span>
       <span class="crumb-sep">/</span>
-      <span class="crumb-cur">{{ cur[1] }}</span>
+      <span class="crumb-cur">{{ cur.label }}</span>
     </div>
 
     <div class="top-actions">

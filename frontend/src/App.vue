@@ -10,7 +10,8 @@ import AppRail from "./components/AppRail.vue";
 import StepOne from "./components/StepOne.vue";
 import StepTwo from "./components/StepTwo.vue";
 import ParseProgress from "./components/ParseProgress.vue";
-import StepThree from "./components/StepThree.vue";
+import StepAsset from "./components/StepAsset.vue";
+import StepShots from "./components/StepShots.vue";
 import FeedbackLayer from "./components/FeedbackLayer.vue";
 import FxLayer from "./fx/FxLayer.vue";
 import "./fx/fx.css";
@@ -63,7 +64,8 @@ onUnmounted(() => {
         <ParseProgress />
         <section class="view" id="view-1" :class="{ hidden: S.step !== 1 }"><StepOne v-if="S.step === 1" /></section>
         <section class="view" id="view-2" :class="{ hidden: S.step !== 2 }"><StepTwo v-if="S.step === 2 && S.parsed" /></section>
-        <section class="view" id="view-3" :class="{ hidden: S.step !== 3 }"><StepThree v-if="S.step === 3" /></section>
+        <section class="view" id="view-3" :class="{ hidden: S.step !== 3 }"><StepAsset v-if="S.step === 3" /></section>
+        <section class="view" id="view-4" :class="{ hidden: S.step !== 4 }"><StepShots v-if="S.step === 4" /></section>
       </main>
     </div>
     <FeedbackLayer />

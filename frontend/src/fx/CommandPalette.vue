@@ -12,7 +12,7 @@ const inputEl = ref(null);
 
 function jumpToShot(id) {
   if (!S.shots.length) { toast("还没有生成分镜", "warn"); return; }
-  if (S.step !== 3) goStep(3);
+  if (S.step !== 4) goStep(4);
   setActiveShot(id);
   nextTick(() => {
     const el = document.querySelector('.shot[data-id="' + id + '"]');
@@ -21,15 +21,16 @@ function jumpToShot(id) {
 }
 
 const base = computed(() => [
-  { id: "s1", group: "导航", icon: "①", label: "导入剧本", hint: "步骤 1", run: () => goStep(1) },
-  { id: "s2", group: "导航", icon: "②", label: "AI 自动拆解 · 分集", hint: "步骤 2", run: () => goStep(2) },
-  { id: "s3", group: "导航", icon: "③", label: "分镜表", hint: "步骤 3", run: () => goStep(3) },
+  { id: "s1", group: "导航", icon: "①", label: "剧本原文", hint: "剧本阶段 · 1/2", run: () => goStep(1) },
+  { id: "s2", group: "导航", icon: "②", label: "AI 拆解确认 · 分集", hint: "剧本阶段 · 2/2", run: () => goStep(2) },
+  { id: "s3", group: "导航", icon: "③", label: "资产定妆", hint: "制作阶段 · 1/2", run: () => goStep(3) },
+  { id: "s4", group: "导航", icon: "④", label: "分镜表", hint: "制作阶段 · 2/2", run: () => goStep(4) },
   { id: "undo", group: "编辑", icon: "↶", label: "撤销", hint: "Ctrl + Z", run: () => canUndo.value ? undo() : toast("没有可撤销的操作", "warn") },
   { id: "redo", group: "编辑", icon: "↷", label: "重做", hint: "Ctrl + Shift + Z", run: () => canRedo.value ? redo() : toast("没有可重做的操作", "warn") },
-  { id: "export", group: "文件", icon: "⇩", label: "打开导出菜单", hint: "CSV / Markdown / TXT / JSON", run: () => { if (!S.shots.length) { toast("还没有生成分镜", "warn"); return; } if (S.step !== 3) goStep(3); nextTick(() => { ui.exportOpen = true; }); } },
+  { id: "export", group: "文件", icon: "⇩", label: "打开导出菜单", hint: "CSV / Markdown / TXT / JSON", run: () => { if (!S.shots.length) { toast("还没有生成分镜", "warn"); return; } if (S.step !== 4) goStep(4); nextTick(() => { ui.exportOpen = true; }); } },
   { id: "settings", group: "文件", icon: "⚙", label: "生成设置", hint: "模型 / 节奏 / 画幅", run: () => openModal("settings") },
   { id: "projects", group: "文件", icon: "◫", label: "切换 / 管理项目", hint: "新建 · 重命名 · 删除 · 副本", run: () => openModal("projects") },
-  { id: "help", group: "文件", icon: "?", label: "使用说明", hint: "三步出分镜", run: () => openModal("help") },
+  { id: "help", group: "文件", icon: "?", label: "使用说明", hint: "剧本 → 制作 两阶段", run: () => openModal("help") },
   { id: "fx-off", group: "特效", icon: "✦", label: "关闭炫酷特效", hint: "回到原始极简界面", run: () => setFx(false) },
   { id: "fx-dark", group: "特效", icon: "◐", label: fx.dark ? "切到浅色极光" : "切到暗夜霓虹", hint: "皮肤", run: () => setDark(!fx.dark) },
   { id: "fx-calm", group: "特效", icon: "≋", label: "动效：舒缓", hint: "降低浮动与扫光", run: () => setMotion("calm") },

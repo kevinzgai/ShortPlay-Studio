@@ -61,6 +61,9 @@ function gotoScript() {
     <div class="inline-note">场景地点需要你确认才算准确；其余缺失项都能一键补全，补全会写回剧本文本，随时可撤销。</div>
   </div>
 
+  <div class="inline-note" style="margin-bottom:8px">
+    这一层的资产清单用来核对 AI 拆得全不全（漏人漏物在这里补）；真正出图定妆在制作阶段的「资产定妆」。
+  </div>
   <AssetPanel style="margin-bottom:18px" />
 
   <div class="card pad" style="margin-bottom:18px">
@@ -99,6 +102,6 @@ function gotoScript() {
   <div class="cta-row">
     <button class="btn" id="back-1" @click="goStep(1)">← 返回改剧本</button>
     <button class="btn primary lg" id="generate" @click="doGenerate(true)">{{ aiEnabledUi ? "AI 生成 " + (S.episodes.length || "") + " 集分镜 →" : "生成 " + stats.scenes + " 场的分镜 →" }}</button>
-    <span class="cta-note">生成后可任意增删改、排序、批量重生成，每一步都能撤销</span>
+    <span class="cta-note">生成后进「资产定妆」：先给角色 / 场景出图，再去分镜表逐镜检查；每一步都能撤销</span>
   </div>
 </template>

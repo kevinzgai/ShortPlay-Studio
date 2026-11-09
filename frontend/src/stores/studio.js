@@ -296,7 +296,8 @@ export function hydrate(data, info) {
   S.shots.forEach((s) => { ids[s.id] = 1; });
   S.selected = (Array.isArray(S.selected) ? S.selected : []).filter((id) => ids[id]);
   if (S.activeId && !ids[S.activeId]) S.activeId = S.shots.length ? S.shots[0].id : null;
-  if (!S.shots.length && S.step === 3) S.step = 1;
+  if (S.step > 4) S.step = 4;
+  if (!S.shots.length && S.step === 4) S.step = S.parsed ? 3 : 1;
   if (!S.script && S.step === 2) S.step = 1;
 }
 
@@ -616,7 +617,7 @@ export function localGenerate() {
     S.activeId = S.shots.length ? S.shots[0].id : null;
     S.aiSource = "local"; S.episodeSource = "local"; S.aiModel = "";
     S.aiDegraded = []; S.aiWarnings = [];
-    S.stale = ""; S.step = 3;
+    S.stale = ""; S.step = 4;
     busy(false); window.scrollTo(0, 0); save();
     toast("已生成 " + (S.episodes.length ? S.episodes.length + " 集 / " : "") + S.shots.length +
       " 个分镜，约 " + E.totalDuration(S.shots) + " 秒", "ok", "撤销", undo);
@@ -758,7 +759,7 @@ function applyAiResult(result) {
   S.episodeSource = (episodes.length && episodes.every((e) => e.source === "local")) ? "local" : "ai";
   S.aiDegraded = degraded;
   S.aiWarnings = result.warnings || [];
-  S.stale = ""; S.step = 3;
+  S.stale = ""; S.step = 4;
   window.scrollTo(0, 0); save();
 
   const head = (S.episodes.length ? S.episodes.length + " 集 / " : "") + S.shots.length + " 镜";
@@ -945,10 +946,30 @@ export const EPISODE_MODES = [
   ["2", "固定 2 集"], ["3", "固定 3 集"], ["4", "固定 4 集"]
 ];
 
+/* --------------------------- 两阶段 · 四个工作区 ---------------------------
+   剧本阶段：把文字整理成可信的结构（原文 → 拆解确认）
+   制作阶段：把结构做成能出片的资产与镜头（资产定妆 → 分镜表）
+   闸门：没有剧本进不了拆解；没有镜头进不了分镜表。
+   注意：S.step 是对外契约（tools/verify_* 与已存项目都按它走），
+   这里只重组导航层级，不改这四个数字的含义顺序。 */
+export const STEPS = [
+  { no: 1, stage: "script", stageName: "剧本阶段", label: "剧本原文", hint: "粘贴或上传原文" },
+  { no: 2, stage: "script", stageName: "剧本阶段", label: "AI 拆解确认", hint: "分集 · 场次 · 角色 · 体检" },
+  { no: 3, stage: "production", stageName: "制作阶段", label: "资产定妆", hint: "角色 · 场景 · 道具出图" },
+  { no: 4, stage: "production", stageName: "制作阶段", label: "分镜表", hint: "改字段 · 导出" }
+];
+export const STAGES = [
+  { key: "script", name: "剧本阶段", note: "把文字整理成结构", steps: [1, 2] },
+  { key: "production", name: "制作阶段", note: "把结构做成片子", steps: [3, 4] }
+];
+export const stageOf = (n) => (Number(n) <= 2 ? "script" : "production");
+
 /* --------------------------- 导航 / 输入 --------------------------- */
 export function goStep(n) {
+  n = Math.max(1, Math.min(4, Number(n) || 1));
   if (n > 1 && !S.script.replace(/\s/g, "")) { toast("先导入剧本文字", "warn"); return; }
-  if (n === 3 && !S.shots.length) { toast("还没有生成分镜", "warn"); return; }
+  if (n >= 3 && !S.parsed) { toast("先在第 2 步完成 AI 拆解", "warn"); return; }
+  if (n === 4 && !S.shots.length) { toast("还没有生成分镜，先在「资产定妆」页点生成", "warn"); return; }
   S.step = n; window.scrollTo(0, 0); save();
   if (n === 2) planOnly();
 }
@@ -2033,7 +2054,7 @@ export function comfyPreviewPrompts(currentId) {
 }
 export function clearComfyPreview() { ui.comfy.preview = null; }
 
-export function comfyGenerateImages(currentId) {
+export function comfyGenerateImages(currentId, shotIds) {
   if (ui.comfy.busy) return;
   const engine = ui.comfy.engine;
   const seqN = engine === "qwen" ? (ui.comfy.seqN || 1) : 1;
@@ -2047,6 +2068,8 @@ export function comfyGenerateImages(currentId) {
   const all = S.assets[key] || [];
   let list;
   if (ui.comfy.scope === "one") list = all.filter((a) => a.id === currentId);
+  else if (ui.comfy.scope === "shot" && Array.isArray(shotIds) && shotIds.length)
+    list = all.filter((a) => shotIds.indexOf(a.id) >= 0);
   else if (ui.comfy.scope === "p0") list = all.filter((a) => (a.priority || "P1") === "P0");
   else list = all.slice();
   if (!list.length) { toast("这个范围里没有资产，换个范围或先做资产分解", "warn"); return; }

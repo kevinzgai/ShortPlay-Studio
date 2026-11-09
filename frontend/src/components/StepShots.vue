@@ -1,4 +1,6 @@
 <script setup>
+/* 制作阶段 · 第 2 步：分镜表
+   资产定妆拆到上一步，这里只负责镜头本身：画面 / 景别 / 时长 / 台词 / 备注。 */
 import { computed } from "vue";
 import {
   S, totalDuration, staleMsg, visibleShots, episodeTabs,
@@ -9,11 +11,23 @@ import {
 import ShotCard from "./ShotCard.vue";
 import ShotsTable from "./ShotsTable.vue";
 import PreviewPanel from "./PreviewPanel.vue";
-import AssetPanel from "./AssetPanel.vue";
 import ExportMenu from "./ExportMenu.vue";
 
 const showAiStatus = computed(() => S.episodes.length > 0 || S.aiSource === "local");
 const degradedNos = computed(() => S.aiDegraded.map((d) => d.no).join("、"));
+
+function hasPic(a) { return !!(a && (a.refImage || (a.genImages || []).length)); }
+const assetStat = computed(() => {
+  const a = S.assets || {};
+  const all = [].concat(a.characters || [], a.scenes || [], a.props || []);
+  return { total: all.length, ready: all.filter(hasPic).length };
+});
+const assetTip = computed(() => {
+  const s = assetStat.value;
+  if (!s.total) return "本片还没有资产，先回第 3 步从剧本分解";
+  if (s.ready === s.total) return "资产已全部定妆";
+  return "还有 " + (s.total - s.ready) + " 个资产没定妆，参考图槽位会空着";
+});
 </script>
 
 <template>
@@ -27,6 +41,13 @@ const degradedNos = computed(() => S.aiDegraded.map((d) => d.no).join("、"));
     <span class="chip">{{ S.shots.length }} 镜</span>
     <span class="chip">约 {{ totalDuration }} 秒</span>
     <span class="chip">{{ S.config.aspect }}</span>
+  </div>
+
+  <div class="shot-asset-bar" :class="{ ready: assetStat.total && assetStat.ready === assetStat.total }">
+    <span class="sab-dot" aria-hidden="true"></span>
+    <span class="sab-txt"><b>资产</b> {{ assetStat.ready }} / {{ assetStat.total }} 已定妆</span>
+    <span class="sab-note">{{ assetTip }}</span>
+    <button class="btn sm quiet" id="to-assets" @click="goStep(3)">去定妆 / 改设定 →</button>
   </div>
 
   <div v-if="staleMsg" class="card pad" style="margin-bottom:14px;background:var(--warn-soft);border-color:#f0e2c4">
@@ -50,8 +71,6 @@ const degradedNos = computed(() => S.aiDegraded.map((d) => d.no).join("、"));
       <button class="btn sm" data-ai-redo @click="aiRedo">AI 重新分集分镜</button>
     </template>
   </div>
-
-  <AssetPanel collapsible style="margin-bottom:14px" />
 
   <div class="workspace" :class="{ solo: S.view === 'table' }">
     <div>
@@ -96,7 +115,7 @@ const degradedNos = computed(() => S.aiDegraded.map((d) => d.no).join("、"));
           <button class="btn" data-episode="all" @click="setActiveEpisode('all')">查看全部</button>
         </div>
         <div v-else class="empty">
-          <div class="big">▤</div><p>还没有分镜。回到第 1 步导入剧本，一键就能排好。</p>
+          <div class="big">▤</div><p>还没有分镜。回到剧本阶段导入剧本，一键就能排好。</p>
           <button class="btn primary" id="empty-back" @click="goStep(1)">去导入剧本</button>
         </div>
       </div>
@@ -106,8 +125,9 @@ const degradedNos = computed(() => S.aiDegraded.map((d) => d.no).join("、"));
   </div>
 
   <div class="cta-row">
-    <button class="btn" id="back-2" @click="goStep(2)">← 回看拆解结果</button>
+    <button class="btn" id="back-3" @click="goStep(3)">← 回资产定妆</button>
+    <button class="btn" id="back-2" @click="goStep(2)">回看拆解结果</button>
     <button class="btn" id="back-1b" @click="goStep(1)">改剧本</button>
-    <span class="cta-note">Ctrl+Z 撤销 · Ctrl+Shift+Z 重做 · 数据只存在本机浏览器</span>
+    <span class="cta-note">Ctrl+Z 撤销 · Ctrl+Shift+Z 重做 · 数据只存在本机</span>
   </div>
 </template>
