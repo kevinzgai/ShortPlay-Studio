@@ -1,0 +1,281 @@
+{
+ "prompt": {
+  "6": {
+   "class_type": "UNETLoader",
+   "inputs": {
+    "weight_dtype": "default"
+   },
+   "_meta": {
+    "title": "UNETLoader"
+   }
+  },
+  "9": {
+   "class_type": "BasicScheduler",
+   "inputs": {
+    "scheduler": "simple",
+    "steps": [
+     "123",
+     0
+    ],
+    "denoise": 1,
+    "model": [
+     "122",
+     0
+    ]
+   },
+   "_meta": {
+    "title": "BasicScheduler"
+   }
+  },
+  "10": {
+   "class_type": "VAEDecode",
+   "inputs": {
+    "samples": [
+     "14",
+     0
+    ],
+    "vae": [
+     "11",
+     0
+    ]
+   },
+   "_meta": {
+    "title": "VAEDecode"
+   }
+  },
+  "11": {
+   "class_type": "VAELoader",
+   "inputs": {},
+   "_meta": {
+    "title": "VAELoader"
+   }
+  },
+  "13": {
+   "class_type": "CLIPLoader",
+   "inputs": {
+    "type": "minimax",
+    "device": "default"
+   },
+   "_meta": {
+    "title": "CLIPLoader"
+   }
+  },
+  "14": {
+   "class_type": "SamplerCustomAdvanced",
+   "inputs": {
+    "noise": [
+     "15",
+     0
+    ],
+    "guider": [
+     "16",
+     0
+    ],
+    "sampler": [
+     "17",
+     0
+    ],
+    "sigmas": [
+     "9",
+     0
+    ],
+    "latent_image": [
+     "104",
+     1
+    ]
+   },
+   "_meta": {
+    "title": "SamplerCustomAdvanced"
+   }
+  },
+  "15": {
+   "class_type": "RandomNoise",
+   "inputs": {},
+   "_meta": {
+    "title": "RandomNoise"
+   }
+  },
+  "16": {
+   "class_type": "BasicGuider",
+   "inputs": {
+    "model": [
+     "122",
+     0
+    ],
+    "conditioning": [
+     "104",
+     0
+    ]
+   },
+   "_meta": {
+    "title": "BasicGuider"
+   }
+  },
+  "17": {
+   "class_type": "KSamplerSelect",
+   "inputs": {
+    "sampler_name": "res_multistep"
+   },
+   "_meta": {
+    "title": "KSamplerSelect"
+   }
+  },
+  "23": {
+   "class_type": "VAEDecodeAudio",
+   "inputs": {
+    "samples": [
+     "14",
+     0
+    ],
+    "vae": [
+     "24",
+     0
+    ]
+   },
+   "_meta": {
+    "title": "VAEDecodeAudio"
+   }
+  },
+  "24": {
+   "class_type": "VAELoader",
+   "inputs": {},
+   "_meta": {
+    "title": "VAELoader"
+   }
+  },
+  "91": {
+   "class_type": "CreateVideo",
+   "inputs": {
+    "fps": 24,
+    "bit_depth": 8,
+    "color_space": "sRGB",
+    "images": [
+     "10",
+     0
+    ],
+    "audio": [
+     "23",
+     0
+    ]
+   },
+   "_meta": {
+    "title": "CreateVideo"
+   }
+  },
+  "104": {
+   "class_type": "MiniMaxH3ImageToVideo",
+   "inputs": {
+    "length": [
+     "107",
+     1
+    ],
+    "clip": [
+     "13",
+     0
+    ],
+    "vae": [
+     "11",
+     0
+    ]
+   },
+   "_meta": {
+    "title": "MiniMaxH3ImageToVideo"
+   }
+  },
+  "107": {
+   "class_type": "ComfyMathExpression",
+   "inputs": {
+    "expression": "max(5, round(a * 24)) + (5 - (max(5, round(a * 24)) % 17)) % 17",
+    "values.a": [
+     "111",
+     0
+    ]
+   },
+   "_meta": {
+    "title": "ComfyMathExpression"
+   }
+  },
+  "111": {
+   "class_type": "PrimitiveFloat",
+   "inputs": {},
+   "_meta": {
+    "title": "Float (duration)"
+   }
+  },
+  "121": {
+   "class_type": "LoraLoaderModelOnly",
+   "inputs": {
+    "model": [
+     "6",
+     0
+    ]
+   },
+   "_meta": {
+    "title": "LoraLoaderModelOnly"
+   }
+  },
+  "122": {
+   "class_type": "ComfySwitchNode",
+   "inputs": {
+    "switch": [
+     "126",
+     0
+    ],
+    "on_false": [
+     "6",
+     0
+    ],
+    "on_true": [
+     "121",
+     0
+    ]
+   },
+   "_meta": {
+    "title": "If/Else Switch (Model)"
+   }
+  },
+  "123": {
+   "class_type": "ComfySwitchNode",
+   "inputs": {
+    "switch": [
+     "126",
+     0
+    ],
+    "on_false": [
+     "124",
+     0
+    ],
+    "on_true": [
+     "125",
+     0
+    ]
+   },
+   "_meta": {
+    "title": "If/Else Switch (Steps)"
+   }
+  },
+  "124": {
+   "class_type": "PrimitiveInt",
+   "inputs": {
+    "value": 20
+   },
+   "_meta": {
+    "title": "PrimitiveInt"
+   }
+  },
+  "125": {
+   "class_type": "PrimitiveInt",
+   "inputs": {},
+   "_meta": {
+    "title": "PrimitiveInt"
+   }
+  },
+  "126": {
+   "class_type": "PrimitiveBoolean",
+   "inputs": {},
+   "_meta": {
+    "title": "Boolean (Enable Lightning LoRA)"
+   }
+  }
+ }
+}

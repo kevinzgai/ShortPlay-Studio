@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>分镜工场 · 5 套 UI 方案对比</title>
+<meta name="description" content="同一份真实分镜数据，用 design-md 风格库中的 5 套设计系统分别落成完整界面，横向对比信息架构与适用场景。">
+<link rel="preconnect" href="https://fonts.loli.net">
+<link href="https://fonts.loli.net/css2?family=Inter:wght@300..600&display=swap" rel="stylesheet">
+<style>
+/* ── Linear 设计 token ────────────────────────────────────────── */
+:root{
+  --bg:#08090a;            /* Marketing Black */
+  --panel:#0f1011;         /* Panel Dark */
+  --surface:#191a1b;       /* Level 3 */
+  --surface-2:#28282c;
+
+  --ink:#f7f8f8;           /* 主文字 */
+  --ink-2:#d0d6e0;         /* 正文 */
+  --ink-3:#8a8f98;         /* 次要 */
+  --ink-4:#62666d;         /* 最弱 */
+
+  --brand:#5e6ad2;
+  --accent:#7170ff;
+  --accent-hi:#828fff;
+
+  --line:rgba(255,255,255,.08);
+  --line-soft:rgba(255,255,255,.05);
+  --line-tint:#141516;
+  --border-solid:#23252a;
+
+  --r-xs:4px; --r-sm:6px; --r:8px; --r-lg:12px;
+  --mono:"Berkeley Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{color-scheme:dark;scroll-behavior:smooth}
+body{
+  font-family:"Inter",-apple-system,system-ui,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  font-feature-settings:"cv01","ss03";
+  font-size:15px;line-height:1.5;color:var(--ink);
+  background:var(--bg);
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+}
+body::before{
+  content:"";position:fixed;inset:0 0 auto;height:520px;pointer-events:none;z-index:0;
+  background:radial-gradient(680px 320px at 50% -8%,rgba(94,106,210,.20),transparent 70%);
+}
+::selection{background:rgba(113,112,255,.32);color:#fff}
+a{text-decoration:none;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+/* ── 粘性导航 ─────────────────────────────────────────────────── */
+.nav{
+  position:sticky;top:0;z-index:20;
+  background:rgba(8,9,10,.82);backdrop-filter:blur(12px) saturate(140%);
+  border-bottom:1px solid var(--line-soft);
+}
+.nav-in{
+  max-width:1200px;margin:0 auto;padding:0 32px;height:58px;
+  display:flex;align-items:center;gap:28px;
+}
+.brand{display:flex;align-items:center;gap:9px;font-size:13.5px;font-weight:510;letter-spacing:-.13px}
+.mark{
+  width:19px;height:19px;border-radius:5px;flex:none;
+  background:linear-gradient(150deg,#828fff,#5e6ad2 62%,#3f4ba8);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 1px 3px rgba(0,0,0,.5);
+}
+.nav-links{display:flex;gap:22px;margin-left:8px}
+.nav-links a{font-size:13px;font-weight:510;color:var(--ink-3);transition:color .15s}
+.nav-links a:hover{color:var(--ink)}
+.nav-cta{
+  margin-left:auto;font-size:13px;font-weight:510;color:var(--ink-2);
+  background:rgba(255,255,255,.02);border:1px solid #24282c;
+  border-radius:var(--r-sm);padding:6px 13px;transition:.15s;
+}
+.nav-cta:hover{background:rgba(255,255,255,.05);color:var(--ink);border-color:rgba(255,255,255,.14)}
+
+/* ── 容器 ─────────────────────────────────────────────────────── */
+.wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:0 32px 96px}
+
+/* ── Hero ─────────────────────────────────────────────────────── */
+header{padding:88px 0 56px}
+.eyebrow{
+  font-family:var(--mono);font-size:11px;font-weight:510;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--accent);margin-bottom:20px;
+}
+h1{
+  font-size:48px;font-weight:510;line-height:1.04;letter-spacing:-1.056px;
+  max-width:14em;
+}
+.lede{
+  color:var(--ink-3);font-size:17px;line-height:1.62;letter-spacing:-.165px;
+  margin-top:20px;max-width:720px;
+}
+.lede strong{color:var(--ink-2);font-weight:510}
+.meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:28px}
+.meta span{
+  font-size:12px;font-weight:510;color:var(--ink-2);
+  border:1px solid var(--border-solid);border-radius:9999px;padding:4px 11px;
+}
+
+/* ── 方案卡片 ─────────────────────────────────────────────────── */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{
+  display:flex;flex-direction:column;overflow:hidden;
+  background:rgba(255,255,255,.02);
+  border:1px solid var(--line);border-radius:var(--r-lg);
+  transition:background .18s,border-color .18s,transform .18s;
+}
+.card:hover{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.13);transform:translateY(-2px)}
+.card.hl{border-color:rgba(113,112,255,.32);box-shadow:inset 0 0 0 1px rgba(113,112,255,.10)}
+.card.hl:hover{border-color:rgba(113,112,255,.5)}
+
+.thumb{
+  position:relative;aspect-ratio:8/5;overflow:hidden;flex:none;
+  background:var(--panel);border-bottom:1px solid var(--line-soft);
+}
+.thumb iframe{
+  position:absolute;left:0;top:0;width:1440px;height:900px;border:0;
+  transform:scale(.25);transform-origin:top left;pointer-events:none;
+}
+.badge{
+  position:absolute;left:10px;top:10px;
+  font-family:var(--mono);font-size:11px;font-weight:510;color:var(--ink);
+  background:rgba(15,16,17,.88);border:1px solid var(--line);border-radius:var(--r-xs);
+  padding:3px 8px;backdrop-filter:blur(6px);
+}
+.badge.pick{color:#c9c9ff;border-color:rgba(113,112,255,.42);background:rgba(94,106,210,.28)}
+.open{
+  position:absolute;right:10px;bottom:10px;
+  font-size:11.5px;font-weight:510;color:var(--ink);
+  background:rgba(255,255,255,.05);border:1px solid var(--line);
+  border-radius:var(--r-sm);padding:5px 10px;transition:.15s;
+}
+.card:hover .open{background:var(--brand);border-color:var(--brand);color:#fff}
+
+.body{padding:16px 18px 18px;display:flex;flex-direction:column;flex:1}
+.r1{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.r1 h2{font-size:17px;font-weight:590;letter-spacing:-.24px}
+.r1 .style{
+  font-family:var(--mono);font-size:11px;color:var(--accent);
+  background:rgba(113,112,255,.10);border:1px solid rgba(113,112,255,.22);
+  border-radius:var(--r-xs);padding:2px 6px;
+}
+.pos{font-size:13px;font-weight:510;letter-spacing:-.13px;color:var(--ink-2);margin-top:10px}
+.desc{font-size:13px;color:var(--ink-3);line-height:1.62;letter-spacing:-.13px;margin-top:8px;flex:1}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
+.tags span{
+  font-size:11px;font-weight:510;color:var(--ink-3);
+  border:1px solid var(--border-solid);border-radius:9999px;padding:3px 9px;
+}
+.links{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line-soft)}
+.links a{
+  text-align:center;font-size:12px;font-weight:510;color:var(--ink-2);
+  background:rgba(255,255,255,.02);border:1px solid #24282c;
+  border-radius:var(--r-sm);padding:7px 6px;transition:.15s;
+}
+.links a:hover{background:rgba(255,255,255,.05);color:var(--ink);border-color:rgba(255,255,255,.14)}
+.links a.pri{background:var(--brand);border-color:var(--brand);color:#fff}
+.links a.pri:hover{background:var(--accent-hi);border-color:var(--accent-hi);color:#fff}
+
+/* ── 横向对比 ─────────────────────────────────────────────────── */
+.compare{
+  margin-top:80px;overflow:hidden;
+  background:rgba(255,255,255,.02);
+  border:1px solid var(--line);border-radius:var(--r-lg);
+}
+.compare-h{padding:20px 22px;border-bottom:1px solid var(--line-soft)}
+.compare-h h2{font-size:20px;font-weight:590;letter-spacing:-.24px}
+.compare-h p{font-size:13px;color:var(--ink-3);margin-top:6px;letter-spacing:-.13px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{
+  text-align:left;font-size:11px;font-weight:510;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-4);background:rgba(255,255,255,.02);
+  padding:10px 16px;border-bottom:1px solid var(--line-soft);white-space:nowrap;
+}
+td{padding:12px 16px;border-bottom:1px solid var(--line-tint);vertical-align:top;line-height:1.5;color:var(--ink-2)}
+tr:last-child td{border-bottom:0}
+tr:hover td{background:rgba(255,255,255,.015)}
+td b{font-weight:510;color:var(--ink);letter-spacing:-.13px}
+td .s{font-family:var(--mono);font-size:11px;color:var(--ink-4)}
+td .stars{color:var(--ink-3);letter-spacing:1px}
+.pill{
+  display:inline-block;font-size:11px;font-weight:510;color:var(--ink-3);
+  border:1px solid var(--border-solid);border-radius:9999px;padding:2px 8px;
+}
+.pill.dark{background:rgba(255,255,255,.06);border-color:transparent;color:var(--ink-2)}
+.pill.light{border-color:rgba(255,255,255,.14)}
+
+/* ── 建议 callout ─────────────────────────────────────────────── */
+.note{
+  margin-top:24px;padding:18px 22px;font-size:14px;line-height:1.7;letter-spacing:-.13px;
+  color:var(--ink-2);
+  background:rgba(113,112,255,.06);
+  border:1px solid rgba(113,112,255,.22);border-radius:var(--r-lg);
+}
+.note b{font-weight:510;color:var(--ink)}
+.note code{
+  font-family:var(--mono);font-size:12px;color:var(--ink);
+  background:rgba(255,255,255,.06);border-radius:var(--r-xs);padding:2px 5px;
+}
+
+footer{
+  margin-top:56px;padding-top:20px;border-top:1px solid var(--line-soft);
+  font-size:12px;line-height:1.7;color:var(--ink-4);letter-spacing:-.13px;
+}
+footer code{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+
+/* ── 响应式 ───────────────────────────────────────────────────── */
+@media (max-width:1024px){
+  .grid{grid-template-columns:repeat(2,1fr)}
+  h1{font-size:38px;letter-spacing:-.9px}
+  .nav-links{display:none}
+}
+@media (max-width:700px){
+  .wrap,.nav-in{padding-left:20px;padding-right:20px}
+  header{padding:56px 0 40px}
+  h1{font-size:32px;letter-spacing:-.704px}
+  .lede{font-size:16px}
+  .grid{grid-template-columns:1fr}
+  .compare{margin-top:48px;overflow-x:auto}
+  table{min-width:720px}
+}
+</style>
+<script>
+/* 缩略图按容器宽度等比缩放 1440×900 的页面，避免固定倍率在窄列露出空白条 */
+(function () {
+  function fit() {
+    document.querySelectorAll(".thumb").forEach(function (t) {
+      var f = t.querySelector("iframe");
+      if (!f) return;
+      var s = t.clientWidth / 1440;
+      f.style.transform = "scale(" + s + ")";
+    });
+  }
+  var raf;
+  window.addEventListener("resize", function () {
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(fit);
+  });
+  window.addEventListener("load", fit);
+  document.readyState !== "loading" ? fit() : document.addEventListener("DOMContentLoaded", fit);
+})();
+</script>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-in">
+    <a class="brand" href="#top"><span class="mark"></span>分镜工场</a>
+    <div class="nav-links">
+      <a href="#plans">方案</a>
+      <a href="#compare">横向对比</a>
+      <a href="v1-linear.html" target="_blank">Linear 预览</a>
+    </div>
+    <a class="nav-cta" href="v1-linear.html" target="_blank">打开方案 A ↗</a>
+  </div>
+</nav>
+
+<div class="wrap" id="top">
+  <header>
+    <div class="eyebrow">ShortPlay Studio / UI Options</div>
+    <h1>分镜工场 · 5 套 UI 方案</h1>
+    <p class="lede">同一份真实数据（《雨夜便利店》第 3 步分镜表：23 镜 / 2 角色 / 4 场景 / 9 项分镜描述卡 / 最终提示词），用 5 套来自 design-md 风格库的设计系统分别落成完整界面。差异在<strong>信息架构</strong>，不只是配色。</p>
+    <div class="meta"><span>5 个独立 HTML · 零依赖可直接打开</span><span>5 份 DESIGN.md 规范已随附</span><span>纯 CSS 绘制取景示意</span><span>桌面 1440px 视角</span></div>
+  </header>
+
+  <div class="grid" id="plans">
+    <div class="card hl">
+      <div class="thumb"><iframe src="v1-linear.html" scrolling="no"></iframe><span class="badge pick">A · 推荐</span><span class="open">打开 ↗</span></div>
+      <div class="body">
+        <div class="r1"><h2>专业工作台</h2><span class="style">linear.app</span></div>
+        <div class="pos">深色三栏 · 密集表格 · 右侧检查器</div>
+        <p class="desc">左侧工作流导航、中间一屏看 7+ 镜的紧凑表格、右侧固定属性检查器与提示词。适合镜头量大、要频繁改字段的重度编辑。品牌靛紫 #7170ff 正好命中你惯用的强调色。</p>
+        <div class="tags"><span>深色</span><span>信息密度最高</span><span>键盘流</span><span>表格编辑</span></div>
+        <div class="links"><a class="pri" href="v1-linear.html" target="_blank">完整预览</a><a href="design-tokens/linear.app/DESIGN.md" target="_blank">设计规范</a></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="thumb"><iframe src="v2-figma.html" scrolling="no"></iframe><span class="badge">B</span><span class="open">打开 ↗</span></div>
+      <div class="body">
+        <div class="r1"><h2>画布编辑器</h2><span class="style">figma</span></div>
+        <div class="pos">图层树 + 无限画布 + 属性面板</div>
+        <p class="desc">把每一镜当成一个 Frame 摆在画布上，可拖排序、批量框选、看画框层级。界面严格黑白，彩色只出现在画面里。最接近「分镜」这件事的物理隐喻。</p>
+        <div class="tags"><span>浅色</span><span>所见即所得</span><span>视觉创作</span><span>自由排布</span></div>
+        <div class="links"><a class="pri" href="v2-figma.html" target="_blank">完整预览</a><a href="design-tokens/figma/DESIGN.md" target="_blank">设计规范</a></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="thumb"><iframe src="v3-runway.html" scrolling="no"></iframe><span class="badge">C</span><span class="open">打开 ↗</span></div>
+      <div class="body">
+        <div class="r1"><h2>电影放映台</h2><span class="style">runwayml</span></div>
+        <div class="pos">全出血画面 + 底部胶片时间轴</div>
+        <p class="desc">界面刻意隐于无形，一镜占满主视区，底部横向胶片条切镜，信息以编辑杂志式排版浮在画面上。适合给客户 / 导演过片，或作为预览模式嵌入。</p>
+        <div class="tags"><span>深色</span><span>沉浸预览</span><span>同类产品标杆</span><span>信息密度低</span></div>
+        <div class="links"><a class="pri" href="v3-runway.html" target="_blank">完整预览</a><a href="design-tokens/runwayml/DESIGN.md" target="_blank">设计规范</a></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="thumb"><iframe src="v4-notion.html" scrolling="no"></iframe><span class="badge">D</span><span class="open">打开 ↗</span></div>
+      <div class="body">
+        <div class="r1"><h2>文档数据库</h2><span class="style">notion</span></div>
+        <div class="pos">暖白文档流 · 属性胶囊 · 数据库表格</div>
+        <p class="desc">把整个项目写成一篇可折叠的文档：属性区、体检 callout、镜头数据库、9 项描述卡、提示词代码块顺序往下读。对「非专业用户」最友好，学习成本最低。</p>
+        <div class="tags"><span>浅色</span><span>极简留白</span><span>新手友好</span><span>线性阅读</span></div>
+        <div class="links"><a class="pri" href="v4-notion.html" target="_blank">完整预览</a><a href="design-tokens/notion/DESIGN.md" target="_blank">设计规范</a></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="thumb"><iframe src="v5-pinterest.html" scrolling="no"></iframe><span class="badge">E</span><span class="open">打开 ↗</span></div>
+      <div class="body">
+        <div class="r1"><h2>分镜卡片墙</h2><span class="style">pinterest</span></div>
+        <div class="pos">瀑布流画卡 · 药丸筛选 · 点开详情</div>
+        <p class="desc">画面优先，一屏铺 12 张镜头卡，靠缩略图快速扫片、找镜、批量选。红色主按钮 + 16px 宽圆角。适合挑图 / 挑镜 / 审美决策，不适合逐字改字段。</p>
+        <div class="tags"><span>浅色</span><span>视觉优先</span><span>暖色调</span><span>浏览快改慢</span></div>
+        <div class="links"><a class="pri" href="v5-pinterest.html" target="_blank">完整预览</a><a href="design-tokens/pinterest/DESIGN.md" target="_blank">设计规范</a></div>
+      </div>
+    </div>
+  </div>
+
+  <section class="compare" id="compare">
+    <div class="compare-h"><h2>横向对比</h2><p>按你现在最痛的场景选，不要按好看选。</p></div>
+    <table>
+      <thead><tr><th>方案</th><th>布局</th><th>一屏镜头数</th><th>改字段效率</th><th>过片体验</th><th>色调</th><th>最适配</th></tr></thead>
+      <tbody>
+        <tr><td><b>A · Linear</b><br><span class="s">linear.app</span></td><td>三栏 / 表格</td><td>7–10</td><td class="stars">★★★★★</td><td class="stars">★★</td><td><span class="pill dark">深色</span></td><td>批量改台词、景别、时长</td></tr>
+        <tr><td><b>B · Figma</b><br><span class="s">figma</span></td><td>图层 / 画布 / 属性</td><td>3–4</td><td class="stars">★★★</td><td class="stars">★★★★</td><td><span class="pill light">浅色</span></td><td>排镜、拖拽、看画面关系</td></tr>
+        <tr><td><b>C · Runway</b><br><span class="s">runwayml</span></td><td>全屏画面 / 胶片条</td><td>1 主 + 8 缩略</td><td class="stars">★</td><td class="stars">★★★★★</td><td><span class="pill dark">深色</span></td><td>给导演 / 客户过片</td></tr>
+        <tr><td><b>D · Notion</b><br><span class="s">notion</span></td><td>文档流 / 数据库表</td><td>6–8</td><td class="stars">★★★★</td><td class="stars">★★</td><td><span class="pill light">暖白</span></td><td>非专业用户上手、剧本到分镜一路读</td></tr>
+        <tr><td><b>E · Pinterest</b><br><span class="s">pinterest</span></td><td>瀑布流卡片</td><td>12+</td><td class="stars">★★</td><td class="stars">★★★★</td><td><span class="pill light">暖白</span></td><td>起始帧图出来后挑图、比图、选镜</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <div class="note"><b>我的建议：</b>主界面用 <b>A</b>（改字段效率最高，且靛紫 #7170ff 与现有偏好一致），把 <b>C</b> 做成「放映模式」按钮切换进去，把 <b>E</b> 留给起始帧图片生成后的挑图环节。B 好看但把每镜做成画框会牺牲 23 镜的可扫描性；D 对新手最友好，但长文档滚动会把「改 / 排 / 导出」藏太深。<br>选完告诉我编号，我直接把对应风格落到 <code>shortplay-studio/frontend/src/</code> 的 Vue 组件里，DESIGN.md 已经在 <code>design-tokens/</code> 备好。</div>
+
+  <footer>风格来源：awesome-design-skill / design-md（54 种，本次选用 5 种）。本页自身按 <code>linear.app</code> 设计系统重构：深色原生 #08090a、透明度阶梯、字重 510、半透明边框。所有取景示意由纯 CSS 绘制，非真实生成图；接上 ComfyUI Flux 起始帧后可直接替换 <code>.scene</code> 容器为 <code>&lt;img&gt;</code>。</footer>
+</div>
+</body>
+</html>

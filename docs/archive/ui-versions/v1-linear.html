@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A · Linear 风格 — 分镜工场</title>
+<link rel="preconnect" href="https://fonts.loli.net">
+<link href="https://fonts.loli.net/css2?family=Inter:wght@300;400;500;590;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#08090a; --panel:#0f1011; --surface:#191a1b; --hover:#28282c;
+  --t1:#f7f8f8; --t2:#d0d6e0; --t3:#8a8f98; --t4:#62666d;
+  --brand:#5e6ad2; --accent:#7170ff; --accent-h:#828fff;
+  --bd:rgba(255,255,255,.06); --bd2:rgba(255,255,255,.09);
+  --green:#10b981;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--t1);font-family:'Inter',-apple-system,system-ui,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;font-size:13px;font-feature-settings:"cv01","ss03";-webkit-font-smoothing:antialiased;height:100vh;overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+.app{display:grid;grid-template-columns:224px minmax(0,1fr) 328px;height:100vh}
+
+/* ---------- 左侧栏 ---------- */
+.side{background:var(--panel);border-right:1px solid var(--bd);display:flex;flex-direction:column;padding:14px 10px;gap:4px}
+.brand{display:flex;align-items:center;gap:9px;padding:4px 8px 16px}
+.brand-mark{width:22px;height:22px;border-radius:6px;background:linear-gradient(145deg,var(--accent-h),var(--brand));display:grid;place-items:center;box-shadow:0 0 16px rgba(113,112,255,.32)}
+.brand-mark i{width:9px;height:9px;border-left:2px solid #fff;border-right:2px solid #fff;display:block;height:10px}
+.brand b{font-size:13.5px;font-weight:590;letter-spacing:-.2px}
+.brand small{color:var(--t4);font-size:10.5px;font-weight:400;margin-left:auto;font-family:ui-monospace,monospace}
+.ws{display:flex;align-items:center;gap:8px;padding:7px 9px;border:1px solid var(--bd);border-radius:6px;background:rgba(255,255,255,.02);margin-bottom:14px}
+.ws .dot{width:16px;height:16px;border-radius:4px;background:#2d2b45;display:grid;place-items:center;font-size:9px;color:#c3bfff}
+.ws span{font-weight:510;font-size:12.5px;flex:1}
+.ws kbd{font-family:ui-monospace,monospace;font-size:10px;color:var(--t4)}
+.slabel{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--t4);padding:12px 9px 6px;font-weight:590}
+.nav{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:5px;color:var(--t3);font-size:12.5px;font-weight:510;position:relative}
+.nav:hover{background:rgba(255,255,255,.035);color:var(--t2)}
+.nav.on{background:rgba(113,112,255,.11);color:var(--accent-h)}
+.nav .num{width:16px;height:16px;border-radius:50%;border:1px solid var(--bd2);display:grid;place-items:center;font-size:9.5px;font-family:ui-monospace,monospace;flex:none}
+.nav.on .num{border-color:var(--accent);color:var(--accent-h)}
+.nav.done .num{border-color:rgba(16,185,129,.5);color:var(--green)}
+.nav .cnt{margin-left:auto;font-family:ui-monospace,monospace;font-size:10.5px;color:var(--t4)}
+.ep{padding:6px 9px 6px 26px;font-size:12px;color:var(--t3);display:flex;align-items:center;gap:8px;border-radius:5px}
+.ep.on{color:var(--t1);background:rgba(255,255,255,.035)}
+.ep .bar{width:2px;height:13px;background:var(--accent);border-radius:2px;margin-left:-15px}
+.ep .n{margin-left:auto;font-family:ui-monospace,monospace;font-size:10.5px;color:var(--t4)}
+.side-bottom{margin-top:auto;border-top:1px solid var(--bd);padding-top:12px}
+.stat{display:flex;justify-content:space-between;padding:4px 9px;font-size:11.5px;color:var(--t4)}
+.stat b{color:var(--t2);font-weight:510;font-family:ui-monospace,monospace}
+.live{display:flex;align-items:center;gap:7px;padding:8px 9px;margin-top:8px;border:1px solid rgba(16,185,129,.18);border-radius:6px;background:rgba(16,185,129,.05);font-size:11px;color:var(--t2)}
+.live i{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+
+/* ---------- 中间 ---------- */
+.main{display:flex;flex-direction:column;min-width:0;background:var(--bg)}
+.top{height:46px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px;padding:0 18px;flex:none}
+.crumb{font-size:12px;color:var(--t4)}
+.crumb b{color:var(--t2);font-weight:510}
+.crumb s{text-decoration:none;color:var(--t4);margin:0 7px}
+.top .sp{flex:1}
+.cmd{display:flex;align-items:center;gap:7px;border:1px solid var(--bd2);border-radius:5px;padding:5px 9px;color:var(--t4);font-size:11.5px;background:rgba(255,255,255,.02)}
+.cmd kbd{font-family:ui-monospace,monospace;border:1px solid var(--bd2);border-radius:3px;padding:1px 4px;font-size:10px}
+.avatar{width:23px;height:23px;border-radius:50%;background:linear-gradient(135deg,#3f3b6d,#6b5fa8);display:grid;place-items:center;font-size:10px;font-weight:590;color:#e4e1ff}
+.content{padding:26px 28px 0;overflow:auto;flex:1}
+.hd{display:flex;align-items:flex-start;gap:16px;margin-bottom:22px}
+.hd h1{font-size:25px;font-weight:510;letter-spacing:-.7px;line-height:1.2}
+.hd p{color:var(--t3);font-size:12.5px;margin-top:7px;line-height:1.5}
+.hd .meta{margin-left:auto;display:flex;gap:22px;padding-top:4px}
+.hd .meta div{text-align:right}
+.hd .meta b{display:block;font-size:17px;font-weight:510;letter-spacing:-.4px;font-family:ui-monospace,monospace}
+.hd .meta span{font-size:10px;color:var(--t4);text-transform:uppercase;letter-spacing:.08em}
+.banner{display:flex;align-items:center;gap:9px;border:1px solid var(--bd);background:rgba(113,112,255,.045);border-radius:6px;padding:9px 12px;font-size:11.5px;color:var(--t2);margin-bottom:16px}
+.banner .tag{font-size:10px;color:var(--accent-h);border:1px solid rgba(113,112,255,.32);border-radius:4px;padding:2px 6px;font-family:ui-monospace,monospace}
+.banner .sp{flex:1}
+.bar{display:flex;align-items:center;gap:8px;padding-bottom:12px;border-bottom:1px solid var(--bd);margin-bottom:2px}
+.seg{display:flex;background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:6px;padding:2px}
+.seg button{padding:5px 12px;border-radius:4px;font-size:11.5px;color:var(--t3);font-weight:510}
+.seg button.on{background:var(--surface);color:var(--t1);box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.bar .sp{flex:1}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border:1px solid var(--bd2);border-radius:5px;background:rgba(255,255,255,.025);font-size:11.5px;font-weight:510;color:var(--t2)}
+.btn:hover{background:var(--hover)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff;box-shadow:0 1px 0 rgba(255,255,255,.12) inset}
+.btn.primary:hover{background:#6b76e0}
+.btn.ghost{border-color:transparent;background:none;color:var(--t3)}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--t4);font-weight:590;padding:10px 8px;border-bottom:1px solid var(--bd);white-space:nowrap}
+.tbl td{padding:11px 8px;border-bottom:1px solid var(--bd);color:var(--t2);vertical-align:middle}
+.tbl tr:hover td{background:rgba(255,255,255,.018)}
+.tbl tr.sel td{background:rgba(113,112,255,.075)}
+.tbl tr.sel td:first-child{box-shadow:inset 2px 0 var(--accent)}
+.mono{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11.5px;color:var(--accent-h);white-space:nowrap}
+.chk{width:13px;height:13px;border:1px solid var(--bd2);border-radius:3px;display:inline-block;vertical-align:middle}
+.chk.on{background:var(--accent);border-color:var(--accent);position:relative}
+.chk.on::after{content:"";position:absolute;left:3.5px;top:1px;width:3px;height:6px;border:solid #fff;border-width:0 1.5px 1.5px 0;transform:rotate(42deg)}
+.desc{max-width:390px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--t1)}
+.sub{font-size:10.5px;color:var(--t4);margin-top:3px}
+.pill{display:inline-block;font-size:10px;padding:2px 6px;border-radius:4px;border:1px solid var(--bd2);color:var(--t3);white-space:nowrap}
+.pill.ai{color:var(--accent-h);border-color:rgba(113,112,255,.3);background:rgba(113,112,255,.08)}
+.pill.ok{color:#7ee0b6;border-color:rgba(16,185,129,.28);background:rgba(16,185,129,.07)}
+.pill.fix{color:#e8c98b;border-color:rgba(232,201,139,.25);background:rgba(232,201,139,.06)}
+.more{color:var(--t4);letter-spacing:2px}
+
+/* ---------- 右侧检查器 ---------- */
+.insp{border-left:1px solid var(--bd);background:var(--panel);overflow:auto;display:flex;flex-direction:column}
+.insp-h{height:46px;border-bottom:1px solid var(--bd);display:flex;align-items:center;padding:0 16px;gap:8px;flex:none}
+.insp-h b{font-size:12px;font-weight:590}
+.insp-h .mono{margin-left:auto;font-size:11px}
+.sec{padding:16px;border-bottom:1px solid var(--bd)}
+.sec-t{font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:var(--t4);font-weight:590;margin-bottom:11px;display:flex;align-items:center;justify-content:space-between}
+.sec-t a{color:var(--accent-h);text-transform:none;letter-spacing:0;font-size:11px;cursor:pointer}
+
+/* 取景示意（纯 CSS 电影画面） */
+.scene{position:relative;overflow:hidden;background:linear-gradient(180deg,#0b1122 0%,#1a2140 40%,#2b1b36 72%,#0b0e1d 100%);isolation:isolate;border-radius:5px}
+.scene::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 42% 32% at 21% 30%,rgba(255,64,120,.38),transparent 72%),radial-gradient(ellipse 34% 28% at 79% 26%,rgba(40,210,255,.32),transparent 74%),linear-gradient(180deg,transparent 52%,rgba(6,8,20,.78) 100%)}
+.scene .store{position:absolute;left:11%;top:23%;width:53%;height:47%;background:linear-gradient(180deg,rgba(184,230,255,.2),rgba(110,170,225,.06));border:1px solid rgba(190,225,255,.22);box-shadow:0 0 28px rgba(120,200,255,.2),inset 0 10px 16px rgba(255,255,255,.1)}
+.scene .sign{position:absolute;left:17%;top:28%;width:31%;height:9%;background:linear-gradient(90deg,#ff4d7d,#8b5cf6);box-shadow:0 0 20px rgba(255,77,125,.65);border-radius:2px}
+.scene .door{position:absolute;left:47%;top:38%;width:13%;height:32%;background:rgba(210,240,255,.13);border:1px solid rgba(210,240,255,.22)}
+.scene .fig{position:absolute;left:59%;bottom:11%;width:6.5%;height:33%;background:linear-gradient(180deg,#090d1c,#151b32);border-radius:44% 44% 16% 16%;box-shadow:0 0 20px rgba(0,0,0,.6)}
+.scene .fig::before{content:"";position:absolute;left:20%;top:-26%;width:60%;height:31%;border-radius:50%;background:#090d1c}
+.scene .rain{position:absolute;inset:-25%;background:repeating-linear-gradient(74deg,transparent 0 8px,rgba(200,225,255,.13) 8px 9px,transparent 9px 17px);opacity:.55}
+.scene .water{position:absolute;left:0;right:0;bottom:0;height:25%;background:linear-gradient(180deg,rgba(255,77,125,.15),rgba(40,210,255,.13));filter:blur(1px)}
+.scene .water::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 19px,rgba(255,255,255,.07) 19px 21px)}
+.scene .ratio{position:absolute;right:8px;top:8px;font-family:ui-monospace,monospace;font-size:9px;color:rgba(255,255,255,.6);background:rgba(0,0,0,.35);padding:2px 5px;border-radius:3px}
+.scene.wide{aspect-ratio:16/9}
+.frame-wrap{border:1px solid var(--bd2);border-radius:6px;padding:5px;background:var(--surface)}
+.cap{font-size:11px;color:var(--t3);margin-top:9px;line-height:1.5}
+.kv{display:grid;grid-template-columns:64px 1fr;gap:7px 8px;font-size:11.5px;line-height:1.45}
+.kv dt{color:var(--t4)}
+.kv dd{color:var(--t2)}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.card-i{border:1px solid var(--bd);border-radius:5px;padding:7px 8px;background:rgba(255,255,255,.015)}
+.card-i span{display:block;font-size:9.5px;color:var(--t4);margin-bottom:3px}
+.card-i b{font-size:11px;font-weight:510;color:var(--t2);line-height:1.35;display:block}
+.prompt{background:var(--bg);border:1px solid var(--bd);border-radius:5px;padding:10px 11px;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:10.5px;line-height:1.65;color:var(--t3);word-break:break-all}
+.prompt em{color:var(--accent-h);font-style:normal}
+.tagmark{position:fixed;right:12px;bottom:10px;font-family:ui-monospace,monospace;font-size:10px;color:var(--t4);background:var(--panel);border:1px solid var(--bd);padding:4px 8px;border-radius:4px;letter-spacing:.04em;z-index:9}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- 左 -->
+  <aside class="side">
+    <div class="brand"><span class="brand-mark"><i></i></span><b>分镜工场</b><small>v1.4</small></div>
+    <div class="ws"><span class="dot">◈</span><span>雨夜便利店</span><kbd>⌘K</kbd></div>
+    <div class="slabel">工作流</div>
+    <div class="nav done"><span class="num">✓</span>导入剧本<span class="cnt">9 场</span></div>
+    <div class="nav done"><span class="num">✓</span>自动拆解<span class="cnt">2 角色</span></div>
+    <div class="nav on"><span class="num">3</span>分镜表<span class="cnt">23 镜</span></div>
+    <div class="slabel">分集</div>
+    <div class="ep on"><span class="bar"></span>全部集<span class="n">23</span></div>
+    <div class="ep">E01 · 雨夜来客<span class="n">12</span></div>
+    <div class="ep">E02 · 未关的灯<span class="n">11</span></div>
+    <div class="slabel">视图</div>
+    <div class="nav"><span class="num">▦</span>角色与场景资产</div>
+    <div class="nav"><span class="num">⇥</span>导出 / 打印</div>
+    <div class="side-bottom">
+      <div class="stat"><span>模型</span><b>deepseek-flash</b></div>
+      <div class="stat"><span>画幅</span><b>16:9</b></div>
+      <div class="stat"><span>总时长</span><b>约 100s</b></div>
+      <div class="live"><i></i>已自动保存 · 本地</div>
+    </div>
+  </aside>
+
+  <!-- 中 -->
+  <main class="main">
+    <div class="top">
+      <div class="crumb">工作区 <s>/</s> 雨夜便利店 <s>/</s> <b>分镜表</b></div>
+      <div class="sp"></div>
+      <div class="cmd">⌕ 搜索镜头、角色、台词 <kbd>⌘ /</kbd></div>
+      <div class="avatar">盖</div>
+    </div>
+    <div class="content">
+      <div class="hd">
+        <div>
+          <h1>雨夜便利店 · 分镜表</h1>
+          <p>点文字直接改，拖 ⠿ 或 ↑↓ 排序 · 改动全部自动保存，可随时撤销</p>
+        </div>
+        <div class="meta">
+          <div><b>23</b><span>镜头</span></div>
+          <div><b>100s</b><span>时长</span></div>
+          <div><b>16:9</b><span>画幅</span></div>
+        </div>
+      </div>
+      <div class="banner"><span class="tag">AI</span>当前分镜由 deepseek-flash 生成 · 台词逐字校验通过 · 0 漏项<span class="sp"></span><span style="color:var(--t4);font-size:11px">规则引擎备份可用</span></div>
+
+      <div class="bar">
+        <div class="seg"><button class="on">表格</button><button>卡片</button><button>时间轴</button></div>
+        <button class="btn ghost">☑ 全选 <span style="color:var(--t4)">已选 1</span></button>
+        <button class="btn ghost">批量重生成</button>
+        <div class="sp"></div>
+        <button class="btn">＋ 插入镜头</button>
+        <button class="btn">导出 ▾</button>
+        <button class="btn primary">＋ 生成下一集</button>
+      </div>
+
+      <table class="tbl">
+        <thead><tr>
+          <th style="width:26px"></th><th style="width:96px">镜号</th><th style="width:150px">场次</th>
+          <th style="width:70px">景别</th><th style="width:56px">时长</th><th>画面描述</th>
+          <th style="width:76px">分镜卡</th><th style="width:88px">状态</th><th style="width:26px"></th>
+        </tr></thead>
+        <tbody>
+          <tr><td><span class="chk"></span></td><td class="mono">E01-001</td><td>第1场 · 便利店门口 · 夜</td><td>全景</td><td class="mono">5s</td><td><div class="desc">外景，便利店门口，夜。雨下得很急，霓虹招牌在水洼里碎成一片。</div><div class="sub">建议建立镜头 · 固定机位 · 交代空间关系</div></td><td><span class="pill">9/9</span></td><td><span class="pill ai">AI</span></td><td class="more">⋮</td></tr>
+          <tr class="sel"><td><span class="chk on"></span></td><td class="mono">E01-002</td><td>第1场 · 便利店门口 · 夜</td><td>全景</td><td class="mono">8s</td><td><div class="desc">林晚（27岁，便利店店员）把伞靠在门边，抬头看了眼雨。</div><div class="sub">缓慢推拉 · 雨声 · 环境音交代空间关系</div></td><td><span class="pill">9/9</span></td><td><span class="pill ai">AI</span> <span class="pill fix">补</span></td><td class="more">⋮</td></tr>
+          <tr><td><span class="chk"></span></td><td class="mono">E01-003</td><td>第1场 · 便利店门口 · 夜</td><td>中景</td><td class="mono">6s</td><td><div class="desc">陈默（30岁，外套湿透）推门进来，风铃响了一声。</div><div class="sub">林晚：又是一整夜的雨。</div></td><td><span class="pill">9/9</span></td><td><span class="pill ai">AI</span></td><td class="more">⋮</td></tr>
+          <tr><td><span class="chk"></span></td><td class="mono">E01-004</td><td>第1场 · 便利店门口 · 夜</td><td>近景</td><td class="mono">4s</td><td><div class="desc">林晚侧脸，睫毛上沾着水汽，视线停在门口。</div><div class="sub">台词：又是一整夜的雨。</div></td><td><span class="pill">9/9</span></td><td><span class="pill ok">已核对</span></td><td class="more">⋮</td></tr>
+          <tr><td><span class="chk"></span></td><td class="mono">E01-005</td><td>第2场 · 便利店店内 · 夜</td><td>特写</td><td class="mono">3s</td><td><div class="desc">湿透的鞋尖在地砖上留下一小滩水。</div><div class="sub">道具：黑伞 · 建立镜头</div></td><td><span class="pill">9/9</span></td><td><span class="pill ai">AI</span></td><td class="more">⋮</td></tr>
+          <tr><td><span class="chk"></span></td><td class="mono">E01-006</td><td>第2场 · 便利店店内 · 夜</td><td>中景</td><td class="mono">7s</td><td><div class="desc">陈默站在货架尽头，没有抬头，外套往下滴水。</div><div class="sub">冷白顶光 · 手持微晃</div></td><td><span class="pill">9/9</span></td><td><span class="pill ai">AI</span></td><td class="more">⋮</td></tr>
+          <tr><td><span class="chk"></span></td><td class="mono">E01-007</td><td>第2场 · 便利店店内 · 夜</td><td>过肩</td><td class="mono">5s</td><td><div class="desc">林晚从收银台后看向货架，手指停在扫码枪上。</div><div class="sub">对白起 · 正反打</div></td><td><span class="pill">8/9</span></td><td><span class="pill fix">待核对</span></td><td class="more">⋮</td></tr>
+        </tbody>
+      </table>
+      <div style="padding:18px 8px;color:var(--t4);font-size:11px">显示 7 / 23 镜 · 向下滚动加载</div>
+    </div>
+  </main>
+
+  <!-- 右 -->
+  <aside class="insp">
+    <div class="insp-h"><b>镜头检查器</b><span class="mono">E01-002</span></div>
+    <div class="sec">
+      <div class="sec-t">取景示意预览 <a>16:9 ▾</a></div>
+      <div class="frame-wrap">
+        <div class="scene wide"><div class="store"></div><div class="sign"></div><div class="door"></div><div class="fig"></div><div class="rain"></div><div class="water"></div><div class="ratio">16:9</div></div>
+      </div>
+      <div class="cap">林晚（27岁，便利店店员）把伞靠在门边，抬头看了眼雨。</div>
+    </div>
+    <div class="sec">
+      <div class="sec-t">属性</div>
+      <dl class="kv">
+        <dt>场次</dt><dd>第1场 · 便利店门口 · 夜</dd>
+        <dt>景别</dt><dd>全景 <span style="color:var(--t4)">（依据：交代空间关系）</span></dd>
+        <dt>时长</dt><dd>8 秒</dd>
+        <dt>运镜</dt><dd>缓慢推拉</dd>
+        <dt>光线</dt><dd>霓虹冷光 + 雨夜环境光</dd>
+        <dt>情绪</dt><dd>疲惫、克制</dd>
+        <dt>引用资产</dt><dd><span class="mono" style="font-size:10.5px">character1</span> · <span class="mono" style="font-size:10.5px">scene1</span></dd>
+      </dl>
+    </div>
+    <div class="sec">
+      <div class="sec-t">AI 分镜描述卡 <a>编辑 9/9</a></div>
+      <div class="cards">
+        <div class="card-i"><span>主体</span><b>林晚，27 岁，便利店店员</b></div>
+        <div class="card-i"><span>动作</span><b>收伞、靠门、抬头</b></div>
+        <div class="card-i"><span>构图</span><b>三分法，人物偏右</b></div>
+        <div class="card-i"><span>景别依据</span><b>交代空间关系</b></div>
+        <div class="card-i"><span>运镜</span><b>缓慢推拉</b></div>
+        <div class="card-i"><span>光线</span><b>霓虹冷光</b></div>
+        <div class="card-i"><span>情绪</span><b>疲惫、克制</b></div>
+        <div class="card-i"><span>声音</span><b>雨声、风铃</b></div>
+        <div class="card-i" style="grid-column:span 2"><span>剪辑衔接</span><b>接上一镜雨景空镜，动作顺接</b></div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-t">这一镜的最终提示词 <a>复制</a></div>
+      <div class="prompt">外景，便利店门口，夜，雨下得很急。<em>林晚，27岁，深蓝色店员制服，湿发贴在额角</em>，把伞靠在门边，抬头看了眼雨。缓慢推拉，全景，三分法构图人物偏右，霓虹招牌的粉紫冷光与雨水反光，疲惫克制，雨声与风铃，16:9 电影感。</div>
+    </div>
+  </aside>
+</div>
+<div class="tagmark">A / linear.app</div>
+</body>
+</html>

@@ -1,0 +1,42 @@
+# ---- 本机私密配置（含真实 API Key，禁止提交）----
+llm-config.bat
+llm-providers.json
+.env
+.env.*
+!.env.example
+*.keystore
+*.jks
+*.p12
+*.pfx
+*.pem
+id_rsa*
+id_ed25519*
+
+# ---- 本机运行数据 / 构建产物 ----
+screenshots/
+__pycache__/
+dist/
+frontend/node_modules/
+projects/
+.tts/
+.workbuddy/
+
+# ---- 内部运维记录（含本机绝对路径）----
+MIGRATION.md
+
+# ---- 本机一次性验证脚本（硬编码本机路径，不随仓库发布）----
+tools/verify_*
+
+# ---- 第三方整包参考源码：许可证 / 署名 / 体积原因，不随本项目开源 ----
+reference/01-参考项目/
+reference/03-提示词范文/script-writing-studio/
+reference/04-ComfyUI链路/comfyui-h3-demo/
+reference/05-外部工具链/
+
+# ---- 参考资料里的依赖与构建产物 ----
+reference/**/node_modules/
+reference/**/.venv/
+reference/**/__pycache__/
+reference/**/dist/
+reference/**/build/
+reference/**/.next/

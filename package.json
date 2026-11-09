@@ -1,0 +1,14 @@
+{
+  "name": "shortplay-studio",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "分镜工场 · 短剧 AI 分集分镜平台（根目录只放命令入口，前端在 frontend/）",
+  "scripts": {
+    "install:frontend": "npm install --prefix frontend",
+    "dev": "npm run dev --prefix frontend",
+    "build": "npm run build --prefix frontend",
+    "example": "node tools/gen_example.js",
+    "example:ai": "node tools/gen_ai_example.js"
+  }
+}

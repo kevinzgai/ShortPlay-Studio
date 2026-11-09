@@ -1,0 +1,767 @@
+{
+  "style": {
+    "anchor": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感",
+    "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+    "aspect": {
+      "turnaround": "3:2",
+      "portrait": "3:4",
+      "concept": "16:9",
+      "coreWide": "2.35:1"
+    },
+    "generationOrder": [
+      "C01",
+      "C02",
+      "C06",
+      "C08",
+      "S03",
+      "S04",
+      "S05",
+      "S06",
+      "S07"
+    ]
+  },
+  "assets": {
+    "characters": [
+      {
+        "id": "c:水雷",
+        "kind": "character",
+        "code": "C01",
+        "name": "水雷",
+        "aliases": [
+          "润土",
+          "雷子"
+        ],
+        "priority": "P0",
+        "visibility": "全程",
+        "age": "18岁",
+        "role": "主角",
+        "wardrobe": "洗旧白T恤外罩灰蓝校服外套",
+        "appearance": "瘦长脸，眉浓眼细，鼻梁挺直",
+        "anchors": {
+          "face": "瘦长脸，眉浓眼细，鼻梁挺直",
+          "flaw": "左眉尾一道浅疤",
+          "wardrobeHook": "脖子上挂红绳玉佩"
+        },
+        "keyword": "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套",
+        "keywordEn": "18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket",
+        "source": "script",
+        "evidence": [
+          "S1",
+          "S3",
+          "S4"
+        ],
+        "sceneNos": [
+          1,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "weight": 5,
+        "refImage": "",
+        "refName": "",
+        "locked": false,
+        "touched": {},
+        "prompts": {
+          "turnaround": "角色设定表，三视图并排（最左为正面全身，中间为侧面全身，最右为背面全身，三者等比例、足底对齐），全身远景，纯白色背景，无阴影投射。\n18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套\n面部特征：瘦长脸，眉浓眼细，鼻梁挺直；可辨识瑕疵：左眉尾一道浅疤。\n服装：洗旧白T恤外罩灰蓝校服外套。配饰与记忆点：脖子上挂红绳玉佩。\n中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。写实电影质感，自然柔和的顶侧光，8k超高清，哈苏中画幅镜头拍摄；皮肤有真实毛孔与不均匀的肤色过渡，布料纤维与磨损痕迹清晰可见。表情：中性。\n比例 3:2 横版。负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+          "faceSheet": "生成参照人物面部特写和人物全身三视图：最左边是人物面部超大特写（占画面高度的三分之二），右边依次放正面全身、侧面全身、背面全身，四者位于同一画面内，等比例、足底对齐，纯白色背景。\n18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套\n面部特征：瘦长脸，眉浓眼细，鼻梁挺直；瑕疵：左眉尾一道浅疤；配饰：脖子上挂红绳玉佩。\n中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。写实电影质感，8k超高清。比例 3:2 横版。",
+          "lineart": "转彩铅素描"
+        }
+      },
+      {
+        "id": "c:爷爷",
+        "kind": "character",
+        "code": "C02",
+        "name": "爷爷",
+        "aliases": [],
+        "priority": "P0",
+        "visibility": "全程",
+        "age": "70岁",
+        "role": "风水先生，主角祖父",
+        "wardrobe": "藏青对襟土布褂，黑布鞋",
+        "appearance": "方脸深皱纹，眉毛花白下垂，眼窝深",
+        "anchors": {
+          "face": "方脸深皱纹，眉毛花白下垂，眼窝深",
+          "flaw": "右耳缺一小块",
+          "wardrobeHook": "腰间挂一串旧铜钱"
+        },
+        "keyword": "70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋",
+        "keywordEn": "70-year-old Chinese village elder, square face deep wrinkles, drooping gray brows sunken eyes, small notch on right ear, old bronze coins at waist, navy frog-button cloth jacket black cloth shoes",
+        "source": "script",
+        "evidence": [
+          "S1",
+          "S3",
+          "S4"
+        ],
+        "sceneNos": [
+          1,
+          3,
+          4
+        ],
+        "weight": 5,
+        "refImage": "",
+        "refName": "",
+        "locked": false,
+        "touched": {},
+        "prompts": {
+          "turnaround": "角色设定表，三视图并排（最左为正面全身，中间为侧面全身，最右为背面全身，三者等比例、足底对齐），全身远景，纯白色背景，无阴影投射。\n70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋\n面部特征：方脸深皱纹，眉毛花白下垂，眼窝深；可辨识瑕疵：右耳缺一小块。\n服装：藏青对襟土布褂，黑布鞋。配饰与记忆点：腰间挂一串旧铜钱。\n中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。写实电影质感，自然柔和的顶侧光，8k超高清，哈苏中画幅镜头拍摄；皮肤有真实毛孔与不均匀的肤色过渡，布料纤维与磨损痕迹清晰可见。表情：中性。\n比例 3:2 横版。负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+          "faceSheet": "生成参照人物面部特写和人物全身三视图：最左边是人物面部超大特写（占画面高度的三分之二），右边依次放正面全身、侧面全身、背面全身，四者位于同一画面内，等比例、足底对齐，纯白色背景。\n70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋\n面部特征：方脸深皱纹，眉毛花白下垂，眼窝深；瑕疵：右耳缺一小块；配饰：腰间挂一串旧铜钱。\n中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。写实电影质感，8k超高清。比例 3:2 横版。",
+          "lineart": "转彩铅素描"
+        }
+      },
+      {
+        "id": "c:二狗",
+        "kind": "character",
+        "code": "C03",
+        "name": "二狗",
+        "aliases": [],
+        "priority": "P1",
+        "visibility": "部分场次",
+        "age": "18岁",
+        "role": "主角玩伴",
+        "wardrobe": "褪色红背心配军绿短裤",
+        "appearance": "圆脸短下巴，小眼睛，招风耳",
+        "anchors": {
+          "face": "圆脸短下巴，小眼睛，招风耳",
+          "flaw": "鼻头一颗黑痣",
+          "wardrobeHook": "肩挎旧网兜"
+        },
+        "keyword": "18岁少年，圆脸短下巴小眼睛招风耳，鼻头一颗黑痣，肩挎旧网兜，褪色红背心配军绿短裤",
+        "keywordEn": "18-year-old Chinese boy, round face short chin small eyes protruding ears, black mole on nose tip, old mesh bag over shoulder, faded red tank top army-green shorts",
+        "source": "script",
+        "evidence": [
+          "S4",
+          "S5",
+          "S6"
+        ],
+        "sceneNos": [
+          4,
+          5,
+          6
+        ],
+        "weight": 3,
+        "refImage": "",
+        "refName": "",
+        "locked": false,
+        "touched": {},
+        "prompts": {
+          "turnaround": "角色设定表，三视图并排（最左为正面全身，中间为侧面全身，最右为背面全身，三者等比例、足底对齐），全身远景，纯白色背景，无阴影投射。\n18岁少年，圆脸短下巴小眼睛招风耳，鼻头一颗黑痣，肩挎旧网兜，褪色红背心配军绿短裤\n面部特征：圆脸短下巴，小眼睛，招风耳；可辨识瑕疵：鼻头一颗黑痣。\n服装：褪色红背心配军绿短裤。配饰与记忆点：肩挎旧网兜。\n中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。写实电影质感，自然柔和的顶侧光，8k超高清，哈苏中画幅镜头拍摄；皮肤有真实毛孔与不均匀的肤色过渡，布料纤维与磨损痕迹清晰可见。表情：中性。\n比例 3:2 横版。负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+          "faceSheet": "生成参照人物面部特写和人物全身三视图：最左边是人物面部超大特写（占画面高度的三分之二），右边依次放正面全身、侧面全身、背面全身，四者位于同一画面内，等比例、足底对齐，纯白色背景。\n18岁少年，圆脸短下巴小眼睛招风耳，鼻头一颗黑痣，肩挎旧网兜，褪色红背心配军绿短裤\n面部特征：圆脸短下巴，小眼睛，招风耳；瑕疵：鼻头一颗黑痣；配饰：肩挎旧网兜。\n中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。写实电影质感，8k超高清。比例 3:2 横版。",
+          "lineart": "转彩铅素描"
+        }
+      },
+      {
+        "id": "c:胖子",
+        "kind": "character",
+        "code": "C04",
+        "name": "胖子",
+        "aliases": [],
+        "priority": "P1",
+        "visibility": "部分场次",
+        "age": "18岁",
+        "role": "主角玩伴",
+        "wardrobe": "撑紧的白背心配大花裤衩",
+        "appearance": "肉圆脸，双下巴，眯缝眼",
+        "anchors": {
+          "face": "肉圆脸，双下巴，眯缝眼",
+          "flaw": "左脸一颗痘印",
+          "wardrobeHook": "腰上别一把杀猪刀"
+        },
+        "keyword": "18岁胖少年，肉圆脸双下巴眯缝眼，左脸一颗痘印，腰上别一把杀猪刀，撑紧的白背心配大花裤衩",
+        "keywordEn": "18-year-old chubby Chinese boy, meaty round face double chin narrow eyes, acne mark on left cheek, pig-butcher knife at waist, tight white tank top and floral shorts",
+        "source": "script",
+        "evidence": [
+          "S4",
+          "S5",
+          "S6"
+        ],
+        "sceneNos": [
+          4,
+          5,
+          6
+        ],
+        "weight": 3,
+        "refImage": "",
+        "refName": "",
+        "locked": false,
+        "touched": {},
+        "prompts": {
+          "turnaround": "角色设定表，三视图并排（最左为正面全身，中间为侧面全身，最右为背面全身，三者等比例、足底对齐），全身远景，纯白色背景，无阴影投射。\n18岁胖少年，肉圆脸双下巴眯缝眼，左脸一颗痘印，腰上别一把杀猪刀，撑紧的白背心配大花裤衩\n面部特征：肉圆脸，双下巴，眯缝眼；可辨识瑕疵：左脸一颗痘印。\n服装：撑紧的白背心配大花裤衩。配饰与记忆点：腰上别一把杀猪刀。\n中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。写实电影质感，自然柔和的顶侧光，8k超高清，哈苏中画幅镜头拍摄；皮肤有真实毛孔与不均匀的肤色过渡，布料纤维与磨损痕迹清晰可见。表情：中性。\n比例 3:2 横版。负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+          "faceSheet": "生成参照人物面部特写和人物全身三视图：最左边是人物面部超大特写（占画面高度的三分之二），右边依次放正面全身、侧面全身、背面全身，四者位于同一画面内，等比例、足底对齐，纯白色背景。\n18岁胖少年，肉圆脸双下巴眯缝眼，左脸一颗痘印，腰上别一把杀猪刀，撑紧的白背心配大花裤衩\n面部特征：肉圆脸，双下巴，眯缝眼；瑕疵：左脸一颗痘印；配饰：腰上别一把杀猪刀。\n中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。写实电影质感，8k超高清。比例 3:2 横版。",
+          "lineart": "转彩铅素描"
+        }
+      },
+      {
+        "id": "c:小强",
+        "kind": "character",
+        "code": "C05",
+        "name": "小强",
+        "aliases": [
+          "强子"
+        ],
+        "priority": "P1",
+        "visibility": "部分场次",
+        "age": "18岁",
+        "role": "主角玩伴",
+        "wardrobe": "土黄格纹短袖衬衫配黑短裤",
+        "appearance": "窄长脸，龅牙，脖子细长",
+        "anchors": {
+          "face": "窄长脸，龅牙，脖子细长",
+          "flaw": "右颊一片胎记",
+          "wardrobeHook": "脚踩人字拖"
+        },
+        "keyword": "18岁少年，窄长脸龅牙脖子细长，右颊一片胎记，脚踩人字拖，土黄格纹短袖衬衫配黑短裤",
+        "keywordEn": "18-year-old Chinese boy, narrow long face buck teeth thin neck, birthmark on right cheek, flip-flops, khaki plaid short-sleeve shirt black shorts",
+        "source": "script",
+        "evidence": [
+          "S4",
+          "S5",
+          "S6"
+        ],
+        "sceneNos": [
+          4,
+          5,
+          6
+        ],
+        "weight": 3,
+        "refImage": "",
+        "refName": "",
+        "locked": false,
+        "touched": {},
+        "prompts": {
+          "turnaround": "角色设定表，三视图并排（最左为正面全身，中间为侧面全身，最右为背面全身，三者等比例、足底对齐），全身远景，纯白色背景，无阴影投射。\n18岁少年，窄长脸龅牙脖子细长，右颊一片胎记，脚踩人字拖，土黄格纹短袖衬衫配黑短裤\n面部特征：窄长脸，龅牙，脖子细长；可辨识瑕疵：右颊一片胎记。\n服装：土黄格纹短袖衬衫配黑短裤。配饰与记忆点：脚踩人字拖。\n中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。写实电影质感，自然柔和的顶侧光，8k超高清，哈苏中画幅镜头拍摄；皮肤有真实毛孔与不均匀的肤色过渡，布料纤维与磨损痕迹清晰可见。表情：中性。\n比例 3:2 横版。负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+          "faceSheet": "生成参照人物面部特写和人物全身三视图：最左边是人物面部超大特写（占画面高度的三分之二），右边依次放正面全身、侧面全身、背面全身，四者位于同一画面内，等比例、足底对齐，纯白色背景。\n18岁少年，窄长脸龅牙脖子细长，右颊一片胎记，脚踩人字拖，土黄格纹短袖衬衫配黑短裤\n面部特征：窄长脸，龅牙，脖子细长；瑕疵：右颊一片胎记；配饰：脚踩人字拖。\n中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。写实电影质感，8k超高清。比例 3:2 横版。",
+          "lineart": "转彩铅素描"
+        }
+      },
+      {
+        "id": "c:老头",
+        "kind": "character",
+        "code": "C06",
+        "name": "老头",
+        "aliases": [
+          "胖老头"
+        ],
+        "priority": "P0",
+        "visibility": "部分场次",
+        "age": "60岁",
+        "role": "莆田村诡异喜宴主人",
+        "wardrobe": "深褐团花缎面老财主长袍",
+        "appearance": "浮肿白脸，笑眼成缝，嘴唇发紫",
+        "anchors": {
+          "face": "浮肿白脸，笑眼成缝，嘴唇发紫",
+          "flaw": "面无血色呈惨白",
+          "wardrobeHook": "头戴黑缎财主帽"
+        },
+        "keyword": "60岁鬼老头，浮肿白脸笑眼成缝嘴唇发紫，面无血色呈惨白，头戴黑缎财主帽，深褐团花缎面老财主长袍",
+        "keywordEn": "60-year-old ghostly Chinese man, puffy pale face slit smiling eyes purple lips, bloodless corpse-pale skin, black satin landlord cap, dark brown patterned satin landlord robe",
+        "source": "script",
+        "evidence": [
+          "S6",
+          "S7",
+          "S8"
+        ],
+        "sceneNos": [
+          6,
+          7,
+          8
+        ],
+        "weight": 5,
+        "refImage": "",
+        "refName": "",
+        "locked": false,
+        "touched": {},
+        "prompts": {
+          "turnaround": "角色设定表，三视图并排（最左为正面全身，中间为侧面全身，最右为背面全身，三者等比例、足底对齐），全身远景，纯白色背景，无阴影投射。\n60岁鬼老头，浮肿白脸笑眼成缝嘴唇发紫，面无血色呈惨白，头戴黑缎财主帽，深褐团花缎面老财主长袍\n面部特征：浮肿白脸，笑眼成缝，嘴唇发紫；可辨识瑕疵：面无血色呈惨白。\n服装：深褐团花缎面老财主长袍。配饰与记忆点：头戴黑缎财主帽。\n中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。写实电影质感，自然柔和的顶侧光，8k超高清，哈苏中画幅镜头拍摄；皮肤有真实毛孔与不均匀的肤色过渡，布料纤维与磨损痕迹清晰可见。表情：中性。\n比例 3:2 横版。负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+          "faceSheet": "生成参照人物面部特写和人物全身三视图：最左边是人物面部超大特写（占画面高度的三分之二），右边依次放正面全身、侧面全身、背面全身，四者位于同一画面内，等比例、足底对齐，纯白色背景。\n60岁鬼老头，浮肿白脸笑眼成缝嘴唇发紫，面无血色呈惨白，头戴黑缎财主帽，深褐团花缎面老财主长袍\n面部特征：浮肿白脸，笑眼成缝，嘴唇发紫；瑕疵：面无血色呈惨白；配饰：头戴黑缎财主帽。\n中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。写实电影质感，8k超高清。比例 3:2 横版。",
+          "lineart": "转彩铅素描"
+        }
+      },
+      {
+        "id": "c:奶奶",
+        "kind": "character",
+        "code": "C07",
+        "name": "奶奶",
+        "aliases": [],
+        "priority": "P1",
+        "visibility": "部分场次",
+        "age": "70岁",
+        "role": "主角已故祖母",
+        "wardrobe": "深灰斜襟旧布衫",
+        "appearance": "干瘦长脸，眼窝凹陷，嘴角下垂",
+        "anchors": {
+          "face": "干瘦长脸，眼窝凹陷，嘴角下垂",
+          "flaw": "半边脸颊青灰",
+          "wardrobeHook": "头上别银簪"
+        },
+        "keyword": "70岁老婆婆，干瘦长脸眼窝凹陷嘴角下垂，半边脸颊青灰，头上别银簪，深灰斜襟旧布衫",
+        "keywordEn": "70-year-old Chinese woman, gaunt long face sunken eye sockets drooping mouth, one cheek gray-blue, silver hairpin in hair, dark gray side-fastening old cloth blouse",
+        "source": "script",
+        "evidence": [
+          "S9"
+        ],
+        "sceneNos": [
+          9
+        ],
+        "weight": 3,
+        "refImage": "",
+        "refName": "",
+        "locked": false,
+        "touched": {},
+        "prompts": {
+          "turnaround": "角色设定表，三视图并排（最左为正面全身，中间为侧面全身，最右为背面全身，三者等比例、足底对齐），全身远景，纯白色背景，无阴影投射。\n70岁老婆婆，干瘦长脸眼窝凹陷嘴角下垂，半边脸颊青灰，头上别银簪，深灰斜襟旧布衫\n面部特征：干瘦长脸，眼窝凹陷，嘴角下垂；可辨识瑕疵：半边脸颊青灰。\n服装：深灰斜襟旧布衫。配饰与记忆点：头上别银簪。\n中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。写实电影质感，自然柔和的顶侧光，8k超高清，哈苏中画幅镜头拍摄；皮肤有真实毛孔与不均匀的肤色过渡，布料纤维与磨损痕迹清晰可见。表情：中性。\n比例 3:2 横版。负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+          "faceSheet": "生成参照人物面部特写和人物全身三视图：最左边是人物面部超大特写（占画面高度的三分之二），右边依次放正面全身、侧面全身、背面全身，四者位于同一画面内，等比例、足底对齐，纯白色背景。\n70岁老婆婆，干瘦长脸眼窝凹陷嘴角下垂，半边脸颊青灰，头上别银簪，深灰斜襟旧布衫\n面部特征：干瘦长脸，眼窝凹陷，嘴角下垂；瑕疵：半边脸颊青灰；配饰：头上别银簪。\n中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。写实电影质感，8k超高清。比例 3:2 横版。",
+          "lineart": "转彩铅素描"
+        }
+      },
+      {
+        "id": "c:鬼媳妇",
+        "kind": "character",
+        "code": "C08",
+        "name": "鬼媳妇",
+        "aliases": [],
+        "priority": "P0",
+        "visibility": "设定未出场",
+        "age": "20岁",
+        "role": "守护主角的鬼妻",
+        "wardrobe": "褪色大红嫁衣，长发披散",
+        "appearance": "鹅蛋脸，长眉细眼，肤色瓷白",
+        "anchors": {
+          "face": "鹅蛋脸，长眉细眼，肤色瓷白",
+          "flaw": "颈上一道暗红勒痕",
+          "wardrobeHook": "腕戴一对红漆木镯"
+        },
+        "keyword": "20岁女鬼，鹅蛋脸长眉细眼肤色瓷白，颈上一道暗红勒痕，腕戴一对红漆木镯，褪色大红嫁衣长发披散",
+        "keywordEn": "20-year-old Chinese female ghost, oval face long brows narrow eyes porcelain-pale skin, dark red mark on neck, pair of red lacquered wooden bangles, faded crimson bridal dress loose long hair",
+        "source": "inferred",
+        "evidence": [
+          "S1",
+          "S2"
+        ],
+        "sceneNos": [
+          1,
+          2
+        ],
+        "weight": 5,
+        "refImage": "",
+        "refName": "",
+        "locked": false,
+        "touched": {},
+        "prompts": {
+          "turnaround": "角色设定表，三视图并排（最左为正面全身，中间为侧面全身，最右为背面全身，三者等比例、足底对齐），全身远景，纯白色背景，无阴影投射。\n20岁女鬼，鹅蛋脸长眉细眼肤色瓷白，颈上一道暗红勒痕，腕戴一对红漆木镯，褪色大红嫁衣长发披散\n面部特征：鹅蛋脸，长眉细眼，肤色瓷白；可辨识瑕疵：颈上一道暗红勒痕。\n服装：褪色大红嫁衣，长发披散。配饰与记忆点：腕戴一对红漆木镯。\n中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。写实电影质感，自然柔和的顶侧光，8k超高清，哈苏中画幅镜头拍摄；皮肤有真实毛孔与不均匀的肤色过渡，布料纤维与磨损痕迹清晰可见。表情：中性。\n比例 3:2 横版。负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+          "faceSheet": "生成参照人物面部特写和人物全身三视图：最左边是人物面部超大特写（占画面高度的三分之二），右边依次放正面全身、侧面全身、背面全身，四者位于同一画面内，等比例、足底对齐，纯白色背景。\n20岁女鬼，鹅蛋脸长眉细眼肤色瓷白，颈上一道暗红勒痕，腕戴一对红漆木镯，褪色大红嫁衣长发披散\n面部特征：鹅蛋脸，长眉细眼，肤色瓷白；瑕疵：颈上一道暗红勒痕；配饰：腕戴一对红漆木镯。\n中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。写实电影质感，8k超高清。比例 3:2 横版。",
+          "lineart": "转彩铅素描"
+        }
+      }
+    ],
+    "scenes": [
+      {
+        "id": "sc:内景|乡下老家院子与堂屋|夏日白天",
+        "kind": "scene",
+        "code": "S01",
+        "name": "乡下老家院子与堂屋",
+        "priority": "P1",
+        "intExt": "内景",
+        "time": "夏日白天",
+        "appearance": "八仙桌；竹椅；墙上罗盘；老式木门",
+        "anchors": {
+          "props": [
+            "八仙桌",
+            "竹椅",
+            "墙上罗盘",
+            "老式木门"
+          ],
+          "light": "日光斜射入屋，暖黄偏灰",
+          "lens": "35mm"
+        },
+        "sceneEn": "Old rural Chinese village house interior, worn wooden table and bamboo chairs, compass on wall, faint dusty daylight",
+        "source": "inferred",
+        "evidence": [
+          "S1"
+        ],
+        "sceneNos": [
+          1
+        ],
+        "refImage": "",
+        "refName": "",
+        "locked": false,
+        "starred": false,
+        "prompts": {
+          "concept": "场景概念图，乡下老家院子与堂屋，内景，夏日白天。\n陈设与细节：八仙桌、竹椅、墙上罗盘、老式木门。\n物理光影：日光斜射入屋，暖黄偏灰。\n材质细节：真实材质与岁月痕迹，无塑料感，无过度磨皮。\n镜头：35mm，纵深构图。中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。写实电影质感，35mm 胶片，浓郁颗粒，高动态范围，深邃阴影，8k超高清。\n比例 16:9 横版；核心场景另出 2.35:1 宽银幕版。负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+          "wide": "同一场景改 2.35:1 宽银幕构图，其余描述不变。"
+        }
+      },
+      {
+        "id": "sc:内景|旧学校教室与走廊|白天",
+        "kind": "scene",
+        "code": "S02",
+        "name": "旧学校教室与走廊",
+        "priority": "P1",
+        "intExt": "内景",
+        "time": "白天",
+        "appearance": "旧课桌；黑板；水泥走廊",
+        "anchors": {
+          "props": [
+            "旧课桌",
+            "黑板",
+            "水泥走廊"
+          ],
+          "light": "冷白日光灯，略偏青绿",
+          "lens": "35mm"
+        },
+        "sceneEn": "Old Chinese school classroom and concrete corridor, worn desks, blackboard, cold greenish fluorescent light",
+        "source": "inferred",
+        "evidence": [
+          "S2"
+        ],
+        "sceneNos": [
+          2
+        ],
+        "refImage": "",
+        "refName": "",
+        "locked": false,
+        "starred": false,
+        "prompts": {
+          "concept": "场景概念图，旧学校教室与走廊，内景，白天。\n陈设与细节：旧课桌、黑板、水泥走廊。\n物理光影：冷白日光灯，略偏青绿。\n材质细节：真实材质与岁月痕迹，无塑料感，无过度磨皮。\n镜头：35mm，纵深构图。中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。写实电影质感，35mm 胶片，浓郁颗粒，高动态范围，深邃阴影，8k超高清。\n比例 16:9 横版；核心场景另出 2.35:1 宽银幕版。负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+          "wide": "同一场景改 2.35:1 宽银幕构图，其余描述不变。"
+        }
+      },
+      {
+        "id": "sc:外景|爷爷家门前土路|黄昏",
+        "kind": "scene",
+        "code": "S03",
+        "name": "爷爷家门前土路",
+        "priority": "P0",
+        "intExt": "外景",
+        "time": "黄昏",
+        "appearance": "自行车；黄纸铜钱；土墙；柴垛",
+        "anchors": {
+          "props": [
+            "自行车",
+            "黄纸铜钱",
+            "土墙",
+            "柴垛"
+          ],
+          "light": "夕阳低照，昏黄带尘",
+          "lens": "24mm广角"
+        },
+        "sceneEn": "Dirt road before an old rural house at dusk, mud walls woodpile, yellow paper coins scattered on ground, hazy amber light",
+        "source": "script",
+        "evidence": [
+          "S3"
+        ],
+        "sceneNos": [
+          3
+        ],
+        "refImage": "",
+        "refName": "",
+        "locked": false,
+        "starred": false,
+        "prompts": {
+          "concept": "场景概念图，爷爷家门前土路，外景，黄昏。\n陈设与细节：自行车、黄纸铜钱、土墙、柴垛。\n物理光影：夕阳低照，昏黄带尘。\n材质细节：真实材质与岁月痕迹，无塑料感，无过度磨皮。\n镜头：24mm广角，纵深构图。中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。写实电影质感，35mm 胶片，浓郁颗粒，高动态范围，深邃阴影，8k超高清。\n比例 16:9 横版；核心场景另出 2.35:1 宽银幕版。负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+          "wide": "同一场景改 2.35:1 宽银幕构图，其余描述不变。"
+        }
+      },
+      {
+        "id": "sc:内景|爷爷家堂屋（午后与夜饭）|下午至夜",
+        "kind": "scene",
+        "code": "S04",
+        "name": "爷爷家堂屋（午后与夜饭）",
+        "priority": "P0",
+        "intExt": "内景",
+        "time": "下午至夜",
+        "appearance": "八仙桌；固定电话；龙虾盆；红烧肉；啤酒瓶",
+        "anchors": {
+          "props": [
+            "八仙桌",
+            "固定电话",
+            "龙虾盆",
+            "红烧肉",
+            "啤酒瓶"
+          ],
+          "light": "钨丝灯昏黄，桌面聚光",
+          "lens": "35mm"
+        },
+        "sceneEn": "Old Chinese farmhouse main room, square table with lobster red pork beer bottles, dim warm tungsten lamp",
+        "source": "script",
+        "evidence": [
+          "S4",
+          "S5"
+        ],
+        "sceneNos": [
+          4,
+          5
+        ],
+        "refImage": "",
+        "refName": "",
+        "locked": false,
+        "starred": false,
+        "prompts": {
+          "concept": "场景概念图，爷爷家堂屋（午后与夜饭），内景，下午至夜。\n陈设与细节：八仙桌、固定电话、龙虾盆、红烧肉、啤酒瓶。\n物理光影：钨丝灯昏黄，桌面聚光。\n材质细节：真实材质与岁月痕迹，无塑料感，无过度磨皮。\n镜头：35mm，纵深构图。中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。写实电影质感，35mm 胶片，浓郁颗粒，高动态范围，深邃阴影，8k超高清。\n比例 16:9 横版；核心场景另出 2.35:1 宽银幕版。负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+          "wide": "同一场景改 2.35:1 宽银幕构图，其余描述不变。"
+        }
+      },
+      {
+        "id": "sc:外景|莆田村喜宴长街|夜",
+        "kind": "scene",
+        "code": "S05",
+        "name": "莆田村喜宴长街",
+        "priority": "P0",
+        "intExt": "外景",
+        "time": "夜",
+        "appearance": "大红灯笼；糖葫芦摊；泥人摊；喜宴长桌；财主帽",
+        "anchors": {
+          "props": [
+            "大红灯笼",
+            "糖葫芦摊",
+            "泥人摊",
+            "喜宴长桌",
+            "财主帽"
+          ],
+          "light": "灯笼红光为主，四周压暗",
+          "lens": "24mm广角"
+        },
+        "sceneEn": "Abandoned Chinese village street turned eerie wedding feast, rows of red lanterns, candy stalls, long banquet tables, pale guests in old costumes",
+        "source": "script",
+        "evidence": [
+          "S6",
+          "S7"
+        ],
+        "sceneNos": [
+          6,
+          7
+        ],
+        "refImage": "",
+        "refName": "",
+        "locked": false,
+        "starred": false,
+        "prompts": {
+          "concept": "场景概念图，莆田村喜宴长街，外景，夜。\n陈设与细节：大红灯笼、糖葫芦摊、泥人摊、喜宴长桌、财主帽。\n物理光影：灯笼红光为主，四周压暗。\n材质细节：真实材质与岁月痕迹，无塑料感，无过度磨皮。\n镜头：24mm广角，纵深构图。中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。写实电影质感，35mm 胶片，浓郁颗粒，高动态范围，深邃阴影，8k超高清。\n比例 16:9 横版；核心场景另出 2.35:1 宽银幕版。负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+          "wide": "同一场景改 2.35:1 宽银幕构图，其余描述不变。"
+        }
+      },
+      {
+        "id": "sc:外景|莆田村暗巷与大红灯笼小路|深夜",
+        "kind": "scene",
+        "code": "S06",
+        "name": "莆田村暗巷与大红灯笼小路",
+        "priority": "P0",
+        "intExt": "外景",
+        "time": "深夜",
+        "appearance": "残存两只红灯笼；黑大褂人影；落叶；树棍",
+        "anchors": {
+          "props": [
+            "残存两只红灯笼",
+            "黑大褂人影",
+            "落叶",
+            "树棍"
+          ],
+          "light": "极弱灯笼光，大面积黑",
+          "lens": "28mm广角"
+        },
+        "sceneEn": "Dark narrow village lane at night, only two red lanterns left, tall figures in black gowns whispering in shadow, drifting leaves",
+        "source": "script",
+        "evidence": [
+          "S8"
+        ],
+        "sceneNos": [
+          8
+        ],
+        "refImage": "",
+        "refName": "",
+        "locked": false,
+        "starred": false,
+        "prompts": {
+          "concept": "场景概念图，莆田村暗巷与大红灯笼小路，外景，深夜。\n陈设与细节：残存两只红灯笼、黑大褂人影、落叶、树棍。\n物理光影：极弱灯笼光，大面积黑。\n材质细节：真实材质与岁月痕迹，无塑料感，无过度磨皮。\n镜头：28mm广角，纵深构图。中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。写实电影质感，35mm 胶片，浓郁颗粒，高动态范围，深邃阴影，8k超高清。\n比例 16:9 横版；核心场景另出 2.35:1 宽银幕版。负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+          "wide": "同一场景改 2.35:1 宽银幕构图，其余描述不变。"
+        }
+      },
+      {
+        "id": "sc:外景|荒坟土坡|深夜",
+        "kind": "scene",
+        "code": "S07",
+        "name": "荒坟土坡",
+        "priority": "P0",
+        "intExt": "外景",
+        "time": "深夜",
+        "appearance": "土坟；墓碑；枯树；落叶",
+        "anchors": {
+          "props": [
+            "土坟",
+            "墓碑",
+            "枯树",
+            "落叶"
+          ],
+          "light": "冷月光，青灰死气",
+          "lens": "24mm广角"
+        },
+        "sceneEn": "Lonely earthen grave mound at night, weathered tombstone, dead tree, cold blue moonlight and mist",
+        "source": "script",
+        "evidence": [
+          "S8",
+          "S9"
+        ],
+        "sceneNos": [
+          8,
+          9
+        ],
+        "refImage": "",
+        "refName": "",
+        "locked": false,
+        "starred": false,
+        "prompts": {
+          "concept": "场景概念图，荒坟土坡，外景，深夜。\n陈设与细节：土坟、墓碑、枯树、落叶。\n物理光影：冷月光，青灰死气。\n材质细节：真实材质与岁月痕迹，无塑料感，无过度磨皮。\n镜头：24mm广角，纵深构图。中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。写实电影质感，35mm 胶片，浓郁颗粒，高动态范围，深邃阴影，8k超高清。\n比例 16:9 横版；核心场景另出 2.35:1 宽银幕版。负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+          "wide": "同一场景改 2.35:1 宽银幕构图，其余描述不变。"
+        }
+      }
+    ],
+    "props": [
+      {
+        "id": "p:黄纸铜钱",
+        "kind": "prop",
+        "code": "P01",
+        "name": "黄纸铜钱",
+        "boundTo": [
+          "爷爷"
+        ],
+        "appearance": "黄纸铜钱",
+        "source": "script",
+        "evidence": [
+          "S3"
+        ],
+        "refImage": "",
+        "refName": ""
+      },
+      {
+        "id": "p:红绳玉佩",
+        "kind": "prop",
+        "code": "P02",
+        "name": "红绳玉佩",
+        "boundTo": [
+          "水雷"
+        ],
+        "appearance": "红绳玉佩",
+        "source": "script",
+        "evidence": [
+          "S3"
+        ],
+        "refImage": "",
+        "refName": ""
+      },
+      {
+        "id": "p:红包与喜糖",
+        "kind": "prop",
+        "code": "P03",
+        "name": "红包与喜糖",
+        "boundTo": [
+          "老头"
+        ],
+        "appearance": "红包与喜糖",
+        "source": "script",
+        "evidence": [
+          "S7"
+        ],
+        "refImage": "",
+        "refName": ""
+      },
+      {
+        "id": "p:大红灯笼",
+        "kind": "prop",
+        "code": "P04",
+        "name": "大红灯笼",
+        "boundTo": [
+          "老头"
+        ],
+        "appearance": "大红灯笼",
+        "source": "script",
+        "evidence": [
+          "S6",
+          "S8"
+        ],
+        "refImage": "",
+        "refName": ""
+      },
+      {
+        "id": "p:杀猪刀与猪肉",
+        "kind": "prop",
+        "code": "P05",
+        "name": "杀猪刀与猪肉",
+        "boundTo": [
+          "胖子"
+        ],
+        "appearance": "杀猪刀与猪肉",
+        "source": "script",
+        "evidence": [
+          "S4"
+        ],
+        "refImage": "",
+        "refName": ""
+      },
+      {
+        "id": "p:旧网兜与龙虾",
+        "kind": "prop",
+        "code": "P06",
+        "name": "旧网兜与龙虾",
+        "boundTo": [
+          "二狗"
+        ],
+        "appearance": "旧网兜与龙虾",
+        "source": "script",
+        "evidence": [
+          "S4"
+        ],
+        "refImage": "",
+        "refName": ""
+      },
+      {
+        "id": "p:财主帽与团花长袍",
+        "kind": "prop",
+        "code": "P07",
+        "name": "财主帽与团花长袍",
+        "boundTo": [
+          "老头"
+        ],
+        "appearance": "财主帽与团花长袍",
+        "source": "script",
+        "evidence": [
+          "S6"
+        ],
+        "refImage": "",
+        "refName": ""
+      },
+      {
+        "id": "p:固定电话",
+        "kind": "prop",
+        "code": "P08",
+        "name": "固定电话",
+        "boundTo": [
+          "爷爷"
+        ],
+        "appearance": "固定电话",
+        "source": "script",
+        "evidence": [
+          "S4"
+        ],
+        "refImage": "",
+        "refName": ""
+      }
+    ]
+  },
+  "coverage": {
+    "scriptCharacters": 6,
+    "assetCharacters": 8,
+    "charactersCovered": 6,
+    "scenesTotal": 9,
+    "scenesCovered": 9,
+    "assetScenes": 7,
+    "assetProps": 8,
+    "inferred": 3
+  },
+  "warnings": [],
+  "model": "deepseek-flash",
+  "generatedAt": "2026-11-09T10:23:30",
+  "elapsedSeconds": 17.4
+}

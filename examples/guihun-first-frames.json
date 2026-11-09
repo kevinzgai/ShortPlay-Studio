@@ -1,0 +1,1358 @@
+{
+  "frames": [
+    {
+      "code": "E01-001",
+      "sceneNo": 1,
+      "size": "全景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套；70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋\n场景：乡下老家院子与堂屋；八仙桌、竹椅、墙上罗盘、老式木门；日光斜射入屋，暖黄偏灰。\n画面主体：乡下老宅的院门与坐在门槛上的年幼水雷。动作起点：水雷在门槛上晃着腿，爷爷在门内阴影里站着不动。\n构图与机位：正面平拍，院墙压住画面上缘，门槛横在中景，水雷与爷爷一明一暗分列左右；景别：全景；运镜：固定机位，轻微手持呼吸感。\n光线：夏日正午顶光，院中发白，门内暗部偏冷。情绪：平静日常里透着一点说不清的凉。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, 70-year-old Chinese village elder, square face deep wrinkles, drooping gray brows sunken eyes, small notch on right ear, old bronze coins at waist, navy frog-button cloth jacket black cloth shoes, Old rural Chinese village house interior, worn wooden table and bamboo chairs, compass on wall, faint dusty daylight, wide shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套",
+        "70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋"
+      ],
+      "refAssets": [
+        "C01",
+        "C02",
+        "S01"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E01-002",
+      "sceneNo": 1,
+      "size": "全景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋\n场景：乡下老家院子与堂屋；八仙桌、竹椅、墙上罗盘、老式木门；日光斜射入屋，暖黄偏灰。\n画面主体：雷夜中的老宅屋檐与门口披衣的爷爷。动作起点：响雷炸开，爷爷扶住门框抬头看天。\n构图与机位：低角度仰拍，闪电占画面上方，爷爷贴在右下角；景别：全景；运镜：固定机位，雷光闪过时轻微震镜。\n光线：闪电冷白强光劈下，屋檐阴影浓黑，屋内一片暗。情绪：惊悸不安，像有什么被雷声惊动。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 70-year-old Chinese village elder, square face deep wrinkles, drooping gray brows sunken eyes, small notch on right ear, old bronze coins at waist, navy frog-button cloth jacket black cloth shoes, Old rural Chinese village house interior, worn wooden table and bamboo chairs, compass on wall, faint dusty daylight, wide shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋"
+      ],
+      "refAssets": [
+        "C02",
+        "S01"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E01-003",
+      "sceneNo": 1,
+      "size": "近景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套；70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋\n场景：乡下老家院子与堂屋；八仙桌、竹椅、墙上罗盘、老式木门；日光斜射入屋，暖黄偏灰。\n画面主体：少年水雷的脸与爷爷按在他头顶的手掌。动作起点：水雷仰头，爷爷的手掌压下，压乱了他的头发。\n构图与机位：过肩近景，爷爷手臂作前景斜切，水雷面部占画面中心；景别：近景；运镜：轻微推近。\n光线：侧逆光暖白，脸的一侧压出阴影。情绪：懵懂的顺从。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, 70-year-old Chinese village elder, square face deep wrinkles, drooping gray brows sunken eyes, small notch on right ear, old bronze coins at waist, navy frog-button cloth jacket black cloth shoes, Old rural Chinese village house interior, worn wooden table and bamboo chairs, compass on wall, faint dusty daylight, medium close-up, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套",
+        "70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋"
+      ],
+      "refAssets": [
+        "C01",
+        "C02",
+        "S01"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E01-004",
+      "sceneNo": 1,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套；70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋；20岁女鬼，鹅蛋脸长眉细眼肤色瓷白，颈上一道暗红勒痕，腕戴一对红漆木镯，褪色大红嫁衣长发披散\n场景：乡下老家院子与堂屋；八仙桌、竹椅、墙上罗盘、老式木门；日光斜射入屋，暖黄偏灰。\n画面主体：院中发问的水雷与对面侧身的爷爷。动作起点：水雷仰起下巴开口，爷爷停住侧过身。\n构图与机位：过肩中景，水雷背对镜头占左前，爷爷正面收在右三分之一处；景别：中景；运镜：固定机位，焦点从爷爷肩头拉到水雷后脑。\n光线：院中散射日光，人脸柔和，背景墙压暗。情绪：孩子式的好奇，带一点试探。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, 70-year-old Chinese village elder, square face deep wrinkles, drooping gray brows sunken eyes, small notch on right ear, old bronze coins at waist, navy frog-button cloth jacket black cloth shoes, 20-year-old Chinese female ghost, oval face long brows narrow eyes porcelain-pale skin, dark red mark on neck, pair of red lacquered wooden bangles, faded crimson bridal dress loose long hair, Old rural Chinese village house interior, worn wooden table and bamboo chairs, compass on wall, faint dusty daylight, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套",
+        "70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋",
+        "20岁女鬼，鹅蛋脸长眉细眼肤色瓷白，颈上一道暗红勒痕，腕戴一对红漆木镯，褪色大红嫁衣长发披散"
+      ],
+      "refAssets": [
+        "C01",
+        "C02",
+        "C08",
+        "S01"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E01-005",
+      "sceneNo": 1,
+      "size": "近景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套；70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋\n场景：乡下老家院子与堂屋；八仙桌、竹椅、墙上罗盘、老式木门；日光斜射入屋，暖黄偏灰。\n画面主体：爷爷压低的侧脸与半垂的眼睛。动作起点：爷爷开口时喉头动了一下，视线扫向堂屋暗处。\n构图与机位：近景侧四十五度，身后堂屋门洞是一片暗背景；景别：近景；运镜：固定机位，极轻微手持。\n光线：院光打亮半张脸，另半张埋在门洞暗部。情绪：郑重里带着一点讳莫如深。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, 70-year-old Chinese village elder, square face deep wrinkles, drooping gray brows sunken eyes, small notch on right ear, old bronze coins at waist, navy frog-button cloth jacket black cloth shoes, Old rural Chinese village house interior, worn wooden table and bamboo chairs, compass on wall, faint dusty daylight, medium close-up, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套",
+        "70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋"
+      ],
+      "refAssets": [
+        "C01",
+        "C02",
+        "S01"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E01-006",
+      "sceneNo": 1,
+      "size": "近景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套；70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋；20岁女鬼，鹅蛋脸长眉细眼肤色瓷白，颈上一道暗红勒痕，腕戴一对红漆木镯，褪色大红嫁衣长发披散\n场景：乡下老家院子与堂屋；八仙桌、竹椅、墙上罗盘、老式木门；日光斜射入屋，暖黄偏灰。\n画面主体：水雷仰起的脸和往前探的肩。动作起点：水雷往前挪半步，眼睛睁大。\n构图与机位：正面近景略低机位，院墙作虚背景；景别：近景；运镜：轻微跟移半步。\n光线：正面散射光，眼白映得发亮。情绪：好奇压过害怕，还带着不好意思。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, 70-year-old Chinese village elder, square face deep wrinkles, drooping gray brows sunken eyes, small notch on right ear, old bronze coins at waist, navy frog-button cloth jacket black cloth shoes, 20-year-old Chinese female ghost, oval face long brows narrow eyes porcelain-pale skin, dark red mark on neck, pair of red lacquered wooden bangles, faded crimson bridal dress loose long hair, Old rural Chinese village house interior, worn wooden table and bamboo chairs, compass on wall, faint dusty daylight, medium close-up, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套",
+        "70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋",
+        "20岁女鬼，鹅蛋脸长眉细眼肤色瓷白，颈上一道暗红勒痕，腕戴一对红漆木镯，褪色大红嫁衣长发披散"
+      ],
+      "refAssets": [
+        "C01",
+        "C02",
+        "C08",
+        "S01"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E01-007",
+      "sceneNo": 1,
+      "size": "特写",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套；70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋\n场景：乡下老家院子与堂屋；八仙桌、竹椅、墙上罗盘、老式木门；日光斜射入屋，暖黄偏灰。\n画面主体：爷爷捏住脸颊的手指与水雷被扯变形的脸。动作起点：手指捏下，水雷的脸被扯向两边，脖子往回缩。\n构图与机位：特写满框，爷爷的手从画面右侧伸入；景别：特写；运镜：手持轻晃。\n光线：院光偏暖，指节在脸上投下小片阴影。情绪：又羞又亲昵的打趣。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, 70-year-old Chinese village elder, square face deep wrinkles, drooping gray brows sunken eyes, small notch on right ear, old bronze coins at waist, navy frog-button cloth jacket black cloth shoes, Old rural Chinese village house interior, worn wooden table and bamboo chairs, compass on wall, faint dusty daylight, close-up, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套",
+        "70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋"
+      ],
+      "refAssets": [
+        "C01",
+        "C02",
+        "S01"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E01-008",
+      "sceneNo": 1,
+      "size": "全景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套\n场景：乡下老家院子与堂屋；八仙桌、竹椅、墙上罗盘、老式木门；日光斜射入屋，暖黄偏灰。\n画面主体：学校门口的水雷与散开的同学。动作起点：水雷站定不动，目光左右扫过人群。\n构图与机位：全景平拍，人流从画面两侧穿过，水雷定在中轴；景别：全景；运镜：固定机位，人群自然流动。\n光线：白日顶光偏白，影子短而硬。情绪：警觉逐渐取代顽皮。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, Old rural Chinese village house interior, worn wooden table and bamboo chairs, compass on wall, faint dusty daylight, wide shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套"
+      ],
+      "refAssets": [
+        "C01",
+        "S01"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E01-009",
+      "sceneNo": 1,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套\n场景：乡下老家院子与堂屋；八仙桌、竹椅、墙上罗盘、老式木门；日光斜射入屋，暖黄偏灰。\n画面主体：指骂的同学、被堵在墙边的水雷与赶来的老师。动作起点：同学的手指点到水雷面前，老师从走廊深处走近。\n构图与机位：中景侧拍，走廊纵深成对角线，老师压在背景深处；景别：中景；运镜：横移跟拍半步。\n光线：走廊侧窗白光，人物脸上明暗对半。情绪：压迫感刚要起就被掐断。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, Old rural Chinese village house interior, worn wooden table and bamboo chairs, compass on wall, faint dusty daylight, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套"
+      ],
+      "refAssets": [
+        "C01",
+        "S01"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E01-010",
+      "sceneNo": 1,
+      "size": "近景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套\n场景：乡下老家院子与堂屋；八仙桌、竹椅、墙上罗盘、老式木门；日光斜射入屋，暖黄偏灰。\n画面主体：水雷迷糊的眼睛与桌上的试卷。动作起点：水雷脑袋往下一沉，视线散开，试卷被翻过来露出满篇作答。\n构图与机位：近景俯拍，试卷斜铺前景，水雷的头顶在后景；景别：近景；运镜：焦点由人脸拉向卷面。\n光线：教室窗口白光偏冷，卷面反光。情绪：恍惚到不敢信。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, Old rural Chinese village house interior, worn wooden table and bamboo chairs, compass on wall, faint dusty daylight, medium close-up, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套"
+      ],
+      "refAssets": [
+        "C01",
+        "S01"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E01-011",
+      "sceneNo": 2,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：本镜无明确出场角色，不新增人物\n场景：旧学校教室与走廊；旧课桌、黑板、水泥走廊；冷白日光灯，略偏青绿。\n画面主体：学校与马路。动作起点：从那以后，我就留了个心眼。于是乎，许多神奇的事情在我身上发生了。。\n构图与机位：平视机位，纵深构图；景别：中景；运镜：固定机位。\n光线：冷白日光灯，略偏青绿。情绪：紧绷。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, Old Chinese school classroom and concrete corridor, worn desks, blackboard, cold greenish fluorescent light, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [],
+      "refAssets": [
+        "S02"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E01-012",
+      "sceneNo": 2,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：本镜无明确出场角色，不新增人物\n场景：旧学校教室与走廊；旧课桌、黑板、水泥走廊；冷白日光灯，略偏青绿。\n画面主体：学校与马路。动作起点：比如有同学无缘无故骂我打我，于是，他们不是被老师骂，就是被同学打。。\n构图与机位：平视机位，纵深构图；景别：中景；运镜：固定机位。\n光线：冷白日光灯，略偏青绿。情绪：紧绷。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, Old Chinese school classroom and concrete corridor, worn desks, blackboard, cold greenish fluorescent light, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [],
+      "refAssets": [
+        "S02"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E01-013",
+      "sceneNo": 2,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：本镜无明确出场角色，不新增人物\n场景：旧学校教室与走廊；旧课桌、黑板、水泥走廊；冷白日光灯，略偏青绿。\n画面主体：学校与马路。动作起点：记得有一次考试，好几个题目都不会做，我脑袋忽然一迷糊，结果居然考了个满分。。\n构图与机位：平视机位，纵深构图；景别：中景；运镜：固定机位。\n光线：冷白日光灯，略偏青绿。情绪：紧绷。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, Old Chinese school classroom and concrete corridor, worn desks, blackboard, cold greenish fluorescent light, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [],
+      "refAssets": [
+        "S02"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E01-014",
+      "sceneNo": 2,
+      "size": "全景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套\n场景：旧学校教室与走廊；旧课桌、黑板、水泥走廊；冷白日光灯，略偏青绿。\n画面主体：横穿马路的孩子与冲进河里的小轿车。动作起点：孩子们跑过路面，轿车急转冲出路面扎进河水。\n构图与机位：全景斜侧机位，马路横穿画面，河面在右下，车头朝河；景别：全景；运镜：甩镜跟随车身到河面再停住。\n光线：白日强光，河面反光刺眼。情绪：玩闹骤然转成惊险。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, Old Chinese school classroom and concrete corridor, worn desks, blackboard, cold greenish fluorescent light, wide shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套"
+      ],
+      "refAssets": [
+        "C01",
+        "S02"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E01-015",
+      "sceneNo": 2,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套\n场景：旧学校教室与走廊；旧课桌、黑板、水泥走廊；冷白日光灯，略偏青绿。\n画面主体：湿透上岸的女人与站着不动的水雷。动作起点：女人撑地爬起，一边喘一边抬手指向水雷的肩头。\n构图与机位：中景侧逆，女人在前景低处，水雷在右后景被指到；景别：中景；运镜：手持微晃，稍向水雷肩膀偏。\n光线：河面反光从侧下打上来，人脸发白。情绪：惊魂未定到语无伦次。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, Old Chinese school classroom and concrete corridor, worn desks, blackboard, cold greenish fluorescent light, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套"
+      ],
+      "refAssets": [
+        "C01",
+        "S02"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E01-016",
+      "sceneNo": 2,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套\n场景：旧学校教室与走廊；旧课桌、黑板、水泥走廊；冷白日光灯，略偏青绿。\n画面主体：弯腰捂肚子的水雷与回头看的女生。动作起点：水雷开口半句就捂住肚子，肩膀往下塌。\n构图与机位：中景平拍，女生背影在左前景，水雷在中景弯下；景别：中景；运镜：固定机位，不动。\n光线：教室窗光均匀，人脸偏白。情绪：郁闷又不得不认命。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, Old Chinese school classroom and concrete corridor, worn desks, blackboard, cold greenish fluorescent light, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套"
+      ],
+      "refAssets": [
+        "C01",
+        "S02"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E01-017",
+      "sceneNo": 2,
+      "size": "近景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套\n场景：旧学校教室与走廊；旧课桌、黑板、水泥走廊；冷白日光灯，略偏青绿。\n画面主体：靠栏杆的水雷的侧脸。动作起点：水雷抬眼看向走廊外，肩膀放松下来。\n构图与机位：近景侧拍，栏杆横穿前景，走廊纵深虚在身后；景别：近景；运镜：固定机位，极缓推。\n光线：走廊外白光漫进来，脸侧留一道柔边光。情绪：笃定，甚至有点安心。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, Old Chinese school classroom and concrete corridor, worn desks, blackboard, cold greenish fluorescent light, medium close-up, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套"
+      ],
+      "refAssets": [
+        "C01",
+        "S02"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E01-018",
+      "sceneNo": 2,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套\n场景：旧学校教室与走廊；旧课桌、黑板、水泥走廊；冷白日光灯，略偏青绿。\n画面主体：旧墙边走廊上的水雷。动作起点：水雷边走边低头，忽然收脚定在原地。\n构图与机位：中景跟移，旧墙占画面左侧，走廊尽头是黑；景别：中景；运镜：跟移后急停。\n光线：夜里路灯偏黄，旧墙皮发暗。情绪：汗毛立起的警觉。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, Old Chinese school classroom and concrete corridor, worn desks, blackboard, cold greenish fluorescent light, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套"
+      ],
+      "refAssets": [
+        "C01",
+        "S02"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E01-019",
+      "sceneNo": 2,
+      "size": "特写",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套\n场景：旧学校教室与走廊；旧课桌、黑板、水泥走廊；冷白日光灯，略偏青绿。\n画面主体：水雷胸口那片巴掌大的阴寒痕迹。动作起点：那片寒气贴着衣料往里收，边缘微微抽动。\n构图与机位：特写俯拍，衣料纹理铺满画框，寒气占中心；景别：特写；运镜：微距固定，极轻微呼吸。\n光线：冷调路灯侧光，寒气处比周围更暗。情绪：冷到发怵，却不敢出声。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, Old Chinese school classroom and concrete corridor, worn desks, blackboard, cold greenish fluorescent light, close-up, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套"
+      ],
+      "refAssets": [
+        "C01",
+        "S02"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E01-020",
+      "sceneNo": 2,
+      "size": "全景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：本镜无明确出场角色，不新增人物\n场景：旧学校教室与走廊；旧课桌、黑板、水泥走廊；冷白日光灯，略偏青绿。\n画面主体：夜里的初中宿舍与空着的床铺。动作起点：窗扇被夜风推得轻轻晃动，宿舍里没有人动。\n构图与机位：全景正面，两列铁架床向深处收成透视线，窗户在左侧亮着一小块夜光；景别：全景；运镜：固定机位，不动。\n光线：窗外月光偏青，床架反出细窄的冷边。情绪：暑假前的空荡与不安。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, Old Chinese school classroom and concrete corridor, worn desks, blackboard, cold greenish fluorescent light, wide shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [],
+      "refAssets": [
+        "S02"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E01-021",
+      "sceneNo": 2,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套\n场景：旧学校教室与走廊；旧课桌、黑板、水泥走廊；冷白日光灯，略偏青绿。\n画面主体：闭眼躺着的水雷与晃动的鬼影。动作起点：水雷眼皮发抖，鬼影在床间缓慢移动。\n构图与机位：中景侧俯，水雷占前景三分之一，鬼影在过道深处走动；景别：中景；运镜：固定机位，浅景深。\n光线：月光冷青，鬼影处近乎全黑。情绪：闭着眼也在发抖的恐惧。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, Old Chinese school classroom and concrete corridor, worn desks, blackboard, cold greenish fluorescent light, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套"
+      ],
+      "refAssets": [
+        "C01",
+        "S02"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E01-022",
+      "sceneNo": 2,
+      "size": "近景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套\n场景：旧学校教室与走廊；旧课桌、黑板、水泥走廊；冷白日光灯，略偏青绿。\n画面主体：坐在床边的披发女鬼与床上的水雷。动作起点：女鬼低下头，垂落的头发扫到床沿。\n构图与机位：近景低机位，女鬼背影占左前，水雷的脸在枕上；景别：近景；运镜：低机位微推。\n光线：月光从窗缝切进来，女鬼身上无光。情绪：窒息般的被注视感。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, Old Chinese school classroom and concrete corridor, worn desks, blackboard, cold greenish fluorescent light, medium close-up, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套"
+      ],
+      "refAssets": [
+        "C01",
+        "S02"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E01-023",
+      "sceneNo": 3,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：本镜无明确出场角色，不新增人物\n场景：爷爷家门前土路；自行车、黄纸铜钱、土墙、柴垛；夕阳低照，昏黄带尘。\n画面主体：初中宿舍。动作起点：快到十八岁生日的时候，正是学校放暑假。。\n构图与机位：平视机位，纵深构图；景别：中景；运镜：固定机位。\n光线：夕阳低照，昏黄带尘。情绪：紧绷。\n24mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, Dirt road before an old rural house at dusk, mud walls woodpile, yellow paper coins scattered on ground, hazy amber light, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [],
+      "refAssets": [
+        "S03"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E01-024",
+      "sceneNo": 3,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：本镜无明确出场角色，不新增人物\n场景：爷爷家门前土路；自行车、黄纸铜钱、土墙、柴垛；夕阳低照，昏黄带尘。\n画面主体：初中宿舍。动作起点：那两天，我总是觉得身上冷得慌，夜里一闭眼睛就看到许许多多吓人的恶鬼在宿舍里面晃悠，有几个披头散发的女鬼还坐在我床边看着我。。\n构图与机位：平视机位，纵深构图；景别：中景；运镜：固定机位。\n光线：夕阳低照，昏黄带尘。情绪：紧绷。\n24mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, Dirt road before an old rural house at dusk, mud walls woodpile, yellow paper coins scattered on ground, hazy amber light, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [],
+      "refAssets": [
+        "S03"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E01-025",
+      "sceneNo": 3,
+      "size": "近景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套；20岁女鬼，鹅蛋脸长眉细眼肤色瓷白，颈上一道暗红勒痕，腕戴一对红漆木镯，褪色大红嫁衣长发披散\n场景：爷爷家门前土路；自行车、黄纸铜钱、土墙、柴垛；夕阳低照，昏黄带尘。\n画面主体：坐起的水雷的冷汗与空床沿。动作起点：水雷撑起上身，眼睛定在床边空处。\n构图与机位：近景正面，床沿横在画面下缘，身后是黑；景别：近景；运镜：手持，轻微不稳。\n光线：月光冷青压在半张脸上。情绪：后怕之后的确定。\n24mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, 20-year-old Chinese female ghost, oval face long brows narrow eyes porcelain-pale skin, dark red mark on neck, pair of red lacquered wooden bangles, faded crimson bridal dress loose long hair, Dirt road before an old rural house at dusk, mud walls woodpile, yellow paper coins scattered on ground, hazy amber light, medium close-up, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套",
+        "20岁女鬼，鹅蛋脸长眉细眼肤色瓷白，颈上一道暗红勒痕，腕戴一对红漆木镯，褪色大红嫁衣长发披散"
+      ],
+      "refAssets": [
+        "C01",
+        "C08",
+        "S03"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E01-026",
+      "sceneNo": 3,
+      "size": "特写",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套\n场景：爷爷家门前土路；自行车、黄纸铜钱、土墙、柴垛；夕阳低照，昏黄带尘。\n画面主体：水雷被月光切成两半的脸。动作起点：水雷牙关咬紧，喉结上下动了一次。\n构图与机位：特写满框，鼻梁成为明暗分界；景别：特写；运镜：固定机位，极缓推近。\n光线：冷月光侧切，另半边脸全黑。情绪：发狠的笃定。\n24mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, Dirt road before an old rural house at dusk, mud walls woodpile, yellow paper coins scattered on ground, hazy amber light, close-up, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套"
+      ],
+      "refAssets": [
+        "C01",
+        "S03"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E01-027",
+      "sceneNo": 3,
+      "size": "全景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套\n场景：爷爷家门前土路；自行车、黄纸铜钱、土墙、柴垛；夕阳低照，昏黄带尘。\n画面主体：跨进老宅门槛的水雷与敞开的堂屋门。动作起点：水雷一步跨过门槛，包带滑到肩上，脚步没停。\n构图与机位：全景正面平拍，院门框住人物，堂屋门洞在纵深尽头；景别：全景；运镜：固定机位，人物由远走近。\n光线：正午顶光把院子照白，堂屋门内一片黑。情绪：急切，像要去找答案。\n24mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, Dirt road before an old rural house at dusk, mud walls woodpile, yellow paper coins scattered on ground, hazy amber light, wide shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套"
+      ],
+      "refAssets": [
+        "C01",
+        "S03"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E02-001",
+      "sceneNo": 4,
+      "size": "全景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋\n场景：爷爷家堂屋（午后与夜饭）；八仙桌、固定电话、龙虾盆、红烧肉、啤酒瓶；钨丝灯昏黄，桌面聚光。\n画面主体：爷爷家院门前的爷爷和刚回来的我。动作起点：爷爷看清是我，脸色骤然板起，脚步朝门口迎了半步。\n构图与机位：院门与土路占后景，爷爷立在门内一侧，我背身从画面前缘入画；景别：全景；运镜：固定机位，轻微手持跟随我入画。\n光线：偏西的日光斜扫进院子，暖色里带灰。情绪：骤然收紧的警觉。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 70-year-old Chinese village elder, square face deep wrinkles, drooping gray brows sunken eyes, small notch on right ear, old bronze coins at waist, navy frog-button cloth jacket black cloth shoes, Old Chinese farmhouse main room, square table with lobster red pork beer bottles, dim warm tungsten lamp, wide shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋"
+      ],
+      "refAssets": [
+        "C02",
+        "S04"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E02-002",
+      "sceneNo": 4,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋\n场景：爷爷家堂屋（午后与夜饭）；八仙桌、固定电话、龙虾盆、红烧肉、啤酒瓶；钨丝灯昏黄，桌面聚光。\n画面主体：撒黄纸的爷爷与站在他身前的我。动作起点：黄纸从指间甩出飘落在我身后，爷爷另一只手扣住我的胳膊往回带。\n构图与机位：过肩拍爷爷侧脸，散落的黄纸铺在两人之间的地面作前景；景别：中景；运镜：轻微下压再随爷爷转身向屋门移动。\n光线：院中斜阳照在黄纸上，纸面泛出亮边。情绪：急切又压着声音的郑重。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 70-year-old Chinese village elder, square face deep wrinkles, drooping gray brows sunken eyes, small notch on right ear, old bronze coins at waist, navy frog-button cloth jacket black cloth shoes, Old Chinese farmhouse main room, square table with lobster red pork beer bottles, dim warm tungsten lamp, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋"
+      ],
+      "refAssets": [
+        "C02",
+        "S04"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E02-003",
+      "sceneNo": 4,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋\n场景：爷爷家堂屋（午后与夜饭）；八仙桌、固定电话、龙虾盆、红烧肉、啤酒瓶；钨丝灯昏黄，桌面聚光。\n画面主体：堂屋里的爷爷与我。动作起点：爷爷绕着我转半圈，伸手翻看我的衣袖和肩膀，嘴里不停发问。\n构图与机位：两人分列画面左右，八仙桌作中间支点，门光从背后打进来；景别：中景；运镜：固定机位，轻微跟随爷爷身体晃动。\n光线：门外日光透进堂屋，屋内偏暗，人脸带一层侧光。情绪：紧张追问里透出心疼。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 70-year-old Chinese village elder, square face deep wrinkles, drooping gray brows sunken eyes, small notch on right ear, old bronze coins at waist, navy frog-button cloth jacket black cloth shoes, Old Chinese farmhouse main room, square table with lobster red pork beer bottles, dim warm tungsten lamp, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋"
+      ],
+      "refAssets": [
+        "C02",
+        "S04"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E02-004",
+      "sceneNo": 4,
+      "size": "近景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋\n场景：爷爷家堂屋（午后与夜饭）；八仙桌、固定电话、龙虾盆、红烧肉、啤酒瓶；钨丝灯昏黄，桌面聚光。\n画面主体：松口气的爷爷。动作起点：他扶着桌沿坐下，胸口沉下去，长长呼出一口气。\n构图与机位：近景正面对准爷爷，桌沿压住画面下缘，我在前景虚成肩影；景别：近景；运镜：固定机位，等呼气结束再轻推半寸。\n光线：门光落在爷爷半张脸上，另半边沉在屋影里。情绪：后怕散去的疲惫松动。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 70-year-old Chinese village elder, square face deep wrinkles, drooping gray brows sunken eyes, small notch on right ear, old bronze coins at waist, navy frog-button cloth jacket black cloth shoes, Old Chinese farmhouse main room, square table with lobster red pork beer bottles, dim warm tungsten lamp, medium close-up, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋"
+      ],
+      "refAssets": [
+        "C02",
+        "S04"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E02-005",
+      "sceneNo": 5,
+      "size": "全景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋\n场景：爷爷家堂屋（午后与夜饭）；八仙桌、固定电话、龙虾盆、红烧肉、啤酒瓶；钨丝灯昏黄，桌面聚光。\n画面主体：拖着自行车的爷爷与挂上玉佩的我。动作起点：爷爷一手扶车把，一手把玉佩挂到我颈上并拉紧绳结。\n构图与机位：门槛作前景，自行车横在画面左侧，我们两人在右侧门口光里；景别：全景；运镜：从屋内向后轻移，跟住爷爷转身挂玉佩的动作。\n光线：门口下午的白光偏冷，屋内暖褐，人脸一半亮一半暗。情绪：临出门前的牵挂。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 70-year-old Chinese village elder, square face deep wrinkles, drooping gray brows sunken eyes, small notch on right ear, old bronze coins at waist, navy frog-button cloth jacket black cloth shoes, Old Chinese farmhouse main room, square table with lobster red pork beer bottles, dim warm tungsten lamp, wide shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋"
+      ],
+      "refAssets": [
+        "C02",
+        "S04"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E02-006",
+      "sceneNo": 5,
+      "size": "近景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋\n场景：爷爷家堂屋（午后与夜饭）；八仙桌、固定电话、龙虾盆、红烧肉、啤酒瓶；钨丝灯昏黄，桌面聚光。\n画面主体：俯身嘱咐的爷爷。动作起点：他双手按住我的肩，说到「陌生人」时手指收紧了一下。\n构图与机位：过肩近景，爷爷占画面大半，我的后脑勺在右下角；景别：近景；运镜：固定机位，说到最后一句轻轻靠近一寸。\n光线：门口冷白光照在爷爷侧脸，眼窝留影。情绪：不容商量的郑重。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 70-year-old Chinese village elder, square face deep wrinkles, drooping gray brows sunken eyes, small notch on right ear, old bronze coins at waist, navy frog-button cloth jacket black cloth shoes, Old Chinese farmhouse main room, square table with lobster red pork beer bottles, dim warm tungsten lamp, medium close-up, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋"
+      ],
+      "refAssets": [
+        "C02",
+        "S04"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E02-007",
+      "sceneNo": 5,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋\n场景：爷爷家堂屋（午后与夜饭）；八仙桌、固定电话、龙虾盆、红烧肉、啤酒瓶；钨丝灯昏黄，桌面聚光。\n画面主体：独自留在堂屋里的我。动作起点：我走到门口又折回桌边，抬手挡了挡门口的天光。\n构图与机位：门框成框，我的身影压在画幅正中，门外亮白的天占上三分之一；景别：中景；运镜：固定机位，靠我走动的横向位移带节奏。\n光线：门外白亮日光与屋内暗褐对比明显。情绪：空落落的无聊。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 70-year-old Chinese village elder, square face deep wrinkles, drooping gray brows sunken eyes, small notch on right ear, old bronze coins at waist, navy frog-button cloth jacket black cloth shoes, Old Chinese farmhouse main room, square table with lobster red pork beer bottles, dim warm tungsten lamp, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋"
+      ],
+      "refAssets": [
+        "C02",
+        "S04"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E02-008",
+      "sceneNo": 5,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：本镜无明确出场角色，不新增人物\n场景：爷爷家堂屋（午后与夜饭）；八仙桌、固定电话、龙虾盆、红烧肉、啤酒瓶；钨丝灯昏黄，桌面聚光。\n画面主体：洗脸出门的我与锁着的伙伴家门。动作起点：我甩掉手上的水珠，抬手推了推那把锁，门板晃了一下没开。\n构图与机位：先近后拉，锁头在画面前景，我退到巷子中段；景别：中景；运镜：跟随我出巷口，落到门前停住。\n光线：斜阳照在门板上，巷子里一半亮一半阴。情绪：兴冲冲转成扫兴。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, Old Chinese farmhouse main room, square table with lobster red pork beer bottles, dim warm tungsten lamp, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [],
+      "refAssets": [
+        "S04"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E02-009",
+      "sceneNo": 5,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋\n场景：爷爷家堂屋（午后与夜饭）；八仙桌、固定电话、龙虾盆、红烧肉、啤酒瓶；钨丝灯昏黄，桌面聚光。\n画面主体：淘米煮饭的我与响起的固定电话。动作起点：我的手还湿着从米盆里抬起，转头盯住那台电话。\n构图与机位：米盆和手在画面下方前景，电话在左侧墙边，人被夹在中间；景别：中景；运镜：固定机位，铃声响起时轻微一震。\n光线：灶口火光映在手上，屋里其余部分是暗的。情绪：被铃声打断的一愣。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 70-year-old Chinese village elder, square face deep wrinkles, drooping gray brows sunken eyes, small notch on right ear, old bronze coins at waist, navy frog-button cloth jacket black cloth shoes, Old Chinese farmhouse main room, square table with lobster red pork beer bottles, dim warm tungsten lamp, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋"
+      ],
+      "refAssets": [
+        "C02",
+        "S04"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E02-010",
+      "sceneNo": 5,
+      "size": "近景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋\n场景：爷爷家堂屋（午后与夜饭）；八仙桌、固定电话、龙虾盆、红烧肉、啤酒瓶；钨丝灯昏黄，桌面聚光。\n画面主体：握着听筒接电话的我。动作起点：听筒贴紧耳朵，我边听边点头，手指绕着电话线。\n构图与机位：近景侧拍，电话线从画面下缘绕出去，墙上挂着爷爷的物件；景别：近景；运镜：固定机位，随点头微微起伏。\n光线：窗口侧光打在半边脸上，另半边压暗。情绪：听话里的乖顺和一点不情愿。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 70-year-old Chinese village elder, square face deep wrinkles, drooping gray brows sunken eyes, small notch on right ear, old bronze coins at waist, navy frog-button cloth jacket black cloth shoes, Old Chinese farmhouse main room, square table with lobster red pork beer bottles, dim warm tungsten lamp, medium close-up, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋"
+      ],
+      "refAssets": [
+        "C02",
+        "S04"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E02-011",
+      "sceneNo": 6,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁胖少年，肉圆脸双下巴眯缝眼，左脸一颗痘印，腰上别一把杀猪刀，撑紧的白背心配大花裤衩\n场景：莆田村喜宴长街；大红灯笼、糖葫芦摊、泥人摊、喜宴长桌、财主帽；灯笼红光为主，四周压暗。\n画面主体：堂屋里刚放下电话的我和门外的喊声。动作起点：我的手还搭在听筒上，头已经转向门外。\n构图与机位：门框在画面右侧开出一道亮口，我和电话在左侧暗处；景别：中景；运镜：固定机位，喊声响起时轻推半寸向门口。\n光线：傍晚的橙光从门缝切进来，屋内开始转暗。情绪：突然被叫到的意外。\n24mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old chubby Chinese boy, meaty round face double chin narrow eyes, acne mark on left cheek, pig-butcher knife at waist, tight white tank top and floral shorts, Abandoned Chinese village street turned eerie wedding feast, rows of red lanterns, candy stalls, long banquet tables, pale guests in old costumes, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁胖少年，肉圆脸双下巴眯缝眼，左脸一颗痘印，腰上别一把杀猪刀，撑紧的白背心配大花裤衩"
+      ],
+      "refAssets": [
+        "C04",
+        "S05"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E02-012",
+      "sceneNo": 6,
+      "size": "全景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，圆脸短下巴小眼睛招风耳，鼻头一颗黑痣，肩挎旧网兜，褪色红背心配军绿短裤；18岁胖少年，肉圆脸双下巴眯缝眼，左脸一颗痘印，腰上别一把杀猪刀，撑紧的白背心配大花裤衩；18岁少年，窄长脸龅牙脖子细长，右颊一片胎记，脚踩人字拖，土黄格纹短袖衬衫配黑短裤\n场景：莆田村喜宴长街；大红灯笼、糖葫芦摊、泥人摊、喜宴长桌、财主帽；灯笼红光为主，四周压暗。\n画面主体：院里的胖子、二狗、小强和门口的我。动作起点：三个人一齐朝我咧嘴笑，胖子抬手在我肩上拍了一下。\n构图与机位：门口台阶作前景，三人错落站成一排，晚霞在他们背后；景别：全景；运镜：固定机位，略低角度仰拍他们的身高。\n光线：傍晚橙红天光从背后勾出人物轮廓。情绪：久别重逢的憨厚热络。\n24mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, round face short chin small eyes protruding ears, black mole on nose tip, old mesh bag over shoulder, faded red tank top army-green shorts, 18-year-old chubby Chinese boy, meaty round face double chin narrow eyes, acne mark on left cheek, pig-butcher knife at waist, tight white tank top and floral shorts, 18-year-old Chinese boy, narrow long face buck teeth thin neck, birthmark on right cheek, flip-flops, khaki plaid short-sleeve shirt black shorts, Abandoned Chinese village street turned eerie wedding feast, rows of red lanterns, candy stalls, long banquet tables, pale guests in old costumes, wide shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，圆脸短下巴小眼睛招风耳，鼻头一颗黑痣，肩挎旧网兜，褪色红背心配军绿短裤",
+        "18岁胖少年，肉圆脸双下巴眯缝眼，左脸一颗痘印，腰上别一把杀猪刀，撑紧的白背心配大花裤衩",
+        "18岁少年，窄长脸龅牙脖子细长，右颊一片胎记，脚踩人字拖，土黄格纹短袖衬衫配黑短裤"
+      ],
+      "refAssets": [
+        "C03",
+        "C04",
+        "C05",
+        "S05"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E02-013",
+      "sceneNo": 6,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，圆脸短下巴小眼睛招风耳，鼻头一颗黑痣，肩挎旧网兜，褪色红背心配军绿短裤；18岁胖少年，肉圆脸双下巴眯缝眼，左脸一颗痘印，腰上别一把杀猪刀，撑紧的白背心配大花裤衩\n场景：莆田村喜宴长街；大红灯笼、糖葫芦摊、泥人摊、喜宴长桌、财主帽；灯笼红光为主，四周压暗。\n画面主体：献宝的胖子和二狗。动作起点：胖子拍下猪肉，二狗把袋子一倾，龙虾在桌面爬散。\n构图与机位：桌面作前景，两人一左一右从画框外探身进来；景别：中景；运镜：固定机位，随龙虾散开轻微下压。\n光线：屋内已点灯，暖黄灯泡照在桌面上。情绪：炫耀又得意的兴奋。\n24mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, round face short chin small eyes protruding ears, black mole on nose tip, old mesh bag over shoulder, faded red tank top army-green shorts, 18-year-old chubby Chinese boy, meaty round face double chin narrow eyes, acne mark on left cheek, pig-butcher knife at waist, tight white tank top and floral shorts, Abandoned Chinese village street turned eerie wedding feast, rows of red lanterns, candy stalls, long banquet tables, pale guests in old costumes, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，圆脸短下巴小眼睛招风耳，鼻头一颗黑痣，肩挎旧网兜，褪色红背心配军绿短裤",
+        "18岁胖少年，肉圆脸双下巴眯缝眼，左脸一颗痘印，腰上别一把杀猪刀，撑紧的白背心配大花裤衩"
+      ],
+      "refAssets": [
+        "C03",
+        "C04",
+        "S05"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E02-014",
+      "sceneNo": 6,
+      "size": "近景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，窄长脸龅牙脖子细长，右颊一片胎记，脚踩人字拖，土黄格纹短袖衬衫配黑短裤\n场景：莆田村喜宴长街；大红灯笼、糖葫芦摊、泥人摊、喜宴长桌、财主帽；灯笼红光为主，四周压暗。\n画面主体：摆啤酒的小强与桌上那锅米饭。动作起点：小强一瓶瓶立稳啤酒，瓶身晃出泡沫，我用手背碰了碰锅沿。\n构图与机位：桌面近景，四只瓶身在前景排开，饭锅在后方虚处；景别：近景；运镜：固定机位，随瓶子落桌轻轻一顿。\n光线：灯泡暖光在玻璃瓶上拉出一道高光。情绪：寒酸里带点得意。\n24mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, narrow long face buck teeth thin neck, birthmark on right cheek, flip-flops, khaki plaid short-sleeve shirt black shorts, Abandoned Chinese village street turned eerie wedding feast, rows of red lanterns, candy stalls, long banquet tables, pale guests in old costumes, medium close-up, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，窄长脸龅牙脖子细长，右颊一片胎记，脚踩人字拖，土黄格纹短袖衬衫配黑短裤"
+      ],
+      "refAssets": [
+        "C05",
+        "S05"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E02-015",
+      "sceneNo": 6,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：本镜无明确出场角色，不新增人物\n场景：莆田村喜宴长街；大红灯笼、糖葫芦摊、泥人摊、喜宴长桌、财主帽；灯笼红光为主，四周压暗。\n画面主体：灶前忙碌的几人。动作起点：有人揭锅盖，热气冲上来，龙虾红透，我们伸手抓起来就吃。\n构图与机位：灶台蒸气作前景遮住一半画面，人和桌子在后景；景别：中景；运镜：手持绕灶台半圈落到桌边。\n光线：灶火的红光与灯泡暖黄交叠。情绪：手忙脚乱的热闹。\n24mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, Abandoned Chinese village street turned eerie wedding feast, rows of red lanterns, candy stalls, long banquet tables, pale guests in old costumes, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [],
+      "refAssets": [
+        "S05"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E02-016",
+      "sceneNo": 6,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：本镜无明确出场角色，不新增人物\n场景：莆田村喜宴长街；大红灯笼、糖葫芦摊、泥人摊、喜宴长桌、财主帽；灯笼红光为主，四周压暗。\n画面主体：围桌聊天的几人中间沉默的我。动作起点：我剥着壳只听不说，胖子和二狗比划着手势，最后一个酒瓶被倒空。\n构图与机位：越过桌面拍过去，我的侧脸在前景，说笑的几人在对面；景别：中景；运镜：固定机位，末尾轻推向空酒瓶。\n光线：灯泡低垂，桌面亮，几人的脸半明半暗。情绪：热闹里的孤立和克制。\n24mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, Abandoned Chinese village street turned eerie wedding feast, rows of red lanterns, candy stalls, long banquet tables, pale guests in old costumes, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [],
+      "refAssets": [
+        "S05"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E02-017",
+      "sceneNo": 6,
+      "size": "近景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁胖少年，肉圆脸双下巴眯缝眼，左脸一颗痘印，腰上别一把杀猪刀，撑紧的白背心配大花裤衩\n场景：莆田村喜宴长街；大红灯笼、糖葫芦摊、泥人摊、喜宴长桌、财主帽；灯笼红光为主，四周压暗。\n画面主体：端起红烧肉的胖子与桌前的饭碗。动作起点：胖子一筷接一筷往碗里扒肉，我们几个的筷子停在半空。\n构图与机位：近景俯拍桌面，肉盘在画幅中心，胖子的手从右侧反复入画；景别：近景；运镜：固定机位，每夹一次肉微微一顿。\n光线：灯泡直射在油亮的肉面上。情绪：哭笑不得的抢食。\n24mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old chubby Chinese boy, meaty round face double chin narrow eyes, acne mark on left cheek, pig-butcher knife at waist, tight white tank top and floral shorts, Abandoned Chinese village street turned eerie wedding feast, rows of red lanterns, candy stalls, long banquet tables, pale guests in old costumes, medium close-up, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁胖少年，肉圆脸双下巴眯缝眼，左脸一颗痘印，腰上别一把杀猪刀，撑紧的白背心配大花裤衩"
+      ],
+      "refAssets": [
+        "C04",
+        "S05"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E02-018",
+      "sceneNo": 6,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，圆脸短下巴小眼睛招风耳，鼻头一颗黑痣，肩挎旧网兜，褪色红背心配军绿短裤\n场景：莆田村喜宴长街；大红灯笼、糖葫芦摊、泥人摊、喜宴长桌、财主帽；灯笼红光为主，四周压暗。\n画面主体：放下筷子提议的二狗。动作起点：二狗一抹嘴，手往门外一挥，眼睛发亮。\n构图与机位：二狗在画面右三分处，桌上残盘作前景，其余人背对镜头成排；景别：中景；运镜：固定机位，二狗挥手时轻摇跟一下。\n光线：灯泡暖光打在二狗脸上，背景墙暗下去。情绪：起哄前的兴奋。\n24mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, round face short chin small eyes protruding ears, black mole on nose tip, old mesh bag over shoulder, faded red tank top army-green shorts, Abandoned Chinese village street turned eerie wedding feast, rows of red lanterns, candy stalls, long banquet tables, pale guests in old costumes, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，圆脸短下巴小眼睛招风耳，鼻头一颗黑痣，肩挎旧网兜，褪色红背心配军绿短裤"
+      ],
+      "refAssets": [
+        "C03",
+        "S05"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E02-019",
+      "sceneNo": 6,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋\n场景：莆田村喜宴长街；大红灯笼、糖葫芦摊、泥人摊、喜宴长桌、财主帽；灯笼红光为主，四周压暗。\n画面主体：桌边犹豫后点头的我。动作起点：我先低头捏着筷子，随后抬头点头，抬手比了个「十」。\n构图与机位：我在画幅中央稍偏左，其余几人的脸在对面等着我的回答；景别：中景；运镜：固定机位，我抬手比十时轻推近半寸。\n光线：灯泡光从头顶压下，眼窝有影。情绪：被架住的为难和妥协。\n24mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 70-year-old Chinese village elder, square face deep wrinkles, drooping gray brows sunken eyes, small notch on right ear, old bronze coins at waist, navy frog-button cloth jacket black cloth shoes, Abandoned Chinese village street turned eerie wedding feast, rows of red lanterns, candy stalls, long banquet tables, pale guests in old costumes, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋"
+      ],
+      "refAssets": [
+        "C02",
+        "S05"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E02-020",
+      "sceneNo": 6,
+      "size": "全景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋\n场景：莆田村喜宴长街；大红灯笼、糖葫芦摊、泥人摊、喜宴长桌、财主帽；灯笼红光为主，四周压暗。\n画面主体：收拾完出门的我们几个人。动作起点：最后一个人把碗摞好，我们推门鱼贯而出，堂屋的灯还亮着。\n构图与机位：从屋内向外拍，门框成框，几个人影依次穿过；景别：全景；运镜：固定机位，看着人影一个个出画。\n光线：屋内灯泡暖黄，门外已经是深蓝的夜色。情绪：说定之后的轻快。\n24mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 70-year-old Chinese village elder, square face deep wrinkles, drooping gray brows sunken eyes, small notch on right ear, old bronze coins at waist, navy frog-button cloth jacket black cloth shoes, Abandoned Chinese village street turned eerie wedding feast, rows of red lanterns, candy stalls, long banquet tables, pale guests in old costumes, wide shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋"
+      ],
+      "refAssets": [
+        "C02",
+        "S05"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E03-001",
+      "sceneNo": 7,
+      "size": "全景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套；18岁少年，圆脸短下巴小眼睛招风耳，鼻头一颗黑痣，肩挎旧网兜，褪色红背心配军绿短裤；18岁胖少年，肉圆脸双下巴眯缝眼，左脸一颗痘印，腰上别一把杀猪刀，撑紧的白背心配大花裤衩；18岁少年，窄长脸龅牙脖子细长，右颊一片胎记，脚踩人字拖，土黄格纹短袖衬衫配黑短裤\n场景：莆田村喜宴长街；大红灯笼、糖葫芦摊、泥人摊、喜宴长桌、财主帽；灯笼红光为主，四周压暗。\n画面主体：枯草丛里的野兔和追兔的二狗、胖子、强子、水雷。动作起点：野兔贴地窜逃，四个人踩着枯草一路追出去，前方的村口亮起一片灯光。\n构图与机位：低机位贴着草面拍野兔，人影压在后景追赶，灯光占画面右上一角；景别：全景；运镜：手持跟拍，随人物前冲轻微晃动。\n光线：夜色的冷蓝为主，远处灯光是唯一暖黄亮源。情绪：兴奋又急促的追逐劲。\n24mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, 18-year-old Chinese boy, round face short chin small eyes protruding ears, black mole on nose tip, old mesh bag over shoulder, faded red tank top army-green shorts, 18-year-old chubby Chinese boy, meaty round face double chin narrow eyes, acne mark on left cheek, pig-butcher knife at waist, tight white tank top and floral shorts, 18-year-old Chinese boy, narrow long face buck teeth thin neck, birthmark on right cheek, flip-flops, khaki plaid short-sleeve shirt black shorts, Abandoned Chinese village street turned eerie wedding feast, rows of red lanterns, candy stalls, long banquet tables, pale guests in old costumes, wide shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套",
+        "18岁少年，圆脸短下巴小眼睛招风耳，鼻头一颗黑痣，肩挎旧网兜，褪色红背心配军绿短裤",
+        "18岁胖少年，肉圆脸双下巴眯缝眼，左脸一颗痘印，腰上别一把杀猪刀，撑紧的白背心配大花裤衩",
+        "18岁少年，窄长脸龅牙脖子细长，右颊一片胎记，脚踩人字拖，土黄格纹短袖衬衫配黑短裤"
+      ],
+      "refAssets": [
+        "C01",
+        "C03",
+        "C04",
+        "C05",
+        "S05"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E03-002",
+      "sceneNo": 7,
+      "size": "全景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：本镜无明确出场角色，不新增人物\n场景：莆田村喜宴长街；大红灯笼、糖葫芦摊、泥人摊、喜宴长桌、财主帽；灯笼红光为主，四周压暗。\n画面主体：张灯结彩的街口、聚集的人群和糖葫芦、捏泥人摊子。动作起点：人群来回走动，摊主举着糖葫芦串吆喝，成排的大红灯笼在夜风里轻晃。\n构图与机位：从人群背后越肩拍过去，灯笼压住画面上沿，摊位分列两侧做前景；景别：全景；运镜：缓慢横移，带出街道纵深。\n光线：大红灯笼的暖红主光压住夜色。情绪：热闹得有点反常的喜庆。\n24mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, Abandoned Chinese village street turned eerie wedding feast, rows of red lanterns, candy stalls, long banquet tables, pale guests in old costumes, wide shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [],
+      "refAssets": [
+        "S05"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E03-003",
+      "sceneNo": 7,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：本镜无明确出场角色，不新增人物\n场景：莆田村喜宴长街；大红灯笼、糖葫芦摊、泥人摊、喜宴长桌、财主帽；灯笼红光为主，四周压暗。\n画面主体：几个穿古时衣衫的男女。动作起点：他们从镜头前并肩走过，衣摆扫过挂灯笼的竹竿。\n构图与机位：前景用两盏虚化灯笼夹住画面，人在中景横穿；景别：中景；运镜：固定机位，轻微呼吸感。\n光线：灯笼红光从侧上方打下来，人脸偏暖。情绪：热闹中透出一丝说不出的别扭。\n24mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, Abandoned Chinese village street turned eerie wedding feast, rows of red lanterns, candy stalls, long banquet tables, pale guests in old costumes, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [],
+      "refAssets": [
+        "S05"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E03-004",
+      "sceneNo": 7,
+      "size": "近景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，窄长脸龅牙脖子细长，右颊一片胎记，脚踩人字拖，土黄格纹短袖衬衫配黑短裤\n场景：莆田村喜宴长街；大红灯笼、糖葫芦摊、泥人摊、喜宴长桌、财主帽；灯笼红光为主，四周压暗。\n画面主体：四下张望的强子。动作起点：他扭头看左又看右，脚边草丛空空，野兔的踪影彻底没了。\n构图与机位：人占画面左侧三分之一，右侧留出空荡的荒地；景别：近景；运镜：缓慢推近半步。\n光线：侧后方灯笼红光勾边，脸上多是冷影。情绪：追丢了猎物的疑惑。\n24mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, narrow long face buck teeth thin neck, birthmark on right cheek, flip-flops, khaki plaid short-sleeve shirt black shorts, Abandoned Chinese village street turned eerie wedding feast, rows of red lanterns, candy stalls, long banquet tables, pale guests in old costumes, medium close-up, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，窄长脸龅牙脖子细长，右颊一片胎记，脚踩人字拖，土黄格纹短袖衬衫配黑短裤"
+      ],
+      "refAssets": [
+        "C05",
+        "S05"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E03-005",
+      "sceneNo": 8,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，圆脸短下巴小眼睛招风耳，鼻头一颗黑痣，肩挎旧网兜，褪色红背心配军绿短裤；70岁老婆婆，干瘦长脸眼窝凹陷嘴角下垂，半边脸颊青灰，头上别银簪，深灰斜襟旧布衫\n场景：莆田村暗巷与大红灯笼小路；残存两只红灯笼、黑大褂人影、落叶、树棍；极弱灯笼光，大面积黑。\n画面主体：挠头的二狗和身后亮着灯的戏台方向。动作起点：二狗抬手挠着后脑勺，边说边朝街里抬了抬下巴。\n构图与机位：二狗在中景偏右，戏台的灯光虚在后景左侧；景别：中景；运镜：固定机位，轻微手持。\n光线：灯笼暖红打亮半张脸，另一侧落在暗处。情绪：纳闷又带点熟门熟路的疑惑。\n28mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, round face short chin small eyes protruding ears, black mole on nose tip, old mesh bag over shoulder, faded red tank top army-green shorts, 70-year-old Chinese woman, gaunt long face sunken eye sockets drooping mouth, one cheek gray-blue, silver hairpin in hair, dark gray side-fastening old cloth blouse, Dark narrow village lane at night, only two red lanterns left, tall figures in black gowns whispering in shadow, drifting leaves, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，圆脸短下巴小眼睛招风耳，鼻头一颗黑痣，肩挎旧网兜，褪色红背心配军绿短裤",
+        "70岁老婆婆，干瘦长脸眼窝凹陷嘴角下垂，半边脸颊青灰，头上别银簪，深灰斜襟旧布衫"
+      ],
+      "refAssets": [
+        "C03",
+        "C07",
+        "S06"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E03-006",
+      "sceneNo": 8,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁胖少年，肉圆脸双下巴眯缝眼，左脸一颗痘印，腰上别一把杀猪刀，撑紧的白背心配大花裤衩\n场景：莆田村暗巷与大红灯笼小路；残存两只红灯笼、黑大褂人影、落叶、树棍；极弱灯笼光，大面积黑。\n画面主体：摸肚皮的胖子和街里成排的喜宴桌。动作起点：胖子手掌在鼓起的肚皮上按了按，话说得慢悠悠。\n构图与机位：胖子占画面右半，左侧留出摆满碗筷的桌面；景别：中景；运镜：固定机位，几乎不动。\n光线：暖红灯笼光为主，肚皮上一片亮。情绪：吃撑后的懒散和奇怪。\n28mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old chubby Chinese boy, meaty round face double chin narrow eyes, acne mark on left cheek, pig-butcher knife at waist, tight white tank top and floral shorts, Dark narrow village lane at night, only two red lanterns left, tall figures in black gowns whispering in shadow, drifting leaves, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁胖少年，肉圆脸双下巴眯缝眼，左脸一颗痘印，腰上别一把杀猪刀，撑紧的白背心配大花裤衩"
+      ],
+      "refAssets": [
+        "C04",
+        "S06"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E03-007",
+      "sceneNo": 8,
+      "size": "近景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，窄长脸龅牙脖子细长，右颊一片胎记，脚踩人字拖，土黄格纹短袖衬衫配黑短裤\n场景：莆田村暗巷与大红灯笼小路；残存两只红灯笼、黑大褂人影、落叶、树棍；极弱灯笼光，大面积黑。\n画面主体：转身回头的强子。动作起点：他把下巴往街外一抬，肩膀同时侧过去要迈步。\n构图与机位：近景卡在胸口以上，身后是虚掉的灯笼串；景别：近景；运镜：固定机位，随他转身轻微甩一下。\n光线：侧面红光，脸有一半在阴影里。情绪：清醒的不耐烦。\n28mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, narrow long face buck teeth thin neck, birthmark on right cheek, flip-flops, khaki plaid short-sleeve shirt black shorts, Dark narrow village lane at night, only two red lanterns left, tall figures in black gowns whispering in shadow, drifting leaves, medium close-up, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，窄长脸龅牙脖子细长，右颊一片胎记，脚踩人字拖，土黄格纹短袖衬衫配黑短裤"
+      ],
+      "refAssets": [
+        "C05",
+        "S06"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E03-008",
+      "sceneNo": 8,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，圆脸短下巴小眼睛招风耳，鼻头一颗黑痣，肩挎旧网兜，褪色红背心配军绿短裤；60岁鬼老头，浮肿白脸笑眼成缝嘴唇发紫，面无血色呈惨白，头戴黑缎财主帽，深褐团花缎面老财主长袍\n场景：莆田村暗巷与大红灯笼小路；残存两只红灯笼、黑大褂人影、落叶、树棍；极弱灯笼光，大面积黑。\n画面主体：穿老财主衣、戴财主帽的胖老头和二狗被抓的手。动作起点：老头快步挤出人群，两只手一起攥住二狗的手掌。\n构图与机位：两只手在画面下方正中，老头笑脸从上方压进来；景别：中景；运镜：从握手的动作向上摇到他脸上。\n光线：灯笼红光正打老头满脸，二狗半边脸暗。情绪：热络得让人不自在。\n28mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, round face short chin small eyes protruding ears, black mole on nose tip, old mesh bag over shoulder, faded red tank top army-green shorts, 60-year-old ghostly Chinese man, puffy pale face slit smiling eyes purple lips, bloodless corpse-pale skin, black satin landlord cap, dark brown patterned satin landlord robe, Dark narrow village lane at night, only two red lanterns left, tall figures in black gowns whispering in shadow, drifting leaves, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，圆脸短下巴小眼睛招风耳，鼻头一颗黑痣，肩挎旧网兜，褪色红背心配军绿短裤",
+        "60岁鬼老头，浮肿白脸笑眼成缝嘴唇发紫，面无血色呈惨白，头戴黑缎财主帽，深褐团花缎面老财主长袍"
+      ],
+      "refAssets": [
+        "C03",
+        "C06",
+        "S06"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E03-009",
+      "sceneNo": 8,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，圆脸短下巴小眼睛招风耳，鼻头一颗黑痣，肩挎旧网兜，褪色红背心配军绿短裤；60岁鬼老头，浮肿白脸笑眼成缝嘴唇发紫，面无血色呈惨白，头戴黑缎财主帽，深褐团花缎面老财主长袍\n场景：莆田村暗巷与大红灯笼小路；残存两只红灯笼、黑大褂人影、落叶、树棍；极弱灯笼光，大面积黑。\n画面主体：连说带比划的胖老头。动作起点：他一手攥着二狗不松，一手朝街里的喜宴桌连摆，脑袋跟着点。\n构图与机位：老头在画面中央，后景人群横穿，喜宴桌摆在左下；景别：中景；运镜：固定机位，人群动而机位不动。\n光线：一片暖红罩住他，帽檐在额头投下一道影。情绪：过分热情的招呼。\n28mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, round face short chin small eyes protruding ears, black mole on nose tip, old mesh bag over shoulder, faded red tank top army-green shorts, 60-year-old ghostly Chinese man, puffy pale face slit smiling eyes purple lips, bloodless corpse-pale skin, black satin landlord cap, dark brown patterned satin landlord robe, Dark narrow village lane at night, only two red lanterns left, tall figures in black gowns whispering in shadow, drifting leaves, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，圆脸短下巴小眼睛招风耳，鼻头一颗黑痣，肩挎旧网兜，褪色红背心配军绿短裤",
+        "60岁鬼老头，浮肿白脸笑眼成缝嘴唇发紫，面无血色呈惨白，头戴黑缎财主帽，深褐团花缎面老财主长袍"
+      ],
+      "refAssets": [
+        "C03",
+        "C06",
+        "S06"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E03-010",
+      "sceneNo": 8,
+      "size": "近景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套；70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋；18岁少年，圆脸短下巴小眼睛招风耳，鼻头一颗黑痣，肩挎旧网兜，褪色红背心配军绿短裤；60岁鬼老头，浮肿白脸笑眼成缝嘴唇发紫，面无血色呈惨白，头戴黑缎财主帽，深褐团花缎面老财主长袍\n场景：莆田村暗巷与大红灯笼小路；残存两只红灯笼、黑大褂人影、落叶、树棍；极弱灯笼光，大面积黑。\n画面主体：回头看同伴的二狗和旁边咂嘴的老头。动作起点：二狗脖子扭过来扫了一圈自己人，老头的嘴同时发出咂的一声。\n构图与机位：二狗占左半，老头的脸从右侧边缘挤进来；景别：近景；运镜：固定机位，轻微侧跟二狗转头。\n光线：红光偏侧，二狗眼底有一点亮。情绪：错愕与老头的笃定形成对照。\n28mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, 70-year-old Chinese village elder, square face deep wrinkles, drooping gray brows sunken eyes, small notch on right ear, old bronze coins at waist, navy frog-button cloth jacket black cloth shoes, 18-year-old Chinese boy, round face short chin small eyes protruding ears, black mole on nose tip, old mesh bag over shoulder, faded red tank top army-green shorts, 60-year-old ghostly Chinese man, puffy pale face slit smiling eyes purple lips, bloodless corpse-pale skin, black satin landlord cap, dark brown patterned satin landlord robe, Dark narrow village lane at night, only two red lanterns left, tall figures in black gowns whispering in shadow, drifting leaves, medium close-up, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套",
+        "70岁老人，方脸深皱纹眉毛花白下垂眼窝深，右耳缺一小块，腰间挂一串旧铜钱，藏青对襟土布褂黑布鞋",
+        "18岁少年，圆脸短下巴小眼睛招风耳，鼻头一颗黑痣，肩挎旧网兜，褪色红背心配军绿短裤",
+        "60岁鬼老头，浮肿白脸笑眼成缝嘴唇发紫，面无血色呈惨白，头戴黑缎财主帽，深褐团花缎面老财主长袍"
+      ],
+      "refAssets": [
+        "C01",
+        "C02",
+        "C03",
+        "C06",
+        "S06"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E03-011",
+      "sceneNo": 8,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套；18岁少年，圆脸短下巴小眼睛招风耳，鼻头一颗黑痣，肩挎旧网兜，褪色红背心配军绿短裤；18岁胖少年，肉圆脸双下巴眯缝眼，左脸一颗痘印，腰上别一把杀猪刀，撑紧的白背心配大花裤衩；18岁少年，窄长脸龅牙脖子细长，右颊一片胎记，脚踩人字拖，土黄格纹短袖衬衫配黑短裤；60岁鬼老头，浮肿白脸笑眼成缝嘴唇发紫，面无血色呈惨白，头戴黑缎财主帽，深褐团花缎面老财主长袍\n场景：莆田村暗巷与大红灯笼小路；残存两只红灯笼、黑大褂人影、落叶、树棍；极弱灯笼光，大面积黑。\n画面主体：逐一点名的胖老头和被他指到的四个人。动作起点：老头抬起的手指从二狗扫到胖子、强子、水雷，每点一个就顿一下。\n构图与机位：四人在后景站成一排，老头的手指从左往右横过画面；景别：中景；运镜：随手指横移一小段。\n光线：暖红为主，四人的脸在他指到时依次被照亮。情绪：被叫破名字后的发凉。\n28mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, 18-year-old Chinese boy, round face short chin small eyes protruding ears, black mole on nose tip, old mesh bag over shoulder, faded red tank top army-green shorts, 18-year-old chubby Chinese boy, meaty round face double chin narrow eyes, acne mark on left cheek, pig-butcher knife at waist, tight white tank top and floral shorts, 18-year-old Chinese boy, narrow long face buck teeth thin neck, birthmark on right cheek, flip-flops, khaki plaid short-sleeve shirt black shorts, 60-year-old ghostly Chinese man, puffy pale face slit smiling eyes purple lips, bloodless corpse-pale skin, black satin landlord cap, dark brown patterned satin landlord robe, Dark narrow village lane at night, only two red lanterns left, tall figures in black gowns whispering in shadow, drifting leaves, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套",
+        "18岁少年，圆脸短下巴小眼睛招风耳，鼻头一颗黑痣，肩挎旧网兜，褪色红背心配军绿短裤",
+        "18岁胖少年，肉圆脸双下巴眯缝眼，左脸一颗痘印，腰上别一把杀猪刀，撑紧的白背心配大花裤衩",
+        "18岁少年，窄长脸龅牙脖子细长，右颊一片胎记，脚踩人字拖，土黄格纹短袖衬衫配黑短裤",
+        "60岁鬼老头，浮肿白脸笑眼成缝嘴唇发紫，面无血色呈惨白，头戴黑缎财主帽，深褐团花缎面老财主长袍"
+      ],
+      "refAssets": [
+        "C01",
+        "C03",
+        "C04",
+        "C05",
+        "C06",
+        "S06"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E03-012",
+      "sceneNo": 8,
+      "size": "近景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套；60岁鬼老头，浮肿白脸笑眼成缝嘴唇发紫，面无血色呈惨白，头戴黑缎财主帽，深褐团花缎面老财主长袍\n场景：莆田村暗巷与大红灯笼小路；残存两只红灯笼、黑大褂人影、落叶、树棍；极弱灯笼光，大面积黑。\n画面主体：伸手过来的胖老头和连退半步的水雷。动作起点：老头的手朝前探，水雷肩膀一缩、脚跟往后蹭，脸色发白不出声。\n构图与机位：老头的手从画面前景伸入，水雷在背景被逼到画面边缘；景别：近景；运镜：手持轻微后拉，跟着水雷退。\n光线：老头身上红光偏冷，水雷这侧压到暗部。情绪：熟人般的热络与压不住的恐惧相撞。\n28mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, 60-year-old ghostly Chinese man, puffy pale face slit smiling eyes purple lips, bloodless corpse-pale skin, black satin landlord cap, dark brown patterned satin landlord robe, Dark narrow village lane at night, only two red lanterns left, tall figures in black gowns whispering in shadow, drifting leaves, medium close-up, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套",
+        "60岁鬼老头，浮肿白脸笑眼成缝嘴唇发紫，面无血色呈惨白，头戴黑缎财主帽，深褐团花缎面老财主长袍"
+      ],
+      "refAssets": [
+        "C01",
+        "C06",
+        "S06"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E03-013",
+      "sceneNo": 8,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套；60岁鬼老头，浮肿白脸笑眼成缝嘴唇发紫，面无血色呈惨白，头戴黑缎财主帽，深褐团花缎面老财主长袍\n场景：莆田村暗巷与大红灯笼小路；残存两只红灯笼、黑大褂人影、落叶、树棍；极弱灯笼光，大面积黑。\n画面主体：笑着劝说的胖老头和半探进怀里的手。动作起点：他一边说一边把手伸进衣襟里摸索，肩膀跟着晃。\n构图与机位：老头在画面中央偏右，水雷虚在左后景；景别：中景；运镜：固定机位，极轻推。\n光线：红光从上方罩下，怀里的手落在暗处。情绪：哄小孩似的热络里透着不对劲。\n28mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, 60-year-old ghostly Chinese man, puffy pale face slit smiling eyes purple lips, bloodless corpse-pale skin, black satin landlord cap, dark brown patterned satin landlord robe, Dark narrow village lane at night, only two red lanterns left, tall figures in black gowns whispering in shadow, drifting leaves, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套",
+        "60岁鬼老头，浮肿白脸笑眼成缝嘴唇发紫，面无血色呈惨白，头戴黑缎财主帽，深褐团花缎面老财主长袍"
+      ],
+      "refAssets": [
+        "C01",
+        "C06",
+        "S06"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E03-014",
+      "sceneNo": 8,
+      "size": "特写",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套；60岁鬼老头，浮肿白脸笑眼成缝嘴唇发紫，面无血色呈惨白，头戴黑缎财主帽，深褐团花缎面老财主长袍\n场景：莆田村暗巷与大红灯笼小路；残存两只红灯笼、黑大褂人影、落叶、树棍；极弱灯笼光，大面积黑。\n画面主体：红包、一把喜糖和两只接头的手。动作起点：红包和喜糖递到画面中央，水雷的手指先缩了一下又伸出来接住。\n构图与机位：红包喜糖压前景中心，两只手从左右伸入；景别：特写；运镜：固定机位，焦点从红包转到手指。\n光线：红包的红色在暗处格外扎眼。情绪：没骨气的心动。\n28mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, 60-year-old ghostly Chinese man, puffy pale face slit smiling eyes purple lips, bloodless corpse-pale skin, black satin landlord cap, dark brown patterned satin landlord robe, Dark narrow village lane at night, only two red lanterns left, tall figures in black gowns whispering in shadow, drifting leaves, close-up, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套",
+        "60岁鬼老头，浮肿白脸笑眼成缝嘴唇发紫，面无血色呈惨白，头戴黑缎财主帽，深褐团花缎面老财主长袍"
+      ],
+      "refAssets": [
+        "C01",
+        "C06",
+        "S06"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E03-015",
+      "sceneNo": 8,
+      "size": "全景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套；18岁少年，圆脸短下巴小眼睛招风耳，鼻头一颗黑痣，肩挎旧网兜，褪色红背心配军绿短裤；18岁胖少年，肉圆脸双下巴眯缝眼，左脸一颗痘印，腰上别一把杀猪刀，撑紧的白背心配大花裤衩；18岁少年，窄长脸龅牙脖子细长，右颊一片胎记，脚踩人字拖，土黄格纹短袖衬衫配黑短裤；60岁鬼老头，浮肿白脸笑眼成缝嘴唇发紫，面无血色呈惨白，头戴黑缎财主帽，深褐团花缎面老财主长袍\n场景：莆田村暗巷与大红灯笼小路；残存两只红灯笼、黑大褂人影、落叶、树棍；极弱灯笼光，大面积黑。\n画面主体：被老头揽走的二狗、胖子和跟上前的强子，以及留在原地的水雷。动作起点：老头揽着人往街里走，几个人脚步跟着挪，水雷站着没动。\n构图与机位：人群向画面深处走，水雷定在前景偏左，越拉越远；景别：全景；运镜：固定机位，不跟人。\n光线：人越走越进灯笼的红光里，水雷这侧保持冷暗。情绪：被留下的孤立感。\n28mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, 18-year-old Chinese boy, round face short chin small eyes protruding ears, black mole on nose tip, old mesh bag over shoulder, faded red tank top army-green shorts, 18-year-old chubby Chinese boy, meaty round face double chin narrow eyes, acne mark on left cheek, pig-butcher knife at waist, tight white tank top and floral shorts, 18-year-old Chinese boy, narrow long face buck teeth thin neck, birthmark on right cheek, flip-flops, khaki plaid short-sleeve shirt black shorts, 60-year-old ghostly Chinese man, puffy pale face slit smiling eyes purple lips, bloodless corpse-pale skin, black satin landlord cap, dark brown patterned satin landlord robe, Dark narrow village lane at night, only two red lanterns left, tall figures in black gowns whispering in shadow, drifting leaves, wide shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套",
+        "18岁少年，圆脸短下巴小眼睛招风耳，鼻头一颗黑痣，肩挎旧网兜，褪色红背心配军绿短裤",
+        "18岁胖少年，肉圆脸双下巴眯缝眼，左脸一颗痘印，腰上别一把杀猪刀，撑紧的白背心配大花裤衩",
+        "18岁少年，窄长脸龅牙脖子细长，右颊一片胎记，脚踩人字拖，土黄格纹短袖衬衫配黑短裤",
+        "60岁鬼老头，浮肿白脸笑眼成缝嘴唇发紫，面无血色呈惨白，头戴黑缎财主帽，深褐团花缎面老财主长袍"
+      ],
+      "refAssets": [
+        "C01",
+        "C03",
+        "C04",
+        "C05",
+        "C06",
+        "S06"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E03-016",
+      "sceneNo": 9,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套\n场景：荒坟土坡；土坟、墓碑、枯树、落叶；冷月光，青灰死气。\n画面主体：独自站着的水雷和四周脸色惨白的宾客。动作起点：水雷缓缓环视，视线扫过的人脸上都没有血色。\n构图与机位：水雷在画面前景背影，惨白的脸从他两侧后景依次显出；景别：中景；运镜：缓慢摇过人群。\n光线：灯笼红光映在惨白的脸上，红白对比刺眼。情绪：越看越不对劲的发毛。\n24mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, Lonely earthen grave mound at night, weathered tombstone, dead tree, cold blue moonlight and mist, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套"
+      ],
+      "refAssets": [
+        "C01",
+        "S07"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E03-017",
+      "sceneNo": 9,
+      "size": "近景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套；18岁少年，圆脸短下巴小眼睛招风耳，鼻头一颗黑痣，肩挎旧网兜，褪色红背心配军绿短裤\n场景：荒坟土坡；土坟、墓碑、枯树、落叶；冷月光，青灰死气。\n画面主体：皱眉盯向前方的水雷。动作起点：他眉心收紧，喉头动了一下，脚尖已经朝那个方向偏。\n构图与机位：近景卡在胸口，身后灯笼虚成一片红；景别：近景；运镜：极轻推近。\n光线：正面偏暗，只留一点红边。情绪：警觉与不放心。\n24mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, 18-year-old Chinese boy, round face short chin small eyes protruding ears, black mole on nose tip, old mesh bag over shoulder, faded red tank top army-green shorts, Lonely earthen grave mound at night, weathered tombstone, dead tree, cold blue moonlight and mist, medium close-up, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套",
+        "18岁少年，圆脸短下巴小眼睛招风耳，鼻头一颗黑痣，肩挎旧网兜，褪色红背心配军绿短裤"
+      ],
+      "refAssets": [
+        "C01",
+        "C03",
+        "S07"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E03-018",
+      "sceneNo": 9,
+      "size": "全景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套；18岁少年，圆脸短下巴小眼睛招风耳，鼻头一颗黑痣，肩挎旧网兜，褪色红背心配军绿短裤；60岁鬼老头，浮肿白脸笑眼成缝嘴唇发紫，面无血色呈惨白，头戴黑缎财主帽，深褐团花缎面老财主长袍\n场景：荒坟土坡；土坟、墓碑、枯树、落叶；冷月光，青灰死气。\n画面主体：街尾暗处的胖老头和几个穿黑大褂的高瘦身影。动作起点：他们凑在一起，抬手指向水雷这边，边说边点。\n构图与机位：水雷在前景背影，暗处的一伙人压在对角线的街尾；景别：全景；运镜：长焦固定，压缩纵深。\n光线：他们站的地方灯照不到，只有轮廓和一点反光。情绪：被人盯上的不安。\n24mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, 18-year-old Chinese boy, round face short chin small eyes protruding ears, black mole on nose tip, old mesh bag over shoulder, faded red tank top army-green shorts, 60-year-old ghostly Chinese man, puffy pale face slit smiling eyes purple lips, bloodless corpse-pale skin, black satin landlord cap, dark brown patterned satin landlord robe, Lonely earthen grave mound at night, weathered tombstone, dead tree, cold blue moonlight and mist, wide shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套",
+        "18岁少年，圆脸短下巴小眼睛招风耳，鼻头一颗黑痣，肩挎旧网兜，褪色红背心配军绿短裤",
+        "60岁鬼老头，浮肿白脸笑眼成缝嘴唇发紫，面无血色呈惨白，头戴黑缎财主帽，深褐团花缎面老财主长袍"
+      ],
+      "refAssets": [
+        "C01",
+        "C03",
+        "C06",
+        "S07"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E03-019",
+      "sceneNo": 9,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套\n场景：荒坟土坡；土坟、墓碑、枯树、落叶；冷月光，青灰死气。\n画面主体：变暗的街道、回头的雷子和只剩两盏的红灯笼。动作起点：光线一层层沉下去，水雷猛回头，整排灯笼只剩两只还亮着。\n构图与机位：两盏灯笼分列画面左右上角，水雷的脸夹在中间；景别：中景；运镜：固定机位，随回头轻甩。\n光线：从满街暖红骤降到两点微光。情绪：忽然被抽空的窒息感。\n24mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, Lonely earthen grave mound at night, weathered tombstone, dead tree, cold blue moonlight and mist, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套"
+      ],
+      "refAssets": [
+        "C01",
+        "S07"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E03-020",
+      "sceneNo": 9,
+      "size": "近景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套\n场景：荒坟土坡；土坟、墓碑、枯树、落叶；冷月光，青灰死气。\n画面主体：盯着灯笼的水雷。动作起点：他喉头一滚，嘴唇抖着把话挤出来，脚下已经在找退路。\n构图与机位：近景偏侧，两盏灯笼的光点虚在画面右上方；景别：近景；运镜：手持轻微晃动。\n光线：只有两点昏黄落在脸上，其余全暗。情绪：压不住的惊恐。\n24mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, Lonely earthen grave mound at night, weathered tombstone, dead tree, cold blue moonlight and mist, medium close-up, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套"
+      ],
+      "refAssets": [
+        "C01",
+        "S07"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E03-021",
+      "sceneNo": 9,
+      "size": "全景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套\n场景：荒坟土坡；土坟、墓碑、枯树、落叶；冷月光，青灰死气。\n画面主体：奔跑的水雷和身后被风卷起的落叶。动作起点：他撒腿向来路狂奔，不敢回头，落叶被风卷着紧贴脚跟。\n构图与机位：侧后方跟拍，人占画面下三分之一，街道向后急速退去；景别：全景；运镜：手持跟拍，晃动加大。\n光线：灯笼光迅速被甩到身后，前方只剩夜色。情绪：慌不择路的逃命。\n24mm广角。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, Lonely earthen grave mound at night, weathered tombstone, dead tree, cold blue moonlight and mist, wide shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套"
+      ],
+      "refAssets": [
+        "C01",
+        "S07"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E03-022",
+      "sceneNo": 10,
+      "size": "全景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套\n场景：未注明地点；按剧本场次描述；未注明。\n画面主体：扑倒在地的水雷和荒路土面。动作起点：他脚下一绊，身体前扑，双掌撑地又滑出去半米。\n构图与机位：低机位贴近地面，人从画面右侧扑进左侧；景别：全景；运镜：固定低机位，人物自己冲进画面。\n光线：夜色冷蓝，远处一点残余红光。情绪：猝不及防的一摔。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, wide shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套"
+      ],
+      "refAssets": [
+        "C01"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E03-023",
+      "sceneNo": 10,
+      "size": "近景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套\n场景：未注明地点；按剧本场次描述；未注明。\n画面主体：撑在地上喘气的水雷。动作起点：他手掌按着土，肩膀起伏，眼神有一瞬间的发愣。\n构图与机位：近景俯拍，人物在下方，空荡的荒路在上方；景别：近景；运镜：固定俯拍，极慢推。\n光线：冷蓝为主，额头有一层薄汗的反光。情绪：想起老话后的发凉。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, medium close-up, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套"
+      ],
+      "refAssets": [
+        "C01"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E03-024",
+      "sceneNo": 10,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套\n场景：未注明地点；按剧本场次描述；未注明。\n画面主体：转头的水雷、地上的树棍和旁边的土坟。动作起点：他猛地回头，撞见脚边横着的树棍，视线顺着抬到坟包上。\n构图与机位：树棍压前景，土坟占画面右侧三分之二，人在左侧；景别：中景；运镜：随转头甩镜，最后定格在坟上。\n光线：冷月光压在坟头，坟前一片死黑。情绪：背后发麻的惊惧。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套"
+      ],
+      "refAssets": [
+        "C01"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E03-025",
+      "sceneNo": 10,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套\n场景：未注明地点；按剧本场次描述；未注明。\n画面主体：墓碑下蹲着的人影。动作起点：人影慢慢转过头，露出笑，抬起一只枯手朝水雷招了两下。\n构图与机位：墓碑在前景左侧做遮挡，人影缩在碑后的暗里；景别：中景；运镜：固定机位，不动。\n光线：坟前无光，只有月光扫到半张脸。情绪：诡异到不敢呼吸。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套"
+      ],
+      "refAssets": [
+        "C01"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E03-026",
+      "sceneNo": 10,
+      "size": "特写",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套；70岁老婆婆，干瘦长脸眼窝凹陷嘴角下垂，半边脸颊青灰，头上别银簪，深灰斜襟旧布衫\n场景：未注明地点；按剧本场次描述；未注明。\n画面主体：水雷骤然收缩的眼睛。动作起点：瞳孔一缩，眼皮撑大，整个人僵在原地。\n构图与机位：特写只留双眼与半张脸，背景全虚；景别：特写；运镜：急速推近后定住。\n光线：冷光直打，眼底一片惨白。情绪：认出亲人却更恐惧。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, 70-year-old Chinese woman, gaunt long face sunken eye sockets drooping mouth, one cheek gray-blue, silver hairpin in hair, dark gray side-fastening old cloth blouse, close-up, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套",
+        "70岁老婆婆，干瘦长脸眼窝凹陷嘴角下垂，半边脸颊青灰，头上别银簪，深灰斜襟旧布衫"
+      ],
+      "refAssets": [
+        "C01",
+        "C07"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E03-027",
+      "sceneNo": 10,
+      "size": "近景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套；70岁老婆婆，干瘦长脸眼窝凹陷嘴角下垂，半边脸颊青灰，头上别银簪，深灰斜襟旧布衫\n场景：未注明地点；按剧本场次描述；未注明。\n画面主体：僵在坟前的水雷。动作起点：他嘴唇动了动，眼神从墓碑移到那张笑脸上又躲开。\n构图与机位：近景带到一点墓碑边缘，人脸占画面主位；景别：近景；运镜：固定机位，极轻手持。\n光线：冷蓝月光打脸，半边陷在坟影里。情绪：认不认之间的崩塌。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, 70-year-old Chinese woman, gaunt long face sunken eye sockets drooping mouth, one cheek gray-blue, silver hairpin in hair, dark gray side-fastening old cloth blouse, medium close-up, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套",
+        "70岁老婆婆，干瘦长脸眼窝凹陷嘴角下垂，半边脸颊青灰，头上别银簪，深灰斜襟旧布衫"
+      ],
+      "refAssets": [
+        "C01",
+        "C07"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E03-028",
+      "sceneNo": 10,
+      "size": "全景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套\n场景：未注明地点；按剧本场次描述；未注明。\n画面主体：爬起身奔逃的水雷和身后的土坟。动作起点：他手一撑地弹起，撒腿向来路冲，土屑从裤腿掉下来。\n构图与机位：人从坟前离开，土坟留在画面右侧后景迅速变小；景别：全景；运镜：手持跟拍起身。\n光线：月光照着荒路，坟头越来越暗。情绪：只想离得越远越好。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, wide shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套"
+      ],
+      "refAssets": [
+        "C01"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E03-029",
+      "sceneNo": 10,
+      "size": "中景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套；70岁老婆婆，干瘦长脸眼窝凹陷嘴角下垂，半边脸颊青灰，头上别银簪，深灰斜襟旧布衫\n场景：未注明地点；按剧本场次描述；未注明。\n画面主体：奔跑的水雷和追在身后的呼唤。动作起点：他边跑边缩脖子，脚步乱了一下又加快，始终不敢回头。\n构图与机位：侧后方跟拍，人偏画面左，右侧留出空荡荒路；景别：中景；运镜：手持跟拍，晃动明显。\n光线：冷蓝夜色，路面只有一线微光。情绪：被熟悉的声音追着走的恐惧。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, 70-year-old Chinese woman, gaunt long face sunken eye sockets drooping mouth, one cheek gray-blue, silver hairpin in hair, dark gray side-fastening old cloth blouse, medium shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套",
+        "70岁老婆婆，干瘦长脸眼窝凹陷嘴角下垂，半边脸颊青灰，头上别银簪，深灰斜襟旧布衫"
+      ],
+      "refAssets": [
+        "C01",
+        "C07"
+      ],
+      "firstFrameUrl": ""
+    },
+    {
+      "code": "E03-030",
+      "sceneNo": 10,
+      "size": "远景",
+      "aspect": "9:16",
+      "prompt": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感。单帧电影剧照，9:16，本镜第 0 帧（起始帧）：不要三视图、不要设定表、不要拼贴图、不要画面文字。\n出场角色（固定特征原样保持，不得重写）：18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套；70岁老婆婆，干瘦长脸眼窝凹陷嘴角下垂，半边脸颊青灰，头上别银簪，深灰斜襟旧布衫\n场景：未注明地点；按剧本场次描述；未注明。\n画面主体：荒路尽头水雷的背影和路边那座土坟。动作起点：背影沿荒路越跑越远，呼唤声一层层贴上来，坟包纹丝不动。\n构图与机位：荒路作纵深引导线，土坟压在画面右前景，人影缩在路尽头；景别：远景；运镜：固定远景，不追不摇。\n光线：冷月照出灰白的路，坟影最黑。情绪：跑不掉的压迫感。\n35mm。写实电影质感，35mm 胶片颗粒，高动态范围，深邃阴影，8k超高清。\n负面词：卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, 70-year-old Chinese woman, gaunt long face sunken eye sockets drooping mouth, one cheek gray-blue, silver hairpin in hair, dark gray side-fastening old cloth blouse, extreme wide shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+      "keywords": [
+        "18岁少年，瘦长脸眉浓眼细鼻梁挺直，左眉尾一道浅疤，脖子上挂红绳玉佩，洗旧白T恤外罩灰蓝校服外套",
+        "70岁老婆婆，干瘦长脸眼窝凹陷嘴角下垂，半边脸颊青灰，头上别银簪，深灰斜襟旧布衫"
+      ],
+      "refAssets": [
+        "C01",
+        "C07"
+      ],
+      "firstFrameUrl": ""
+    }
+  ],
+  "aspect": "9:16",
+  "style": "中式民俗恐怖写实，阴冷低饱和，乡野旧年代质感",
+  "negative": "卡通,动漫,塑料感,过曝,现代都市高楼,英文字母,水印,畸形手指,多余肢体,面部变形",
+  "stats": {
+    "total": 77,
+    "withCharacters": 66,
+    "withScene": 68,
+    "avgPromptLength": 418
+  }
+}

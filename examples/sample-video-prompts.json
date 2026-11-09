@@ -1,0 +1,1333 @@
+{
+  "schema": "shortplay-v4",
+  "target": "comfyui-h3-demo POST /v1/videos",
+  "contract": {
+    "endpoint": "/v1/videos",
+    "modes": [
+      "t2v",
+      "i2v",
+      "fl2v"
+    ],
+    "durations": [
+      "5s",
+      "8s",
+      "10s"
+    ],
+    "promptMaxLength": 4000,
+    "multiRefSupported": false,
+    "note": "i2v 只吃一张首帧图；多槽位参考图需 r2v 类模型，本接口不支持"
+  },
+  "aspect": "16:9",
+  "frame": {
+    "quality": "standard",
+    "aspect": "16:9",
+    "width": 1024,
+    "height": 576
+  },
+  "preflight": {
+    "shots": 23,
+    "t2v": 23,
+    "i2v": 0,
+    "multiRef": 0,
+    "durationSnapped": 13,
+    "promptTooLong": 0,
+    "scriptSeconds": 100,
+    "outputSeconds": 118,
+    "warnings": [
+      "13 个镜头的时长吸附到 5/8/10 秒档位：成片 100 秒 → 118 秒"
+    ],
+    "cutChecks": [
+      {
+        "code": "line-overflow",
+        "level": "error",
+        "shot": "020",
+        "title": "台词装不进镜头",
+        "detail": "第 020 镜台词约需 5 秒（18 字），但镜头只有 4 秒，会被切掉尾音。"
+      }
+    ]
+  },
+  "segments": [
+    {
+      "seg": "001",
+      "sceneNo": 1,
+      "scene": "第1场 · 便利店门口 · 夜",
+      "shots": [
+        "001"
+      ],
+      "seconds": 5,
+      "startSeconds": 0,
+      "mode": "t2v",
+      "firstFrameUrl": "",
+      "frame": {
+        "quality": "standard",
+        "aspect": "16:9",
+        "width": 1024,
+        "height": 576
+      },
+      "duration": "10s",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 外景，便利店门口，夜。雨下得很急，霓虹招牌在水洼里碎成一片。全景。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "seg": "002",
+      "sceneNo": 1,
+      "scene": "第1场 · 便利店门口 · 夜",
+      "shots": [
+        "002",
+        "003"
+      ],
+      "seconds": 10,
+      "startSeconds": 0,
+      "mode": "t2v",
+      "firstFrameUrl": "",
+      "frame": {
+        "quality": "standard",
+        "aspect": "16:9",
+        "width": 1024,
+        "height": 576
+      },
+      "duration": "10s",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 27岁，便利店店员把伞架搬到门边，抬头看了眼街对面。全景。\n[Shot 2] At 00:00:06.000, the camera cuts to 一辆黑色轿车停在路边，没有熄火。全景。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "seg": "003",
+      "sceneNo": 1,
+      "scene": "第1场 · 便利店门口 · 夜",
+      "shots": [
+        "004",
+        "005"
+      ],
+      "seconds": 9,
+      "startSeconds": 0,
+      "mode": "t2v",
+      "firstFrameUrl": "",
+      "frame": {
+        "quality": "standard",
+        "aspect": "16:9",
+        "width": 1024,
+        "height": 576
+      },
+      "duration": "10s",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 她低头看了眼手机，屏幕上是三条未读消息。特写。\n[Shot 2] At 00:00:05.000, the camera cuts to 27岁，便利店店员，神情克制，开口说出台词。便利店门口的环境保留在画面里。中景。27岁，便利店店员说，台词：<d>[Chinese] 林晚：又是一整夜的雨。</d>。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "seg": "004",
+      "sceneNo": 1,
+      "scene": "第1场 · 便利店门口 · 夜",
+      "shots": [
+        "006"
+      ],
+      "seconds": 4,
+      "startSeconds": 0,
+      "mode": "t2v",
+      "firstFrameUrl": "",
+      "frame": {
+        "quality": "standard",
+        "aspect": "16:9",
+        "width": 1024,
+        "height": 576
+      },
+      "duration": "10s",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 镜头缓缓拉远，便利店门口的光线与夜的氛围收进画面，留出转场余韵。远景。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "seg": "005",
+      "sceneNo": 2,
+      "scene": "第2场 · 便利店收银台 · 连续",
+      "shots": [
+        "007",
+        "008"
+      ],
+      "seconds": 10,
+      "startSeconds": 0,
+      "mode": "t2v",
+      "firstFrameUrl": "",
+      "frame": {
+        "quality": "standard",
+        "aspect": "16:9",
+        "width": 1024,
+        "height": 576
+      },
+      "duration": "10s",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 内景，便利店收银台，连续。自动门叮咚响。全景。\n[Shot 2] At 00:00:05.000, the camera cuts to 30岁，外套湿透走进来，把一罐热咖啡放在柜台上。全景。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "seg": "006",
+      "sceneNo": 2,
+      "scene": "第2场 · 便利店收银台 · 连续",
+      "shots": [
+        "009",
+        "010",
+        "011"
+      ],
+      "seconds": 10,
+      "startSeconds": 0,
+      "mode": "t2v",
+      "firstFrameUrl": "",
+      "frame": {
+        "quality": "standard",
+        "aspect": "16:9",
+        "width": 1024,
+        "height": 576
+      },
+      "duration": "10s",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 30岁，外套湿透的手在发抖，他没有抬头。特写。\n[Shot 2] At 00:00:04.000, the camera cuts to 30岁，外套湿透，带着疑问看向对方，开口说出台词。背景虚化，只留人物面部与眼神。特写。30岁，外套湿透说，台词：<d>[Chinese] 陈默：还有热的吗？</d>。\n[Shot 3] At 00:00:07.000, the camera cuts to 27岁，便利店店员，神情克制，开口说出台词。便利店收银台的环境保留在画面里。中景。27岁，便利店店员说，台词：<d>[Chinese] 林晚：只剩这一罐了。</d>。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "seg": "007",
+      "sceneNo": 2,
+      "scene": "第2场 · 便利店收银台 · 连续",
+      "shots": [
+        "012",
+        "013"
+      ],
+      "seconds": 8,
+      "startSeconds": 0,
+      "mode": "t2v",
+      "firstFrameUrl": "",
+      "frame": {
+        "quality": "standard",
+        "aspect": "16:9",
+        "width": 1024,
+        "height": 576
+      },
+      "duration": "10s",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 27岁，便利店店员，把咖啡推回去，神情克制，开口说出台词。背景轻微虚化。近景。27岁，便利店店员说，台词：<d>[Chinese] 林晚（把咖啡推回去）：你不是第一次来这儿。</d>。\n[Shot 2] At 00:00:04.000, the camera cuts to 30岁，外套湿透，神情克制，开口说出台词。背景虚化，只留人物面部与眼神。特写。30岁，外套湿透说，台词：<d>[Chinese] 陈默：……我以前住这附近。</d>。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "seg": "008",
+      "sceneNo": 2,
+      "scene": "第2场 · 便利店收银台 · 连续",
+      "shots": [
+        "014"
+      ],
+      "seconds": 4,
+      "startSeconds": 0,
+      "mode": "t2v",
+      "firstFrameUrl": "",
+      "frame": {
+        "quality": "standard",
+        "aspect": "16:9",
+        "width": 1024,
+        "height": 576
+      },
+      "duration": "10s",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 镜头缓缓拉远，便利店收银台的光线与连续的氛围收进画面，留出转场余韵。远景。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "seg": "009",
+      "sceneNo": 3,
+      "scene": "第3场 · 便利店靠窗座位 · 稍后",
+      "shots": [
+        "015",
+        "016"
+      ],
+      "seconds": 10,
+      "startSeconds": 0,
+      "mode": "t2v",
+      "firstFrameUrl": "",
+      "frame": {
+        "quality": "standard",
+        "aspect": "16:9",
+        "width": 1024,
+        "height": 576
+      },
+      "duration": "10s",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 内景，便利店靠窗座位，稍后。两人隔着一张小桌坐下，雨声被玻璃挡在外面。全景。\n[Shot 2] At 00:00:05.000, the camera cuts to 30岁，外套湿透从口袋里拿出一张旧照片，推到桌子中间。特写。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "seg": "010",
+      "sceneNo": 3,
+      "scene": "第3场 · 便利店靠窗座位 · 稍后",
+      "shots": [
+        "017",
+        "018"
+      ],
+      "seconds": 10,
+      "startSeconds": 0,
+      "mode": "t2v",
+      "firstFrameUrl": "",
+      "frame": {
+        "quality": "standard",
+        "aspect": "16:9",
+        "width": 1024,
+        "height": 576
+      },
+      "duration": "10s",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 27岁，便利店店员没有说话，把那罐热咖啡轻轻推到照片旁边。特写。\n[Shot 2] At 00:00:05.000, the camera cuts to 镜头缓缓拉远，便利店的暖光在雨夜里像一小块岛。远景。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "seg": "011",
+      "sceneNo": 3,
+      "scene": "第3场 · 便利店靠窗座位 · 稍后",
+      "shots": [
+        "019",
+        "020"
+      ],
+      "seconds": 7,
+      "startSeconds": 0,
+      "mode": "t2v",
+      "firstFrameUrl": "",
+      "frame": {
+        "quality": "standard",
+        "aspect": "16:9",
+        "width": 1024,
+        "height": 576
+      },
+      "duration": "10s",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 27岁，便利店店员，带着疑问看向对方，开口说出台词。背景虚化，只留人物面部与眼神。特写。27岁，便利店店员说，台词：<d>[Chinese] 林晚：你一直在等谁？</d>。\n[Shot 2] At 00:00:03.000, the camera cuts to 30岁，外套湿透，神情克制，开口说出台词。背景轻微虚化。近景。30岁，外套湿透说，台词：<d>[Chinese] 陈默：等我女儿。她以前每天这个点来买酸奶。</d>。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "seg": "012",
+      "sceneNo": 4,
+      "scene": "第4场 · 便利店门口 · 次日清晨",
+      "shots": [
+        "021",
+        "022"
+      ],
+      "seconds": 10,
+      "startSeconds": 0,
+      "mode": "t2v",
+      "firstFrameUrl": "",
+      "frame": {
+        "quality": "standard",
+        "aspect": "16:9",
+        "width": 1024,
+        "height": 576
+      },
+      "duration": "10s",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 外景，便利店门口，次日清晨。雨停了。27岁，便利店店员把伞架收回店里，街对面的车位空着。全景。\n[Shot 2] At 00:00:05.000, the camera cuts to 柜台上留着那张旧照片，背面写着一行字：谢谢你还记得。特写。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "seg": "013",
+      "sceneNo": 4,
+      "scene": "第4场 · 便利店门口 · 次日清晨",
+      "shots": [
+        "023"
+      ],
+      "seconds": 3,
+      "startSeconds": 0,
+      "mode": "t2v",
+      "firstFrameUrl": "",
+      "frame": {
+        "quality": "standard",
+        "aspect": "16:9",
+        "width": 1024,
+        "height": 576
+      },
+      "duration": "10s",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 27岁，便利店店员，轻声，神情克制，开口说出台词。背景虚化，只留人物面部与眼神。特写。27岁，便利店店员说，台词：<d>[Chinese] 林晚（轻声）：明天见。</d>。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    }
+  ],
+  "assets": {
+    "characters": [
+      {
+        "id": "c:林晚",
+        "name": "林晚",
+        "age": "27岁",
+        "wardrobe": "",
+        "appearance": "",
+        "ref": ""
+      },
+      {
+        "id": "c:陈默",
+        "name": "陈默",
+        "age": "30岁",
+        "wardrobe": "外套湿透",
+        "appearance": "",
+        "ref": ""
+      }
+    ],
+    "scenes": [
+      {
+        "id": "sc:外景-便利店门口-夜",
+        "name": "便利店门口",
+        "intExt": "外景",
+        "time": "夜",
+        "appearance": "",
+        "ref": ""
+      },
+      {
+        "id": "sc:内景-便利店收银台-连续",
+        "name": "便利店收银台",
+        "intExt": "内景",
+        "time": "连续",
+        "appearance": "",
+        "ref": ""
+      },
+      {
+        "id": "sc:内景-便利店靠窗座位-稍后",
+        "name": "便利店靠窗座位",
+        "intExt": "内景",
+        "time": "稍后",
+        "appearance": "",
+        "ref": ""
+      },
+      {
+        "id": "sc:外景-便利店门口-次日清晨",
+        "name": "便利店门口",
+        "intExt": "外景",
+        "time": "次日清晨",
+        "appearance": "",
+        "ref": ""
+      }
+    ],
+    "props": []
+  },
+  "episodes": [],
+  "items": [
+    {
+      "shot": "001",
+      "mode": "t2v",
+      "duration": "5s",
+      "durationSnapped": false,
+      "quality": "standard",
+      "width": 1024,
+      "height": 576,
+      "prompt": "外景，便利店门口，夜。雨下得很急，霓虹招牌在水洼里碎成一片。全景。场景：便利店门口，外景，夜。短剧质感，16:9 画幅。",
+      "promptLength": 60,
+      "promptTooLong": false,
+      "refs": [
+        {
+          "slot": "character1",
+          "kind": "scene",
+          "name": "便利店门口",
+          "image": "",
+          "role": ""
+        }
+      ],
+      "multiRef": false,
+      "firstFrameUrl": "",
+      "episode": "",
+      "scene": "第1场 · 便利店门口 · 夜",
+      "size": "全景",
+      "scriptDuration": 5,
+      "taggedPrompt": "外景，便利店门口[character1:便利店门口]，夜。雨下得很急，霓虹招牌在水洼里碎成一片。",
+      "cast": [],
+      "dialogue": "",
+      "speaker": "",
+      "locked": false,
+      "notes": "建立镜头 · 固定机位 · 环境音：雨声 · 交代空间关系",
+      "assetStale": false,
+      "h3Shot": "外景，便利店门口，夜。雨下得很急，霓虹招牌在水洼里碎成一片。全景。",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 外景，便利店门口，夜。雨下得很急，霓虹招牌在水洼里碎成一片。全景。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "shot": "002",
+      "mode": "t2v",
+      "duration": "8s",
+      "durationSnapped": true,
+      "quality": "standard",
+      "width": 1024,
+      "height": 576,
+      "prompt": "林晚（27岁，便利店店员）把伞架搬到门边，抬头看了眼街对面。全景。角色：林晚，27岁，便利店店员。场景：便利店门口，外景，夜。短剧质感，16:9 画幅。",
+      "promptLength": 76,
+      "promptTooLong": false,
+      "refs": [
+        {
+          "slot": "character1",
+          "kind": "character",
+          "name": "林晚",
+          "image": "",
+          "role": ""
+        },
+        {
+          "slot": "character2",
+          "kind": "scene",
+          "name": "便利店门口",
+          "image": "",
+          "role": ""
+        }
+      ],
+      "multiRef": false,
+      "firstFrameUrl": "",
+      "episode": "",
+      "scene": "第1场 · 便利店门口 · 夜",
+      "size": "全景",
+      "scriptDuration": 6,
+      "taggedPrompt": "林晚[character1:林晚]（27岁，便利店店员）把伞架搬到门边，抬头看了眼街对面。",
+      "cast": [
+        "林晚"
+      ],
+      "dialogue": "",
+      "speaker": "",
+      "locked": false,
+      "notes": "缓慢拉远 · 环境音：雨声 · 动作一次完整拍完",
+      "assetStale": false,
+      "h3Shot": "27岁，便利店店员把伞架搬到门边，抬头看了眼街对面。全景。",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 27岁，便利店店员把伞架搬到门边，抬头看了眼街对面。全景。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "shot": "003",
+      "mode": "t2v",
+      "duration": "5s",
+      "durationSnapped": true,
+      "quality": "standard",
+      "width": 1024,
+      "height": 576,
+      "prompt": "一辆黑色轿车停在路边，没有熄火。全景。场景：便利店门口，外景，夜。短剧质感，16:9 画幅。",
+      "promptLength": 46,
+      "promptTooLong": false,
+      "refs": [
+        {
+          "slot": "character1",
+          "kind": "scene",
+          "name": "便利店门口",
+          "image": "",
+          "role": ""
+        }
+      ],
+      "multiRef": false,
+      "firstFrameUrl": "",
+      "episode": "",
+      "scene": "第1场 · 便利店门口 · 夜",
+      "size": "全景",
+      "scriptDuration": 4,
+      "taggedPrompt": "一辆黑色轿车停在路边，没有熄火。",
+      "cast": [],
+      "dialogue": "",
+      "speaker": "",
+      "locked": false,
+      "notes": "过肩镜头 · 环境音：雨声 · 动作一次完整拍完",
+      "assetStale": false,
+      "h3Shot": "一辆黑色轿车停在路边，没有熄火。全景。",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 一辆黑色轿车停在路边，没有熄火。全景。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "shot": "004",
+      "mode": "t2v",
+      "duration": "5s",
+      "durationSnapped": false,
+      "quality": "standard",
+      "width": 1024,
+      "height": 576,
+      "prompt": "她低头看了眼手机，屏幕上是三条未读消息。特写。场景：便利店门口，外景，夜。短剧质感，16:9 画幅。",
+      "promptLength": 50,
+      "promptTooLong": false,
+      "refs": [
+        {
+          "slot": "character1",
+          "kind": "scene",
+          "name": "便利店门口",
+          "image": "",
+          "role": ""
+        }
+      ],
+      "multiRef": false,
+      "firstFrameUrl": "",
+      "episode": "",
+      "scene": "第1场 · 便利店门口 · 夜",
+      "size": "特写",
+      "scriptDuration": 5,
+      "taggedPrompt": "她低头看了眼手机，屏幕上是三条未读消息。",
+      "cast": [],
+      "dialogue": "",
+      "speaker": "",
+      "locked": false,
+      "notes": "缓慢拉远 · 环境音：雨声 · 动作一次完整拍完",
+      "assetStale": false,
+      "h3Shot": "她低头看了眼手机，屏幕上是三条未读消息。特写。",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 她低头看了眼手机，屏幕上是三条未读消息。特写。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "shot": "005",
+      "mode": "t2v",
+      "duration": "5s",
+      "durationSnapped": true,
+      "quality": "standard",
+      "width": 1024,
+      "height": 576,
+      "prompt": "林晚，神情克制，开口说出台词。便利店门口的环境保留在画面里。中景。角色：林晚，27岁，便利店店员。场景：便利店门口，外景，夜。林晚张嘴说话，台词：「又是一整夜的雨。」。短剧质感，16:9 画幅。",
+      "promptLength": 97,
+      "promptTooLong": false,
+      "refs": [
+        {
+          "slot": "character1",
+          "kind": "character",
+          "name": "林晚",
+          "image": "",
+          "role": ""
+        },
+        {
+          "slot": "character2",
+          "kind": "scene",
+          "name": "便利店门口",
+          "image": "",
+          "role": ""
+        }
+      ],
+      "multiRef": false,
+      "firstFrameUrl": "",
+      "episode": "",
+      "scene": "第1场 · 便利店门口 · 夜",
+      "size": "中景",
+      "scriptDuration": 4,
+      "taggedPrompt": "林晚[character1:林晚]，神情克制，开口说出台词。便利店门口[character2:便利店门口]的环境保留在画面里。",
+      "cast": [
+        "林晚"
+      ],
+      "dialogue": "林晚：又是一整夜的雨。",
+      "speaker": "林晚",
+      "locked": false,
+      "notes": "中景正反打 · 缓慢推进 · 同期声，台词清晰",
+      "assetStale": false,
+      "h3Shot": "27岁，便利店店员，神情克制，开口说出台词。便利店门口的环境保留在画面里。中景。27岁，便利店店员说，台词：<d>[Chinese] 林晚：又是一整夜的雨。</d>。",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 27岁，便利店店员，神情克制，开口说出台词。便利店门口的环境保留在画面里。中景。27岁，便利店店员说，台词：<d>[Chinese] 林晚：又是一整夜的雨。</d>。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "shot": "006",
+      "mode": "t2v",
+      "duration": "5s",
+      "durationSnapped": true,
+      "quality": "standard",
+      "width": 1024,
+      "height": 576,
+      "prompt": "镜头缓缓拉远，便利店门口的光线与夜的氛围收进画面，留出转场余韵。远景。场景：便利店门口，外景，夜。短剧质感，16:9 画幅。",
+      "promptLength": 62,
+      "promptTooLong": false,
+      "refs": [
+        {
+          "slot": "character1",
+          "kind": "scene",
+          "name": "便利店门口",
+          "image": "",
+          "role": ""
+        }
+      ],
+      "multiRef": false,
+      "firstFrameUrl": "",
+      "episode": "",
+      "scene": "第1场 · 便利店门口 · 夜",
+      "size": "远景",
+      "scriptDuration": 4,
+      "taggedPrompt": "镜头缓缓拉远，便利店门口[character1:便利店门口]的光线与夜的氛围收进画面，留出转场余韵。",
+      "cast": [],
+      "dialogue": "",
+      "speaker": "",
+      "locked": false,
+      "notes": "收束镜头 · 横移跟拍 · 淡出转场",
+      "assetStale": false,
+      "h3Shot": "镜头缓缓拉远，便利店门口的光线与夜的氛围收进画面，留出转场余韵。远景。",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 镜头缓缓拉远，便利店门口的光线与夜的氛围收进画面，留出转场余韵。远景。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "shot": "007",
+      "mode": "t2v",
+      "duration": "5s",
+      "durationSnapped": false,
+      "quality": "standard",
+      "width": 1024,
+      "height": 576,
+      "prompt": "内景，便利店收银台，连续。自动门叮咚响。全景。场景：便利店收银台，内景，连续。短剧质感，16:9 画幅。",
+      "promptLength": 52,
+      "promptTooLong": false,
+      "refs": [
+        {
+          "slot": "character1",
+          "kind": "scene",
+          "name": "便利店收银台",
+          "image": "",
+          "role": ""
+        }
+      ],
+      "multiRef": false,
+      "firstFrameUrl": "",
+      "episode": "",
+      "scene": "第2场 · 便利店收银台 · 连续",
+      "size": "全景",
+      "scriptDuration": 5,
+      "taggedPrompt": "内景，便利店收银台[character1:便利店收银台]，连续。自动门叮咚响。",
+      "cast": [],
+      "dialogue": "",
+      "speaker": "",
+      "locked": false,
+      "notes": "建立镜头 · 过肩镜头 · 交代空间关系",
+      "assetStale": false,
+      "h3Shot": "内景，便利店收银台，连续。自动门叮咚响。全景。",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 内景，便利店收银台，连续。自动门叮咚响。全景。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "shot": "008",
+      "mode": "t2v",
+      "duration": "5s",
+      "durationSnapped": false,
+      "quality": "standard",
+      "width": 1024,
+      "height": 576,
+      "prompt": "陈默（30岁，外套湿透）走进来，把一罐热咖啡放在柜台上。全景。角色：陈默，30岁，穿外套湿透。场景：便利店收银台，内景，连续。短剧质感，16:9 画幅。",
+      "promptLength": 76,
+      "promptTooLong": false,
+      "refs": [
+        {
+          "slot": "character1",
+          "kind": "character",
+          "name": "陈默",
+          "image": "",
+          "role": ""
+        },
+        {
+          "slot": "character2",
+          "kind": "scene",
+          "name": "便利店收银台",
+          "image": "",
+          "role": ""
+        }
+      ],
+      "multiRef": false,
+      "firstFrameUrl": "",
+      "episode": "",
+      "scene": "第2场 · 便利店收银台 · 连续",
+      "size": "全景",
+      "scriptDuration": 5,
+      "taggedPrompt": "陈默[character1:陈默]（30岁，外套湿透）走进来，把一罐热咖啡放在柜台上。",
+      "cast": [
+        "陈默"
+      ],
+      "dialogue": "",
+      "speaker": "",
+      "locked": false,
+      "notes": "横移跟拍 · 动作一次完整拍完",
+      "assetStale": false,
+      "h3Shot": "30岁，外套湿透走进来，把一罐热咖啡放在柜台上。全景。",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 30岁，外套湿透走进来，把一罐热咖啡放在柜台上。全景。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "shot": "009",
+      "mode": "t2v",
+      "duration": "5s",
+      "durationSnapped": true,
+      "quality": "standard",
+      "width": 1024,
+      "height": 576,
+      "prompt": "陈默的手在发抖，他没有抬头。特写。角色：陈默，30岁，穿外套湿透。场景：便利店收银台，内景，连续。短剧质感，16:9 画幅。",
+      "promptLength": 62,
+      "promptTooLong": false,
+      "refs": [
+        {
+          "slot": "character1",
+          "kind": "character",
+          "name": "陈默",
+          "image": "",
+          "role": ""
+        },
+        {
+          "slot": "character2",
+          "kind": "scene",
+          "name": "便利店收银台",
+          "image": "",
+          "role": ""
+        }
+      ],
+      "multiRef": false,
+      "firstFrameUrl": "",
+      "episode": "",
+      "scene": "第2场 · 便利店收银台 · 连续",
+      "size": "特写",
+      "scriptDuration": 4,
+      "taggedPrompt": "陈默[character1:陈默]的手在发抖，他没有抬头。",
+      "cast": [
+        "陈默"
+      ],
+      "dialogue": "",
+      "speaker": "",
+      "locked": false,
+      "notes": "缓慢拉远 · 动作一次完整拍完",
+      "assetStale": false,
+      "h3Shot": "30岁，外套湿透的手在发抖，他没有抬头。特写。",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 30岁，外套湿透的手在发抖，他没有抬头。特写。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "shot": "010",
+      "mode": "t2v",
+      "duration": "5s",
+      "durationSnapped": true,
+      "quality": "standard",
+      "width": 1024,
+      "height": 576,
+      "prompt": "陈默，带着疑问看向对方，开口说出台词。背景虚化，只留人物面部与眼神。特写。角色：陈默，30岁，穿外套湿透。场景：便利店收银台，内景，连续。陈默张嘴说话，台词：「还有热的吗？」。短剧质感，16:9 画幅。",
+      "promptLength": 101,
+      "promptTooLong": false,
+      "refs": [
+        {
+          "slot": "character1",
+          "kind": "character",
+          "name": "陈默",
+          "image": "",
+          "role": ""
+        },
+        {
+          "slot": "character2",
+          "kind": "scene",
+          "name": "便利店收银台",
+          "image": "",
+          "role": ""
+        }
+      ],
+      "multiRef": false,
+      "firstFrameUrl": "",
+      "episode": "",
+      "scene": "第2场 · 便利店收银台 · 连续",
+      "size": "特写",
+      "scriptDuration": 3,
+      "taggedPrompt": "陈默[character1:陈默]，带着疑问看向对方，开口说出台词。背景虚化，只留人物面部与眼神。",
+      "cast": [
+        "陈默"
+      ],
+      "dialogue": "陈默：还有热的吗？",
+      "speaker": "陈默",
+      "locked": false,
+      "notes": "特写正反打 · 横移跟拍 · 同期声，台词清晰",
+      "assetStale": false,
+      "h3Shot": "30岁，外套湿透，带着疑问看向对方，开口说出台词。背景虚化，只留人物面部与眼神。特写。30岁，外套湿透说，台词：<d>[Chinese] 陈默：还有热的吗？</d>。",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 30岁，外套湿透，带着疑问看向对方，开口说出台词。背景虚化，只留人物面部与眼神。特写。30岁，外套湿透说，台词：<d>[Chinese] 陈默：还有热的吗？</d>。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "shot": "011",
+      "mode": "t2v",
+      "duration": "5s",
+      "durationSnapped": true,
+      "quality": "standard",
+      "width": 1024,
+      "height": 576,
+      "prompt": "林晚，神情克制，开口说出台词。便利店收银台的环境保留在画面里。中景。角色：林晚，27岁，便利店店员。场景：便利店收银台，内景，连续。林晚张嘴说话，台词：「只剩这一罐了。」。短剧质感，16:9 画幅。",
+      "promptLength": 99,
+      "promptTooLong": false,
+      "refs": [
+        {
+          "slot": "character1",
+          "kind": "character",
+          "name": "林晚",
+          "image": "",
+          "role": ""
+        },
+        {
+          "slot": "character2",
+          "kind": "scene",
+          "name": "便利店收银台",
+          "image": "",
+          "role": ""
+        }
+      ],
+      "multiRef": false,
+      "firstFrameUrl": "",
+      "episode": "",
+      "scene": "第2场 · 便利店收银台 · 连续",
+      "size": "中景",
+      "scriptDuration": 3,
+      "taggedPrompt": "林晚[character1:林晚]，神情克制，开口说出台词。便利店收银台[character2:便利店收银台]的环境保留在画面里。",
+      "cast": [
+        "林晚"
+      ],
+      "dialogue": "林晚：只剩这一罐了。",
+      "speaker": "林晚",
+      "locked": false,
+      "notes": "中景正反打 · 轻微手持 · 同期声，台词清晰",
+      "assetStale": false,
+      "h3Shot": "27岁，便利店店员，神情克制，开口说出台词。便利店收银台的环境保留在画面里。中景。27岁，便利店店员说，台词：<d>[Chinese] 林晚：只剩这一罐了。</d>。",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 27岁，便利店店员，神情克制，开口说出台词。便利店收银台的环境保留在画面里。中景。27岁，便利店店员说，台词：<d>[Chinese] 林晚：只剩这一罐了。</d>。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "shot": "012",
+      "mode": "t2v",
+      "duration": "5s",
+      "durationSnapped": true,
+      "quality": "standard",
+      "width": 1024,
+      "height": 576,
+      "prompt": "林晚，把咖啡推回去，神情克制，开口说出台词。背景轻微虚化。近景。角色：林晚，27岁，便利店店员。场景：便利店收银台，内景，连续。林晚（把咖啡推回去）张嘴说话，台词：「你不是第一次来这儿。」。短剧质感，16:9 画幅。",
+      "promptLength": 108,
+      "promptTooLong": false,
+      "refs": [
+        {
+          "slot": "character1",
+          "kind": "character",
+          "name": "林晚",
+          "image": "",
+          "role": ""
+        },
+        {
+          "slot": "character2",
+          "kind": "scene",
+          "name": "便利店收银台",
+          "image": "",
+          "role": ""
+        }
+      ],
+      "multiRef": false,
+      "firstFrameUrl": "",
+      "episode": "",
+      "scene": "第2场 · 便利店收银台 · 连续",
+      "size": "近景",
+      "scriptDuration": 4,
+      "taggedPrompt": "林晚[character1:林晚]，把咖啡推回去，神情克制，开口说出台词。背景轻微虚化。",
+      "cast": [
+        "林晚"
+      ],
+      "dialogue": "林晚（把咖啡推回去）：你不是第一次来这儿。",
+      "speaker": "林晚",
+      "locked": false,
+      "notes": "近景正反打 · 缓慢推进 · 同期声，台词清晰",
+      "assetStale": false,
+      "h3Shot": "27岁，便利店店员，把咖啡推回去，神情克制，开口说出台词。背景轻微虚化。近景。27岁，便利店店员说，台词：<d>[Chinese] 林晚（把咖啡推回去）：你不是第一次来这儿。</d>。",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 27岁，便利店店员，把咖啡推回去，神情克制，开口说出台词。背景轻微虚化。近景。27岁，便利店店员说，台词：<d>[Chinese] 林晚（把咖啡推回去）：你不是第一次来这儿。</d>。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "shot": "013",
+      "mode": "t2v",
+      "duration": "5s",
+      "durationSnapped": true,
+      "quality": "standard",
+      "width": 1024,
+      "height": 576,
+      "prompt": "陈默，神情克制，开口说出台词。背景虚化，只留人物面部与眼神。特写。角色：陈默，30岁，穿外套湿透。场景：便利店收银台，内景，连续。陈默张嘴说话，台词：「……我以前住这附近。」。短剧质感，16:9 画幅。",
+      "promptLength": 101,
+      "promptTooLong": false,
+      "refs": [
+        {
+          "slot": "character1",
+          "kind": "character",
+          "name": "陈默",
+          "image": "",
+          "role": ""
+        },
+        {
+          "slot": "character2",
+          "kind": "scene",
+          "name": "便利店收银台",
+          "image": "",
+          "role": ""
+        }
+      ],
+      "multiRef": false,
+      "firstFrameUrl": "",
+      "episode": "",
+      "scene": "第2场 · 便利店收银台 · 连续",
+      "size": "特写",
+      "scriptDuration": 4,
+      "taggedPrompt": "陈默[character1:陈默]，神情克制，开口说出台词。背景虚化，只留人物面部与眼神。",
+      "cast": [
+        "陈默"
+      ],
+      "dialogue": "陈默：……我以前住这附近。",
+      "speaker": "陈默",
+      "locked": false,
+      "notes": "特写正反打 · 轻微手持 · 同期声，台词清晰",
+      "assetStale": false,
+      "h3Shot": "30岁，外套湿透，神情克制，开口说出台词。背景虚化，只留人物面部与眼神。特写。30岁，外套湿透说，台词：<d>[Chinese] 陈默：……我以前住这附近。</d>。",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 30岁，外套湿透，神情克制，开口说出台词。背景虚化，只留人物面部与眼神。特写。30岁，外套湿透说，台词：<d>[Chinese] 陈默：……我以前住这附近。</d>。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "shot": "014",
+      "mode": "t2v",
+      "duration": "5s",
+      "durationSnapped": true,
+      "quality": "standard",
+      "width": 1024,
+      "height": 576,
+      "prompt": "镜头缓缓拉远，便利店收银台的光线与连续的氛围收进画面，留出转场余韵。远景。场景：便利店收银台，内景，连续。短剧质感，16:9 画幅。",
+      "promptLength": 66,
+      "promptTooLong": false,
+      "refs": [
+        {
+          "slot": "character1",
+          "kind": "scene",
+          "name": "便利店收银台",
+          "image": "",
+          "role": ""
+        }
+      ],
+      "multiRef": false,
+      "firstFrameUrl": "",
+      "episode": "",
+      "scene": "第2场 · 便利店收银台 · 连续",
+      "size": "远景",
+      "scriptDuration": 4,
+      "taggedPrompt": "镜头缓缓拉远，便利店收银台[character1:便利店收银台]的光线与连续的氛围收进画面，留出转场余韵。",
+      "cast": [],
+      "dialogue": "",
+      "speaker": "",
+      "locked": false,
+      "notes": "收束镜头 · 轻微手持 · 淡出转场",
+      "assetStale": false,
+      "h3Shot": "镜头缓缓拉远，便利店收银台的光线与连续的氛围收进画面，留出转场余韵。远景。",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 镜头缓缓拉远，便利店收银台的光线与连续的氛围收进画面，留出转场余韵。远景。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "shot": "015",
+      "mode": "t2v",
+      "duration": "5s",
+      "durationSnapped": false,
+      "quality": "standard",
+      "width": 1024,
+      "height": 576,
+      "prompt": "内景，便利店靠窗座位，稍后。两人隔着一张小桌坐下，雨声被玻璃挡在外面。全景。场景：便利店靠窗座位，内景，稍后。短剧质感，16:9 画幅。",
+      "promptLength": 68,
+      "promptTooLong": false,
+      "refs": [
+        {
+          "slot": "character1",
+          "kind": "scene",
+          "name": "便利店靠窗座位",
+          "image": "",
+          "role": ""
+        }
+      ],
+      "multiRef": false,
+      "firstFrameUrl": "",
+      "episode": "",
+      "scene": "第3场 · 便利店靠窗座位 · 稍后",
+      "size": "全景",
+      "scriptDuration": 5,
+      "taggedPrompt": "内景，便利店靠窗座位[character1:便利店靠窗座位]，稍后。两人隔着一张小桌坐下，雨声被玻璃挡在外面。",
+      "cast": [],
+      "dialogue": "",
+      "speaker": "",
+      "locked": false,
+      "notes": "建立镜头 · 轻微手持 · 环境音：雨声 · 交代空间关系",
+      "assetStale": false,
+      "h3Shot": "内景，便利店靠窗座位，稍后。两人隔着一张小桌坐下，雨声被玻璃挡在外面。全景。",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 内景，便利店靠窗座位，稍后。两人隔着一张小桌坐下，雨声被玻璃挡在外面。全景。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "shot": "016",
+      "mode": "t2v",
+      "duration": "5s",
+      "durationSnapped": false,
+      "quality": "standard",
+      "width": 1024,
+      "height": 576,
+      "prompt": "陈默从口袋里拿出一张旧照片，推到桌子中间。特写。角色：陈默，30岁，穿外套湿透。场景：便利店靠窗座位，内景，稍后。短剧质感，16:9 画幅。",
+      "promptLength": 70,
+      "promptTooLong": false,
+      "refs": [
+        {
+          "slot": "character1",
+          "kind": "character",
+          "name": "陈默",
+          "image": "",
+          "role": ""
+        },
+        {
+          "slot": "character2",
+          "kind": "scene",
+          "name": "便利店靠窗座位",
+          "image": "",
+          "role": ""
+        }
+      ],
+      "multiRef": false,
+      "firstFrameUrl": "",
+      "episode": "",
+      "scene": "第3场 · 便利店靠窗座位 · 稍后",
+      "size": "特写",
+      "scriptDuration": 5,
+      "taggedPrompt": "陈默[character1:陈默]从口袋里拿出一张旧照片，推到桌子中间。",
+      "cast": [
+        "陈默"
+      ],
+      "dialogue": "",
+      "speaker": "",
+      "locked": false,
+      "notes": "固定机位 · 环境音：雨声 · 动作一次完整拍完",
+      "assetStale": false,
+      "h3Shot": "30岁，外套湿透从口袋里拿出一张旧照片，推到桌子中间。特写。",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 30岁，外套湿透从口袋里拿出一张旧照片，推到桌子中间。特写。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "shot": "017",
+      "mode": "t2v",
+      "duration": "5s",
+      "durationSnapped": false,
+      "quality": "standard",
+      "width": 1024,
+      "height": 576,
+      "prompt": "林晚没有说话，把那罐热咖啡轻轻推到照片旁边。特写。角色：林晚，27岁，便利店店员。场景：便利店靠窗座位，内景，稍后。短剧质感，16:9 画幅。",
+      "promptLength": 71,
+      "promptTooLong": false,
+      "refs": [
+        {
+          "slot": "character1",
+          "kind": "character",
+          "name": "林晚",
+          "image": "",
+          "role": ""
+        },
+        {
+          "slot": "character2",
+          "kind": "scene",
+          "name": "便利店靠窗座位",
+          "image": "",
+          "role": ""
+        }
+      ],
+      "multiRef": false,
+      "firstFrameUrl": "",
+      "episode": "",
+      "scene": "第3场 · 便利店靠窗座位 · 稍后",
+      "size": "特写",
+      "scriptDuration": 5,
+      "taggedPrompt": "林晚[character1:林晚]没有说话，把那罐热咖啡轻轻推到照片旁边。",
+      "cast": [
+        "林晚"
+      ],
+      "dialogue": "",
+      "speaker": "",
+      "locked": false,
+      "notes": "缓慢推进 · 环境音：雨声 · 动作一次完整拍完",
+      "assetStale": false,
+      "h3Shot": "27岁，便利店店员没有说话，把那罐热咖啡轻轻推到照片旁边。特写。",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 27岁，便利店店员没有说话，把那罐热咖啡轻轻推到照片旁边。特写。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "shot": "018",
+      "mode": "t2v",
+      "duration": "5s",
+      "durationSnapped": false,
+      "quality": "standard",
+      "width": 1024,
+      "height": 576,
+      "prompt": "镜头缓缓拉远，便利店的暖光在雨夜里像一小块岛。远景。场景：便利店靠窗座位，内景，稍后。短剧质感，16:9 画幅。",
+      "promptLength": 56,
+      "promptTooLong": false,
+      "refs": [
+        {
+          "slot": "character1",
+          "kind": "scene",
+          "name": "便利店靠窗座位",
+          "image": "",
+          "role": ""
+        }
+      ],
+      "multiRef": false,
+      "firstFrameUrl": "",
+      "episode": "",
+      "scene": "第3场 · 便利店靠窗座位 · 稍后",
+      "size": "远景",
+      "scriptDuration": 5,
+      "taggedPrompt": "镜头缓缓拉远，便利店的暖光在雨夜里像一小块岛。",
+      "cast": [],
+      "dialogue": "",
+      "speaker": "",
+      "locked": false,
+      "notes": "缓慢拉远 · 环境音：雨声 · 动作一次完整拍完",
+      "assetStale": false,
+      "h3Shot": "镜头缓缓拉远，便利店的暖光在雨夜里像一小块岛。远景。",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 镜头缓缓拉远，便利店的暖光在雨夜里像一小块岛。远景。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "shot": "019",
+      "mode": "t2v",
+      "duration": "5s",
+      "durationSnapped": true,
+      "quality": "standard",
+      "width": 1024,
+      "height": 576,
+      "prompt": "林晚，带着疑问看向对方，开口说出台词。背景虚化，只留人物面部与眼神。特写。角色：林晚，27岁，便利店店员。场景：便利店靠窗座位，内景，稍后。林晚张嘴说话，台词：「你一直在等谁？」。短剧质感，16:9 画幅。",
+      "promptLength": 103,
+      "promptTooLong": false,
+      "refs": [
+        {
+          "slot": "character1",
+          "kind": "character",
+          "name": "林晚",
+          "image": "",
+          "role": ""
+        },
+        {
+          "slot": "character2",
+          "kind": "scene",
+          "name": "便利店靠窗座位",
+          "image": "",
+          "role": ""
+        }
+      ],
+      "multiRef": false,
+      "firstFrameUrl": "",
+      "episode": "",
+      "scene": "第3场 · 便利店靠窗座位 · 稍后",
+      "size": "特写",
+      "scriptDuration": 3,
+      "taggedPrompt": "林晚[character1:林晚]，带着疑问看向对方，开口说出台词。背景虚化，只留人物面部与眼神。",
+      "cast": [
+        "林晚"
+      ],
+      "dialogue": "林晚：你一直在等谁？",
+      "speaker": "林晚",
+      "locked": false,
+      "notes": "特写正反打 · 横移跟拍 · 同期声，台词清晰",
+      "assetStale": false,
+      "h3Shot": "27岁，便利店店员，带着疑问看向对方，开口说出台词。背景虚化，只留人物面部与眼神。特写。27岁，便利店店员说，台词：<d>[Chinese] 林晚：你一直在等谁？</d>。",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 27岁，便利店店员，带着疑问看向对方，开口说出台词。背景虚化，只留人物面部与眼神。特写。27岁，便利店店员说，台词：<d>[Chinese] 林晚：你一直在等谁？</d>。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "shot": "020",
+      "mode": "t2v",
+      "duration": "5s",
+      "durationSnapped": true,
+      "quality": "standard",
+      "width": 1024,
+      "height": 576,
+      "prompt": "陈默，神情克制，开口说出台词。背景轻微虚化。近景。角色：陈默，30岁，穿外套湿透。场景：便利店靠窗座位，内景，稍后。陈默张嘴说话，台词：「等我女儿。她以前每天这个点来买酸奶。」。短剧质感，16:9 画幅。",
+      "promptLength": 102,
+      "promptTooLong": false,
+      "refs": [
+        {
+          "slot": "character1",
+          "kind": "character",
+          "name": "陈默",
+          "image": "",
+          "role": ""
+        },
+        {
+          "slot": "character2",
+          "kind": "scene",
+          "name": "便利店靠窗座位",
+          "image": "",
+          "role": ""
+        }
+      ],
+      "multiRef": false,
+      "firstFrameUrl": "",
+      "episode": "",
+      "scene": "第3场 · 便利店靠窗座位 · 稍后",
+      "size": "近景",
+      "scriptDuration": 4,
+      "taggedPrompt": "陈默[character1:陈默]，神情克制，开口说出台词。背景轻微虚化。",
+      "cast": [
+        "陈默"
+      ],
+      "dialogue": "陈默：等我女儿。她以前每天这个点来买酸奶。",
+      "speaker": "陈默",
+      "locked": false,
+      "notes": "近景正反打 · 轻微手持 · 同期声，台词清晰",
+      "assetStale": false,
+      "h3Shot": "30岁，外套湿透，神情克制，开口说出台词。背景轻微虚化。近景。30岁，外套湿透说，台词：<d>[Chinese] 陈默：等我女儿。她以前每天这个点来买酸奶。</d>。",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 30岁，外套湿透，神情克制，开口说出台词。背景轻微虚化。近景。30岁，外套湿透说，台词：<d>[Chinese] 陈默：等我女儿。她以前每天这个点来买酸奶。</d>。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "shot": "021",
+      "mode": "t2v",
+      "duration": "5s",
+      "durationSnapped": false,
+      "quality": "standard",
+      "width": 1024,
+      "height": 576,
+      "prompt": "外景，便利店门口，次日清晨。雨停了。林晚把伞架收回店里，街对面的车位空着。全景。角色：林晚，27岁，便利店店员。场景：便利店门口，外景，次日清晨。短剧质感，16:9 画幅。",
+      "promptLength": 86,
+      "promptTooLong": false,
+      "refs": [
+        {
+          "slot": "character1",
+          "kind": "character",
+          "name": "林晚",
+          "image": "",
+          "role": ""
+        },
+        {
+          "slot": "character2",
+          "kind": "scene",
+          "name": "便利店门口",
+          "image": "",
+          "role": ""
+        }
+      ],
+      "multiRef": false,
+      "firstFrameUrl": "",
+      "episode": "",
+      "scene": "第4场 · 便利店门口 · 次日清晨",
+      "size": "全景",
+      "scriptDuration": 5,
+      "taggedPrompt": "外景，便利店门口[character2:便利店门口]，次日清晨。雨停了。林晚[character1:林晚]把伞架收回店里，街对面的车位空着。",
+      "cast": [
+        "林晚"
+      ],
+      "dialogue": "",
+      "speaker": "",
+      "locked": false,
+      "notes": "建立镜头 · 缓慢推进 · 环境音：雨声 · 交代空间关系",
+      "assetStale": false,
+      "h3Shot": "外景，便利店门口，次日清晨。雨停了。27岁，便利店店员把伞架收回店里，街对面的车位空着。全景。",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 外景，便利店门口，次日清晨。雨停了。27岁，便利店店员把伞架收回店里，街对面的车位空着。全景。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "shot": "022",
+      "mode": "t2v",
+      "duration": "5s",
+      "durationSnapped": false,
+      "quality": "standard",
+      "width": 1024,
+      "height": 576,
+      "prompt": "柜台上留着那张旧照片，背面写着一行字：谢谢你还记得。特写。场景：便利店门口，外景，次日清晨。短剧质感，16:9 画幅。",
+      "promptLength": 59,
+      "promptTooLong": false,
+      "refs": [
+        {
+          "slot": "character1",
+          "kind": "scene",
+          "name": "便利店门口",
+          "image": "",
+          "role": ""
+        }
+      ],
+      "multiRef": false,
+      "firstFrameUrl": "",
+      "episode": "",
+      "scene": "第4场 · 便利店门口 · 次日清晨",
+      "size": "特写",
+      "scriptDuration": 5,
+      "taggedPrompt": "柜台上留着那张旧照片，背面写着一行字：谢谢你还记得。",
+      "cast": [],
+      "dialogue": "",
+      "speaker": "",
+      "locked": false,
+      "notes": "横移跟拍 · 环境音：雨声 · 动作一次完整拍完",
+      "assetStale": false,
+      "h3Shot": "柜台上留着那张旧照片，背面写着一行字：谢谢你还记得。特写。",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 柜台上留着那张旧照片，背面写着一行字：谢谢你还记得。特写。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    },
+    {
+      "shot": "023",
+      "mode": "t2v",
+      "duration": "5s",
+      "durationSnapped": true,
+      "quality": "standard",
+      "width": 1024,
+      "height": 576,
+      "prompt": "林晚，轻声，神情克制，开口说出台词。背景虚化，只留人物面部与眼神。特写。角色：林晚，27岁，便利店店员。场景：便利店门口，外景，次日清晨。林晚（轻声）张嘴说话，台词：「明天见。」。短剧质感，16:9 画幅。",
+      "promptLength": 103,
+      "promptTooLong": false,
+      "refs": [
+        {
+          "slot": "character1",
+          "kind": "character",
+          "name": "林晚",
+          "image": "",
+          "role": ""
+        },
+        {
+          "slot": "character2",
+          "kind": "scene",
+          "name": "便利店门口",
+          "image": "",
+          "role": ""
+        }
+      ],
+      "multiRef": false,
+      "firstFrameUrl": "",
+      "episode": "",
+      "scene": "第4场 · 便利店门口 · 次日清晨",
+      "size": "特写",
+      "scriptDuration": 3,
+      "taggedPrompt": "林晚[character1:林晚]，轻声，神情克制，开口说出台词。背景虚化，只留人物面部与眼神。",
+      "cast": [
+        "林晚"
+      ],
+      "dialogue": "林晚（轻声）：明天见。",
+      "speaker": "林晚",
+      "locked": false,
+      "notes": "特写正反打 · 缓慢拉远 · 同期声，台词清晰",
+      "assetStale": false,
+      "h3Shot": "27岁，便利店店员，轻声，神情克制，开口说出台词。背景虚化，只留人物面部与眼神。特写。27岁，便利店店员说，台词：<d>[Chinese] 林晚（轻声）：明天见。</d>。",
+      "h3Prompt": "The following describes the actions and dialogue within the shot.\n\nintegrated_multimodal_description:\n[Shot 1] 27岁，便利店店员，轻声，神情克制，开口说出台词。背景虚化，只留人物面部与眼神。特写。27岁，便利店店员说，台词：<d>[Chinese] 林晚（轻声）：明天见。</d>。\n\noverall_soundscape: ambient room tone, subtle crowd noise\nnon_diegetic_music: N/A"
+    }
+  ]
+}

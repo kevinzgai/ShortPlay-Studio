@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>C · Runway 风格 — 分镜工场</title>
+<link rel="preconnect" href="https://fonts.loli.net">
+<link href="https://fonts.loli.net/css2?family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#000;--deep:#030303;--surf:#1a1a1a;--bd:#27272a;--w:#fff;--slate:#767d88;--mid:#7d848e;--gray:#a7a7a7;--silver:#c9ccd1}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--w);font-family:'Inter',-apple-system,system-ui,'PingFang SC','Microsoft YaHei',sans-serif;font-size:14px;line-height:1.3;letter-spacing:-.16px;height:100vh;overflow:hidden;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+.lbl{font-size:11px;font-weight:450;letter-spacing:.35px;text-transform:uppercase;color:var(--mid)}
+.micro{font-size:11px;font-weight:450;line-height:1.3;letter-spacing:normal;text-transform:uppercase;color:var(--slate)}
+.wrap{height:100vh;display:flex;flex-direction:column}
+
+/* 顶栏：极简，无边框，无阴影 */
+nav{height:56px;padding:0 32px;display:flex;align-items:center;gap:34px;flex:none;position:relative;z-index:3}
+.wordmark{font-size:15px;font-weight:600;letter-spacing:-.4px}
+nav .links{display:flex;gap:26px}
+nav .links a{font-size:14px;color:var(--silver);text-decoration:none;font-weight:400}
+nav .links a:hover{color:#fff}
+nav .sp{flex:1}
+nav .mini{font-size:11px;text-transform:uppercase;letter-spacing:.35px;font-weight:450;color:var(--mid)}
+nav .cta{font-size:14px;font-weight:600;border:1px solid var(--bd);border-radius:4px;padding:7px 14px}
+nav .cta:hover{border-color:var(--slate)}
+
+/* 主舞台 */
+.stage{flex:1;position:relative;overflow:hidden;min-height:0}
+.hero{position:absolute;inset:0}
+/* 取景示意（纯 CSS 电影画面，全出血） */
+.scene{position:relative;overflow:hidden;background:linear-gradient(180deg,#080d1e 0%,#151c38 34%,#2a1b38 66%,#080a16 100%);isolation:isolate}
+.scene::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 38% 40% at 20% 34%,rgba(255,64,120,.34),transparent 74%),radial-gradient(ellipse 34% 34% at 76% 30%,rgba(40,210,255,.3),transparent 76%),linear-gradient(180deg,rgba(0,0,0,.28) 0%,transparent 30%,rgba(0,0,0,.1) 55%,rgba(0,0,0,.82) 100%)}
+.scene .store{position:absolute;left:9%;top:18%;width:52%;height:56%;background:linear-gradient(180deg,rgba(184,230,255,.19),rgba(110,170,225,.05));border:1px solid rgba(190,225,255,.2);box-shadow:0 0 60px rgba(120,200,255,.22),inset 0 18px 30px rgba(255,255,255,.09)}
+.scene .sign{position:absolute;left:15%;top:24%;width:29%;height:7%;background:linear-gradient(90deg,#ff4d7d,#8b5cf6);box-shadow:0 0 34px rgba(255,77,125,.6);border-radius:2px}
+.scene .sign::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 12px,rgba(255,255,255,.14) 12px 14px)}
+.scene .door{position:absolute;left:46%;top:34%;width:12%;height:40%;background:rgba(210,240,255,.12);border:1px solid rgba(210,240,255,.22)}
+.scene .shelf{position:absolute;left:13%;top:48%;width:29%;height:2px;background:rgba(210,240,255,.28);box-shadow:0 16px 0 rgba(210,240,255,.16),0 32px 0 rgba(210,240,255,.12)}
+.scene .fig{position:absolute;left:61%;bottom:8%;width:5.2%;height:40%;background:linear-gradient(180deg,#070a16,#121830);border-radius:44% 44% 14% 14%;box-shadow:0 0 26px rgba(0,0,0,.7)}
+.scene .fig::before{content:"";position:absolute;left:19%;top:-20%;width:62%;height:25%;border-radius:50%;background:#070a16}
+.scene .rain{position:absolute;inset:-30%;background:repeating-linear-gradient(74deg,transparent 0 9px,rgba(200,225,255,.12) 9px 10px,transparent 10px 19px);opacity:.5}
+.scene .water{position:absolute;left:0;right:0;bottom:0;height:24%;background:linear-gradient(180deg,rgba(255,77,125,.14),rgba(40,210,255,.12))}
+.scene .water::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 24px,rgba(255,255,255,.06) 24px 26px)}
+.hero .scene{width:100%;height:100%}
+
+/* 舞台上的编辑式排版 */
+.stage-txt{position:absolute;left:42px;top:38px;z-index:2}
+.stage-txt .micro{margin-bottom:14px;display:block}
+.stage-txt h1{font-size:48px;font-weight:400;letter-spacing:-1.2px;line-height:1;max-width:560px}
+.stage-txt h1 em{font-style:normal;color:var(--silver)}
+.stage-txt .shot{font-size:40px;font-weight:400;letter-spacing:-1px;line-height:1;margin-top:14px}
+.stage-txt p{font-size:14px;color:var(--silver);margin-top:20px;max-width:390px;line-height:1.45;letter-spacing:-.16px}
+.stage-txt .row{display:flex;gap:26px;margin-top:26px}
+.stage-txt .row div span{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.35px;color:var(--slate);margin-bottom:5px}
+.stage-txt .row div b{font-size:14px;font-weight:500;letter-spacing:-.16px}
+.stage-tools{position:absolute;right:42px;top:40px;z-index:2;text-align:right}
+.stage-tools .micro{display:block;margin-bottom:12px}
+.stage-tools button{display:block;margin-left:auto;font-size:13px;color:var(--silver);padding:5px 0;letter-spacing:-.16px}
+.stage-tools button:hover{color:#fff}
+.stage-tools .rec{color:#fff;margin-top:10px;font-size:11px;text-transform:uppercase;letter-spacing:.35px}
+.stage-tools .rec i{display:inline-block;width:6px;height:6px;border-radius:50%;background:#ff4d4d;margin-right:7px;vertical-align:middle}
+.play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:62px;height:62px;border:1px solid rgba(255,255,255,.55);border-radius:50%;display:grid;place-items:center;font-size:18px;z-index:2;backdrop-filter:blur(2px)}
+.play:hover{background:rgba(255,255,255,.12)}
+.progress{position:absolute;left:42px;right:42px;bottom:120px;height:1px;background:rgba(255,255,255,.24);z-index:2}
+.progress i{display:block;width:34%;height:1px;background:#fff;position:relative}
+.progress i::after{content:"";position:absolute;right:-3px;top:-2.5px;width:6px;height:6px;border-radius:50%;background:#fff}
+.timecode{position:absolute;right:42px;bottom:130px;font-size:11px;letter-spacing:.35px;color:var(--silver);z-index:2}
+
+/* 底部胶片条 + 信息 */
+.bottom{flex:none;background:var(--deep);padding:18px 32px 20px;position:relative;z-index:2}
+.film-h{display:flex;align-items:center;gap:16px;margin-bottom:12px}
+.film-h .lbl{color:var(--silver)}
+.film-h .n{font-size:11px;color:var(--slate);letter-spacing:.35px}
+.film-h .sp{flex:1}
+.film-h button{font-size:11px;text-transform:uppercase;letter-spacing:.35px;color:var(--silver);font-weight:450}
+.film-h button:hover{color:#fff}
+.film{display:flex;gap:7px;overflow:hidden}
+.thumb{width:132px;flex:none;cursor:pointer;opacity:.52;transition:opacity .2s}
+.thumb:hover{opacity:.82}
+.thumb.on{opacity:1}
+.thumb .pic{position:relative;aspect-ratio:16/9;border-radius:4px;overflow:hidden;outline:1px solid transparent}
+.thumb.on .pic{outline:1.5px solid #fff;outline-offset:1px}
+.thumb .pic .scene{width:100%;height:100%}
+.thumb .cap{display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--slate);letter-spacing:0}
+.thumb.on .cap{color:#fff}
+.thumb .cap b{font-weight:450;font-family:ui-monospace,monospace;font-size:10px}
+.t2 .fig{left:38%;width:4%;height:28%}
+.t3 .store{left:30%;width:60%}
+.t3 .sign{left:36%;background:linear-gradient(90deg,#00e0a0,#00b8ff)}
+.t4 .sign{background:linear-gradient(90deg,#ffb347,#ff4d7d)}
+.t4 .fig{left:24%;width:6%;height:36%}
+.t5 .store{left:5%;width:40%}
+.t5 .fig{left:70%;width:5%;height:34%}
+.detail{display:grid;grid-template-columns:1.4fr 1.4fr 1.5fr;gap:36px;margin-top:20px;padding-top:16px;border-top:1px solid var(--bd)}
+.detail .micro{display:block;margin-bottom:9px}
+.detail p{font-size:13px;color:var(--silver);line-height:1.45;letter-spacing:-.16px}
+.detail .kv{display:flex;flex-wrap:wrap;gap:8px 18px}
+.detail .kv span{font-size:12px;color:var(--silver)}
+.detail .kv span b{color:#fff;font-weight:450;margin-right:6px}
+.detail .prompt{font-size:12px;color:var(--gray);line-height:1.5;font-family:ui-monospace,monospace;letter-spacing:0}
+.detail .prompt em{color:#fff;font-style:normal}
+.tagmark{position:fixed;right:14px;bottom:8px;font-size:10px;text-transform:uppercase;letter-spacing:.35px;color:var(--slate);z-index:9}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <div class="wordmark">分镜工场</div>
+    <div class="links"><a href="#">工作台</a><a href="#">资产</a><a href="#">生成</a><a href="#">导出</a></div>
+    <div class="sp"></div>
+    <span class="mini">雨夜便利店 / E01</span>
+    <button class="cta">分享 ▸</button>
+  </nav>
+
+  <div class="stage">
+    <div class="hero"><div class="scene"><div class="store"></div><div class="sign"></div><div class="door"></div><div class="shelf"></div><div class="fig"></div><div class="rain"></div><div class="water"></div></div></div>
+    <div class="stage-txt">
+      <span class="micro">Scene 01 / Episode 01 / Shot 002</span>
+      <h1>雨夜<br><em>便利店</em></h1>
+      <div class="shot">E01 — 002</div>
+      <p>林晚把伞靠在门边，抬头看了眼雨。霓虹在水洼里碎成一片。</p>
+      <div class="row">
+        <div><span>景别</span><b>全景</b></div>
+        <div><span>时长</span><b>00:08</b></div>
+        <div><span>运镜</span><b>缓慢推拉</b></div>
+        <div><span>画幅</span><b>16:9</b></div>
+      </div>
+    </div>
+    <div class="stage-tools">
+      <span class="micro">Shot Actions</span>
+      <button>重新生成画面 ↗</button>
+      <button>编辑分镜卡 ↗</button>
+      <button>锁定镜头 ↗</button>
+      <button>导出起始帧 ↗</button>
+      <div class="rec"><i></i>Deepseek-Flash / 已同步</div>
+    </div>
+    <div class="play">▶</div>
+    <div class="timecode">00:00:05 / 00:00:13</div>
+    <div class="progress"><i></i></div>
+  </div>
+
+  <div class="bottom">
+    <div class="film-h"><span class="lbl">Timeline · E01 雨夜来客</span><span class="n">23 SHOTS / 100 S</span><div class="sp"></div><button>‹ 上一集</button><button>全部镜头 ▸</button><button>下一集 ›</button></div>
+    <div class="film">
+      <div class="thumb"><div class="pic"><div class="scene"><div class="store"></div><div class="sign"></div><div class="door"></div><div class="rain"></div><div class="water"></div></div></div><div class="cap"><b>001</b><span>5s</span></div></div>
+      <div class="thumb on"><div class="pic"><div class="scene t2"><div class="store"></div><div class="sign"></div><div class="door"></div><div class="fig"></div><div class="rain"></div><div class="water"></div></div></div><div class="cap"><b>002</b><span>8s</span></div></div>
+      <div class="thumb"><div class="pic"><div class="scene t3"><div class="store"></div><div class="sign"></div><div class="door"></div><div class="fig"></div><div class="rain"></div><div class="water"></div></div></div><div class="cap"><b>003</b><span>6s</span></div></div>
+      <div class="thumb"><div class="pic"><div class="scene t4"><div class="store"></div><div class="sign"></div><div class="fig"></div><div class="rain"></div><div class="water"></div></div></div><div class="cap"><b>004</b><span>4s</span></div></div>
+      <div class="thumb"><div class="pic"><div class="scene t5"><div class="store"></div><div class="sign"></div><div class="fig"></div><div class="rain"></div><div class="water"></div></div></div><div class="cap"><b>005</b><span>3s</span></div></div>
+      <div class="thumb"><div class="pic"><div class="scene t2"><div class="store"></div><div class="sign"></div><div class="fig"></div><div class="rain"></div><div class="water"></div></div></div><div class="cap"><b>006</b><span>7s</span></div></div>
+      <div class="thumb"><div class="pic"><div class="scene t3"><div class="store"></div><div class="sign"></div><div class="fig"></div><div class="rain"></div><div class="water"></div></div></div><div class="cap"><b>007</b><span>5s</span></div></div>
+      <div class="thumb"><div class="pic"><div class="scene t4"><div class="store"></div><div class="sign"></div><div class="fig"></div><div class="rain"></div><div class="water"></div></div></div><div class="cap"><b>008</b><span>6s</span></div></div>
+    </div>
+    <div class="detail">
+      <div><span class="micro">画面描述 / Visual</span><p>外景，便利店门口，夜。雨下得很急。林晚（27岁，便利店店员）把伞靠在门边，抬头看了眼雨。霓虹招牌在水洼里碎成一片。</p></div>
+      <div><span class="micro">分镜卡 / 9 items</span><div class="kv"><span><b>主体</b>林晚</span><span><b>动作</b>收伞抬头</span><span><b>构图</b>三分法</span><span><b>光线</b>霓虹冷光</span><span><b>情绪</b>疲惫克制</span><span><b>声音</b>雨声风铃</span></div></div>
+      <div><span class="micro">最终提示词 / Prompt</span><div class="prompt">外景，便利店门口，夜，雨下得很急。<em>林晚，深蓝店员制服，湿发贴额</em>，把伞靠在门边，抬头看雨。缓慢推拉，全景，霓虹冷光，16:9 电影感。</div></div>
+    </div>
+  </div>
+  <div class="tagmark">C / runwayml</div>
+</div>
+</body>
+</html>

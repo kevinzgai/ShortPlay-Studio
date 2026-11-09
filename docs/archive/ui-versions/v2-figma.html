@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>B · Figma 风格 — 分镜工场</title>
+<link rel="preconnect" href="https://fonts.loli.net">
+<link href="https://fonts.loli.net/css2?family=Inter:wght@320;340;400;450;540;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#000;--paper:#fff;--glass:rgba(0,0,0,.08);--line:rgba(0,0,0,.1);--gray:#6b6b6b}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,system-ui,'PingFang SC','Microsoft YaHei',sans-serif;color:var(--ink);background:var(--paper);font-size:13px;font-weight:340;font-feature-settings:"kern";letter-spacing:-.14px;height:100vh;overflow:hidden;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+.mono{font-family:ui-monospace,'SF Mono',Menlo,monospace;letter-spacing:.5px;text-transform:uppercase}
+
+/* 顶部工具栏 */
+.toolbar{height:48px;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 12px;gap:6px;position:relative;z-index:5;background:#fff}
+.logo{width:26px;height:26px;display:grid;place-items:center;margin-right:6px}
+.logo svg{width:16px;height:24px}
+.tb-div{width:1px;height:20px;background:var(--line);margin:0 8px}
+.tool{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:14px;color:#333}
+.tool:hover{background:var(--glass)}
+.tool.on{background:#000;color:#fff}
+.tb-name{margin-left:8px;display:flex;flex-direction:column;line-height:1.15}
+.tb-name b{font-size:12.5px;font-weight:540;letter-spacing:-.2px}
+.tb-name span{font-size:10px;color:var(--gray);font-weight:340}
+.tb-sp{flex:1}
+.zoom{font-size:11.5px;color:#333;padding:6px 8px;border-radius:6px}
+.zoom:hover{background:var(--glass)}
+.pill-btn{padding:8px 18px 9px;border-radius:50px;font-size:13px;font-weight:450;letter-spacing:-.14px}
+.pill-btn.solid{background:#000;color:#fff}
+.pill-btn.glass{background:var(--glass)}
+.pill-btn.outline{border:1px solid #000}
+.pill-btn.grad{background:linear-gradient(100deg,#00e676 0%,#ffe600 32%,#8b3dff 68%,#ff2d95 100%);color:#000;font-weight:540}
+.pill-btn:focus-visible,.tool:focus-visible{outline:2px dashed #000;outline-offset:2px}
+.av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#00e676,#8b3dff);border:2px solid #fff;box-shadow:0 0 0 1px #000;display:grid;place-items:center;font-size:10px;font-weight:700;color:#fff;margin-left:4px}
+
+.body{display:grid;grid-template-columns:232px minmax(0,1fr) 248px;height:calc(100vh - 48px)}
+
+/* 图层面板 */
+.layers{border-right:1px solid var(--line);display:flex;flex-direction:column;overflow:auto;background:#fff}
+.lh{height:38px;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 14px;font-size:11px;font-weight:540;letter-spacing:.02em}
+.lh span{margin-left:auto;color:var(--gray);font-size:13px}
+.lsec{padding:10px 8px;border-bottom:1px solid var(--line)}
+.lsec-t{font-size:10px;font-family:ui-monospace,monospace;letter-spacing:.6px;text-transform:uppercase;color:var(--gray);padding:4px 6px 8px}
+.lrow{display:flex;align-items:center;gap:7px;padding:6px;border-radius:4px;font-size:12px;font-weight:340;color:#333;cursor:default}
+.lrow:hover{background:rgba(0,0,0,.04)}
+.lrow.on{background:#e5e5ff;color:#000;font-weight:450}
+.lrow .ic{width:13px;text-align:center;font-size:11px;color:#777}
+.lrow .n{margin-left:auto;font-size:10px;color:#999;font-family:ui-monospace,monospace}
+.lrow.sub{padding-left:22px}
+.lrow.sub2{padding-left:36px}
+.lfoot{margin-top:auto;border-top:1px solid var(--line);padding:12px 14px;font-size:10.5px;color:var(--gray);line-height:1.6}
+.lfoot b{color:#000;font-weight:540}
+
+/* 画布 */
+.canvas{position:relative;overflow:auto;background-color:#f4f4f4;background-image:radial-gradient(#d2d2d2 .8px,transparent .8px);background-size:16px 16px;padding:34px 40px 80px}
+.cmeta{display:flex;align-items:baseline;gap:12px;margin-bottom:22px}
+.cmeta h1{font-size:20px;font-weight:540;letter-spacing:-.5px}
+.cmeta span{font-size:11px;color:var(--gray)}
+.cmeta .mono{font-size:11px;color:var(--gray);margin-left:auto}
+.frames{display:flex;gap:26px;align-items:flex-start;min-width:1050px}
+.frame-col{flex:1;min-width:0}
+.frame-label{position:relative;font-family:ui-monospace,monospace;font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:#333;margin-bottom:7px;display:flex;align-items:center;gap:6px}
+.frame-label i{width:6px;height:6px;background:#8b3dff;border-radius:1px;display:block}
+.frame-label .r{margin-left:auto;color:#888}
+.frame{border:1px solid #cfcfcf;background:#fff;position:relative}
+.frame.sel{border:1.5px solid #8b3dff;box-shadow:0 0 0 1px #8b3dff}
+.frame.sel::before,.frame.sel::after{content:"";position:absolute;width:7px;height:7px;background:#fff;border:1.5px solid #8b3dff}
+.frame.sel::before{left:-4px;top:-4px}
+.frame.sel::after{right:-4px;bottom:-4px}
+.frame .scene{aspect-ratio:16/9}
+
+/* 取景示意（纯 CSS 电影画面）— 唯一的彩色区域 */
+.scene{position:relative;overflow:hidden;background:linear-gradient(180deg,#0b1122 0%,#1a2140 40%,#2b1b36 72%,#0b0e1d 100%);isolation:isolate}
+.scene::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 42% 32% at 21% 30%,rgba(255,64,120,.4),transparent 72%),radial-gradient(ellipse 34% 28% at 79% 26%,rgba(40,210,255,.34),transparent 74%),linear-gradient(180deg,transparent 52%,rgba(6,8,20,.8) 100%)}
+.scene .store{position:absolute;left:11%;top:23%;width:53%;height:47%;background:linear-gradient(180deg,rgba(184,230,255,.2),rgba(110,170,225,.06));border:1px solid rgba(190,225,255,.22);box-shadow:0 0 28px rgba(120,200,255,.2),inset 0 10px 16px rgba(255,255,255,.1)}
+.scene .sign{position:absolute;left:17%;top:28%;width:31%;height:9%;background:linear-gradient(90deg,#ff4d7d,#8b5cf6);box-shadow:0 0 20px rgba(255,77,125,.65);border-radius:2px}
+.scene .door{position:absolute;left:47%;top:38%;width:13%;height:32%;background:rgba(210,240,255,.13);border:1px solid rgba(210,240,255,.22)}
+.scene .fig{position:absolute;left:59%;bottom:11%;width:6.5%;height:33%;background:linear-gradient(180deg,#090d1c,#151b32);border-radius:44% 44% 16% 16%}
+.scene .fig::before{content:"";position:absolute;left:20%;top:-26%;width:60%;height:31%;border-radius:50%;background:#090d1c}
+.scene .rain{position:absolute;inset:-25%;background:repeating-linear-gradient(74deg,transparent 0 8px,rgba(200,225,255,.13) 8px 9px,transparent 9px 17px);opacity:.55}
+.scene .water{position:absolute;left:0;right:0;bottom:0;height:25%;background:linear-gradient(180deg,rgba(255,77,125,.15),rgba(40,210,255,.13))}
+.scene .water::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 19px,rgba(255,255,255,.07) 19px 21px)}
+.scene.v2 .fig{left:40%;width:5%;height:26%}
+.scene.v3 .sign{background:linear-gradient(90deg,#00e676,#00b8ff)}
+.scene.v3 .store{left:32%;width:56%}
+.finfo{padding:10px 11px 12px;border-top:1px solid var(--line)}
+.finfo .r1{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.finfo .id{font-family:ui-monospace,monospace;font-size:10px;letter-spacing:.5px}
+.badge{font-size:9.5px;padding:2px 7px;border-radius:50px;background:#f0f0f0;font-weight:450}
+.badge.ai{background:linear-gradient(100deg,#00e676,#8b3dff);color:#000}
+.finfo p{font-size:11.5px;line-height:1.45;color:#333;font-weight:340}
+.finfo .sub{font-size:10px;color:#888;margin-top:6px;display:flex;gap:10px}
+.cbar{display:flex;align-items:center;gap:8px;margin-top:26px;padding-top:14px;border-top:1px dashed #c9c9c9;min-width:1050px}
+.cbar .pill-btn{font-size:11.5px;padding:6px 14px 7px}
+.cbar .note{font-size:10.5px;color:#888;margin-left:auto}
+
+/* 属性面板 */
+.props{border-left:1px solid var(--line);background:#fff;overflow:auto;display:flex;flex-direction:column}
+.ph{height:38px;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 14px;gap:8px;font-size:11.5px;font-weight:540}
+.ph .t{margin-left:auto;display:flex;gap:10px;color:var(--gray);font-weight:340}
+.psec{padding:14px;border-bottom:1px solid var(--line)}
+.psec-t{font-family:ui-monospace,monospace;font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:var(--gray);margin-bottom:12px}
+.field{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.field label{width:52px;font-size:11px;color:#666;flex:none}
+.ctrl{flex:1;display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:11.5px;background:#fafafa}
+.ctrl:focus-within{outline:2px dashed #000;outline-offset:1px}
+.ctrl span{color:#999;font-size:10px}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{font-size:10.5px;padding:4px 9px;border:1px solid var(--line);border-radius:50px;color:#444}
+.chip.on{background:#000;color:#fff;border-color:#000}
+.kv{display:grid;grid-template-columns:60px 1fr;gap:8px 6px;font-size:11px;line-height:1.45}
+.kv dt{color:#888}
+.kv dd{color:#222;font-weight:400}
+.mini-scene{width:100%;aspect-ratio:16/9;border-radius:6px;overflow:hidden}
+.code{background:#fafafa;border:1px solid var(--line);border-radius:6px;padding:9px;font-family:ui-monospace,monospace;font-size:9.5px;line-height:1.6;color:#555;word-break:break-all;letter-spacing:0}
+.code em{color:#8b3dff;font-style:normal}
+.tagmark{position:fixed;right:12px;bottom:10px;font-family:ui-monospace,monospace;font-size:10px;color:#777;background:#fff;border:1px solid var(--line);padding:4px 8px;border-radius:50px;letter-spacing:.04em;z-index:9}
+</style>
+</head>
+<body>
+<div class="toolbar">
+  <div class="logo"><svg viewBox="0 0 16 24"><path d="M8 0h4a4 4 0 0 1 0 8H8z" fill="#f24e1e"/><path d="M4 0h4v8H4a4 4 0 0 1 0-8z" fill="#ff7262"/><path d="M4 8h4v8H4a4 4 0 0 1 0-8z" fill="#a259ff"/><circle cx="12" cy="12" r="4" fill="#1abcfe"/><path d="M4 16h4v4a4 4 0 1 1-4-4z" fill="#0acf83"/></svg></div>
+  <div class="tb-name"><b>雨夜便利店 / 分镜表</b><span>草稿 · 刚刚已保存</span></div>
+  <div class="tb-div"></div>
+  <button class="tool on" title="移动">↖</button><button class="tool" title="画框">▣</button><button class="tool" title="形状">▢</button><button class="tool" title="文字">T</button><button class="tool" title="批注">✎</button><button class="tool" title="手型">✋</button>
+  <div class="tb-sp"></div>
+  <button class="zoom">100% ▾</button>
+  <div class="tb-div"></div>
+  <button class="pill-btn glass">▶ 预览</button>
+  <button class="pill-btn outline">导出</button>
+  <button class="pill-btn grad">＋ AI 生成镜头</button>
+  <div class="av">盖</div>
+</div>
+
+<div class="body">
+  <!-- 图层 -->
+  <aside class="layers">
+    <div class="lh">图层 <span>⌄</span></div>
+    <div class="lsec">
+      <div class="lsec-t">Pages</div>
+      <div class="lrow"><span class="ic">▤</span>分镜表 · Step 03</div>
+      <div class="lrow"><span class="ic">▤</span>剧本文稿</div>
+      <div class="lrow"><span class="ic">▤</span>角色与场景资产</div>
+    </div>
+    <div class="lsec" style="border:0">
+      <div class="lsec-t">E01 · 雨夜来客</div>
+      <div class="lrow"><span class="ic">▾</span>Frame / 开场三镜<span class="n">3</span></div>
+      <div class="lrow sub"><span class="ic">▣</span>E01-001 全景</div>
+      <div class="lrow sub on"><span class="ic">▣</span>E01-002 全景<span class="n">◉</span></div>
+      <div class="lrow sub"><span class="ic">▣</span>E01-003 中景</div>
+      <div class="lrow"><span class="ic">▾</span>Frame / 店内对峙<span class="n">4</span></div>
+      <div class="lrow sub"><span class="ic">▣</span>E01-004 近景</div>
+      <div class="lrow sub"><span class="ic">▣</span>E01-005 特写</div>
+      <div class="lrow sub2"><span class="ic">◈</span>道具 · 黑伞</div>
+      <div class="lrow sub"><span class="ic">▣</span>E01-006 中景</div>
+      <div class="lrow sub"><span class="ic">▣</span>E01-007 过肩</div>
+      <div class="lrow"><span class="ic">▸</span>Frame / 集尾钩子<span class="n">5</span></div>
+    </div>
+    <div class="lsec" style="border:0">
+      <div class="lsec-t">Assets</div>
+      <div class="lrow sub"><span class="ic">◉</span>character1 · 林晚</div>
+      <div class="lrow sub"><span class="ic">◉</span>character2 · 陈默</div>
+      <div class="lrow sub"><span class="ic">◈</span>scene1 · 便利店门口</div>
+    </div>
+    <div class="lfoot"><b>2 角色 · 4 场景 · 8 道具</b><br>资产已锁定，改动会同步到全部引用镜头。</div>
+  </aside>
+
+  <!-- 画布 -->
+  <main class="canvas">
+    <div class="cmeta"><h1>雨夜便利店 · 分镜表</h1><span>23 镜 · 约 100 秒 · 16:9</span><span class="mono">Frame / E01</span></div>
+    <div class="frames">
+      <div class="frame-col">
+        <div class="frame-label"><i></i>E01-001 · 建立镜头<span class="r">5s</span></div>
+        <div class="frame"><div class="scene"><div class="store"></div><div class="sign"></div><div class="door"></div><div class="rain"></div><div class="water"></div></div>
+          <div class="finfo"><div class="r1"><span class="id">E01-001</span><span class="badge">全景</span><span class="badge ai">AI</span></div><p>外景，便利店门口，夜。雨下得很急，霓虹招牌在水洼里碎成一片。</p><div class="sub"><span>第1场</span><span>固定机位</span><span>9/9 卡</span></div></div>
+        </div>
+      </div>
+      <div class="frame-col">
+        <div class="frame-label"><i style="background:#8b3dff"></i>E01-002 · 已选中<span class="r">8s</span></div>
+        <div class="frame sel"><div class="scene v2"><div class="store"></div><div class="sign"></div><div class="door"></div><div class="fig"></div><div class="rain"></div><div class="water"></div></div>
+          <div class="finfo"><div class="r1"><span class="id">E01-002</span><span class="badge">全景</span><span class="badge ai">AI</span><span class="badge">补</span></div><p>林晚（27岁，便利店店员）把伞靠在门边，抬头看了眼雨。</p><div class="sub"><span>第1场</span><span>缓慢推拉</span><span>9/9 卡</span></div></div>
+        </div>
+      </div>
+      <div class="frame-col">
+        <div class="frame-label"><i style="background:#00b8ff"></i>E01-003 · 人物入场<span class="r">6s</span></div>
+        <div class="frame"><div class="scene v3"><div class="store"></div><div class="sign"></div><div class="door"></div><div class="fig"></div><div class="rain"></div><div class="water"></div></div>
+          <div class="finfo"><div class="r1"><span class="id">E01-003</span><span class="badge">中景</span><span class="badge ai">AI</span></div><p>陈默（30岁，外套湿透）推门进来，风铃响了一声。</p><div class="sub"><span>第1场</span><span>手持微晃</span><span>9/9 卡</span></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="cbar">
+      <button class="pill-btn outline">＋ 新增画框</button>
+      <button class="pill-btn glass">⇄ 自动排布</button>
+      <button class="pill-btn glass">⊞ 幻灯片视图</button>
+      <span class="note">拖动画框调整顺序 · Alt 拖拽复制 · 双击画面文字直接改</span>
+    </div>
+  </main>
+
+  <!-- 属性 -->
+  <aside class="props">
+    <div class="ph">设计 <span class="t">原型　┆　导出</span></div>
+    <div class="psec">
+      <div class="psec-t">Frame / E01-002</div>
+      <div class="field"><label>景别</label><div class="ctrl">全景 <span>▾</span></div></div>
+      <div class="field"><label>时长</label><div class="ctrl">8 s <span>2–10</span></div></div>
+      <div class="field"><label>画幅</label><div class="ctrl">16 : 9 <span>▾</span></div></div>
+      <div class="field"><label>运镜</label><div class="ctrl">缓慢推拉 <span>▾</span></div></div>
+    </div>
+    <div class="psec">
+      <div class="psec-t">Tags</div>
+      <div class="chips"><span class="chip on">AI</span><span class="chip on">补</span><span class="chip">已核对</span><span class="chip">锁定</span><span class="chip">待核对</span></div>
+    </div>
+    <div class="psec">
+      <div class="psec-t">取景 / 起始帧</div>
+      <div class="mini-scene scene"><div class="store"></div><div class="sign"></div><div class="door"></div><div class="fig"></div><div class="rain"></div><div class="water"></div></div>
+      <div style="font-size:10.5px;color:#888;margin-top:8px;line-height:1.5">firstFrameUrl 已挂到 H3 i2v · 9:16 竖版可切换</div>
+    </div>
+    <div class="psec">
+      <div class="psec-t">AI 分镜描述卡 9/9</div>
+      <dl class="kv">
+        <dt>主体</dt><dd>林晚，27 岁</dd>
+        <dt>动作</dt><dd>收伞、靠门、抬头</dd>
+        <dt>构图</dt><dd>三分法，偏右</dd>
+        <dt>依据</dt><dd>交代空间关系</dd>
+        <dt>运镜</dt><dd>缓慢推拉</dd>
+        <dt>光线</dt><dd>霓虹冷光</dd>
+        <dt>情绪</dt><dd>疲惫、克制</dd>
+        <dt>声音</dt><dd>雨声、风铃</dd>
+        <dt>衔接</dt><dd>动作顺接</dd>
+      </dl>
+    </div>
+    <div class="psec" style="border:0">
+      <div class="psec-t">最终提示词</div>
+      <div class="code">外景，便利店门口，夜，雨下得很急。<em>林晚，深蓝店员制服，湿发贴额</em>，把伞靠在门边，抬头看雨。缓慢推拉，全景，霓虹冷光，疲惫克制，16:9 电影感。</div>
+    </div>
+  </aside>
+</div>
+<div class="tagmark">B / figma</div>
+</body>
+</html>

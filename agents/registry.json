@@ -1,0 +1,165 @@
+{
+  "version": 1,
+  "note": "新增角色 = 加一条 agents 记录 + prompts/<id>.md + skills/<skill>/SKILL.md，无需改 Python 代码。",
+  "pipeline": [
+    "adapt",
+    "parse",
+    "plan",
+    "storyboard",
+    "assets",
+    "frames"
+  ],
+  "agents": [
+    {
+      "id": "adapt",
+      "name": "剧本结构分析师",
+      "stage": "adapt",
+      "order": 1,
+      "desc": "小说 / 散文 → 场次剧本。模型只判结构，正文由服务端逐句重组，原文逐字保真。",
+      "engine": "llm",
+      "builtin": "SYSTEM_ADAPT",
+      "outputKey": "scenes",
+      "skills": [
+        "adapt"
+      ],
+      "endpoint": "/api/ai/adapt",
+      "enabled": true
+    },
+    {
+      "id": "parse",
+      "name": "场次拆解师",
+      "stage": "parse",
+      "order": 2,
+      "desc": "格式化剧本 → 场次 / 台词 / 动作结构，台词逐字保留。",
+      "engine": "llm",
+      "builtin": "SYSTEM_PARSE",
+      "outputKey": "scenes",
+      "skills": [
+        "parse"
+      ],
+      "endpoint": "/api/llm/parse",
+      "enabled": true
+    },
+    {
+      "id": "plan",
+      "name": "总导演助理 · 分集",
+      "stage": "plan",
+      "order": 3,
+      "desc": "按场次边界分集，给出集标题、梗概与集尾钩子。",
+      "engine": "llm",
+      "builtin": "SYSTEM_PLAN",
+      "outputKey": "episodes",
+      "skills": [
+        "plan"
+      ],
+      "endpoint": "/api/ai/plan",
+      "enabled": true
+    },
+    {
+      "id": "storyboard",
+      "name": "分镜大师",
+      "stage": "storyboard",
+      "order": 4,
+      "desc": "逐集拆镜头，9 项分镜描述卡，refs 覆盖剧本行清单，台词逐字一致。",
+      "engine": "llm",
+      "builtin": "SYSTEM_SHOTS",
+      "outputKey": "shots",
+      "skills": [
+        "storyboard"
+      ],
+      "endpoint": "/api/ai/storyboard",
+      "enabled": true,
+      "vars": [
+        "min_shots",
+        "max_shots"
+      ]
+    },
+    {
+      "id": "assets",
+      "name": "美术设定总监",
+      "stage": "assets",
+      "order": 5,
+      "desc": "剧本 → 角色 / 场景 / 道具资产包，含一致性锚点与固定关键词串。",
+      "engine": "llm",
+      "builtin": "SYSTEM_ASSETS",
+      "outputKey": "characters",
+      "skills": [
+        "assets"
+      ],
+      "endpoint": "/api/ai/assets",
+      "enabled": true
+    },
+    {
+      "id": "frames",
+      "name": "起始帧提示词师",
+      "stage": "frames",
+      "order": 6,
+      "desc": "本地模板渲染（不调模型）：分镜 × 资产包 → 77 镜起始帧中英文提示词。",
+      "engine": "local",
+      "builtin": "",
+      "outputKey": "frames",
+      "skills": [
+        "frames"
+      ],
+      "endpoint": "/api/ai/frames",
+      "enabled": true
+    },
+    {
+      "id": "script_evaluator",
+      "name": "剧本评估师",
+      "stage": "review",
+      "order": 7,
+      "desc": "按短剧节奏铁律体检剧本：黄金前 3 秒、反转密度、钩子结尾、爽点与风险。",
+      "engine": "llm",
+      "builtin": "",
+      "outputKey": "report",
+      "generic": true,
+      "skills": [
+        "script-evaluator"
+      ],
+      "input": [
+        "script"
+      ],
+      "enabled": true,
+      "userTemplate": "请评估以下剧本 / 小说原文，只输出结构 JSON，不要解释文字。\n\n原文：\n{script}"
+    },
+    {
+      "id": "script_writer",
+      "name": "剧本创作师",
+      "stage": "write",
+      "order": 8,
+      "desc": "一句话创意 → 分集大纲（集标题、梗概、钩子），不改动词典之外的既有剧本。",
+      "engine": "llm",
+      "builtin": "",
+      "outputKey": "outline",
+      "generic": true,
+      "skills": [
+        "script-writer"
+      ],
+      "input": [
+        "idea"
+      ],
+      "enabled": true,
+      "userTemplate": "请把以下创意扩写成短剧分集大纲，只输出结构 JSON，不要解释文字。\n\n创意：\n{idea}"
+    },
+    {
+      "id": "director",
+      "name": "导演台 · 镜头语言",
+      "stage": "director",
+      "order": 9,
+      "desc": "逐镜补全导演台四要素：机位 / 站位 / 角度 / 光照，供 AI 视频工具照台本布景。",
+      "engine": "llm",
+      "builtin": "",
+      "outputKey": "shots",
+      "generic": true,
+      "skills": [
+        "director"
+      ],
+      "input": [
+        "shots"
+      ],
+      "enabled": true,
+      "userTemplate": "请为以下分镜清单逐镜补全导演台四要素，只输出结构 JSON，不要解释文字。\n\n分镜清单：\n{shots}"
+    }
+  ]
+}

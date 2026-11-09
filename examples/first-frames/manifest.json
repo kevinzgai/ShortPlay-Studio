@@ -1,0 +1,33 @@
+{
+  "source": "guihun-first-frames.json",
+  "model": "flux1-schnell-fp8",
+  "width": 576,
+  "height": 1024,
+  "items": [
+    {
+      "code": "E01-001",
+      "file": "examples/first-frames/E01-001.png",
+      "bytes": 851693,
+      "seconds": 10.1,
+      "seed": 2135812796,
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, long thin face, thick brows narrow eyes straight nose, faint scar on left eyebrow tail, red-string jade pendant on neck, faded white tee under gray-blue school jacket, 70-year-old Chinese village elder, square face deep wrinkles, drooping gray brows sunken eyes, small notch on right ear, old bronze coins at waist, navy frog-button cloth jacket black cloth shoes, Old rural Chinese village house interior, worn wooden table and bamboo chairs, compass on wall, faint dusty daylight, wide shot, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "refAssets": [
+        "C01",
+        "C02",
+        "S01"
+      ]
+    },
+    {
+      "code": "E02-014",
+      "file": "examples/first-frames/E02-014.png",
+      "bytes": 728717,
+      "seconds": 6.0,
+      "seed": 1848578724,
+      "promptEn": "cinematic film still, single frame, opening frame of the shot, 9:16, 18-year-old Chinese boy, narrow long face buck teeth thin neck, birthmark on right cheek, flip-flops, khaki plaid short-sleeve shirt black shorts, Abandoned Chinese village street turned eerie wedding feast, rows of red lanterns, candy stalls, long banquet tables, pale guests in old costumes, medium close-up, 35mm film grain, high dynamic range, deep shadows, real skin texture, photorealistic, 8k, no illustration, no 3d render, no text, no collage",
+      "refAssets": [
+        "C05",
+        "S05"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>D · Notion 风格 — 分镜工场</title>
+<link rel="preconnect" href="https://fonts.loli.net">
+<link href="https://fonts.loli.net/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:rgba(0,0,0,.95);--white:#fff;--warm:#f6f5f4;--warm2:#f1efed;--dark:#31302e;--g500:#615d59;--g300:#a39e98;--blue:#0075de;--bluebg:#f2f9ff;--bluetx:#097fe8;--bd:1px solid rgba(0,0,0,.1);--sh:rgba(0,0,0,.04) 0 4px 18px,rgba(0,0,0,.027) 0 2px 8px,rgba(0,0,0,.02) 0 1px 3px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,system-ui,'PingFang SC','Microsoft YaHei',sans-serif;color:var(--ink);background:var(--white);font-size:16px;font-feature-settings:"lnum","locl";height:100vh;overflow:hidden;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+.app{display:flex;height:100vh}
+
+/* 左侧栏 */
+.side{width:238px;flex:none;background:var(--warm);border-right:var(--bd);display:flex;flex-direction:column;padding:10px 8px;font-size:14px}
+.ws{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:4px;font-weight:600;font-size:14px}
+.ws:hover{background:rgba(0,0,0,.04)}
+.ws .ic{width:20px;height:20px;border-radius:4px;background:var(--dark);color:#fff;display:grid;place-items:center;font-size:11px}
+.ws .ar{margin-left:auto;color:var(--g300);font-size:11px}
+.quick{padding:12px 8px 6px;display:flex;flex-direction:column;gap:2px}
+.quick a{display:flex;gap:9px;align-items:center;padding:5px 8px;border-radius:4px;color:var(--g500);font-size:13.5px;text-decoration:none}
+.quick a:hover{background:rgba(0,0,0,.04)}
+.sec-t{font-size:12px;font-weight:600;color:var(--g300);padding:16px 8px 5px;letter-spacing:.02em}
+.tree a{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:4px;color:var(--g500);font-size:13.5px;text-decoration:none}
+.tree a:hover{background:rgba(0,0,0,.04)}
+.tree a.on{background:rgba(0,0,0,.06);color:var(--ink);font-weight:500}
+.tree a .em{font-size:14px}
+.tree a.sub{padding-left:26px}
+.tree a .cnt{margin-left:auto;font-size:11px;color:var(--g300)}
+.sfoot{margin-top:auto;border-top:var(--bd);padding:10px 8px;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--g500)}
+.sfoot .dot{width:7px;height:7px;border-radius:50%;background:#1aae39}
+
+/* 主区 */
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.top{height:44px;border-bottom:var(--bd);display:flex;align-items:center;gap:8px;padding:0 16px;font-size:13.5px;color:var(--g500);flex:none}
+.top .sep{color:var(--g300)}
+.top b{color:var(--ink);font-weight:500}
+.top .sp{flex:1}
+.top button{font-size:13px;color:var(--g500);padding:5px 8px;border-radius:4px}
+.top button:hover{background:rgba(0,0,0,.04)}
+.top .share{border:1px solid rgba(0,0,0,.1);border-radius:4px;padding:5px 10px;color:var(--ink)}
+
+.scroll{flex:1;overflow:auto}
+.cover{height:132px;background:linear-gradient(100deg,#dfe8f2 0%,#e9e2ee 38%,#f3e6e1 70%,#e7ebe0 100%);position:relative}
+.cover::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 30% 80% at 22% 60%,rgba(120,150,210,.24),transparent 70%),radial-gradient(ellipse 26% 70% at 74% 40%,rgba(230,140,160,.2),transparent 72%)}
+.page{max-width:940px;margin:0 auto;padding:0 56px 80px;position:relative}
+.page-icon{font-size:52px;line-height:1;margin-top:-30px;position:relative;z-index:1;margin-bottom:8px}
+h1{font-size:40px;font-weight:700;letter-spacing:-1.5px;line-height:1.1;margin:6px 0 10px}
+.lede{font-size:16px;color:var(--g500);line-height:1.5;margin-bottom:18px}
+.props{display:flex;flex-direction:column;gap:2px;margin-bottom:22px}
+.prop{display:flex;align-items:center;gap:10px;font-size:14px;min-height:30px}
+.prop .k{width:118px;flex:none;color:var(--g500);display:flex;align-items:center;gap:7px}
+.prop .k i{font-style:normal;font-size:13px;color:var(--g300)}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:2px 9px;border-radius:9999px;letter-spacing:.125px;line-height:1.33}
+.b-blue{background:var(--bluebg);color:var(--bluetx)}
+.b-green{background:#e8f6ec;color:#187a37}
+.b-orange{background:#fdf0e3;color:#b45309}
+.b-purple{background:#f0eafd;color:#6b3fbd}
+.b-gray{background:#f0efed;color:#615d59}
+.b-pink{background:#fceaf3;color:#b83280}
+.callout{display:flex;gap:12px;background:var(--warm);border-radius:4px;padding:14px 16px;font-size:14px;line-height:1.55;margin-bottom:26px}
+.callout .ic{font-size:18px;line-height:1.2}
+.callout b{font-weight:600}
+.callout .r{margin-left:auto;color:var(--bluetx);font-size:13px;white-space:nowrap}
+h2{font-size:24px;font-weight:700;letter-spacing:-.25px;line-height:1.27;margin:32px 0 12px;display:flex;align-items:center;gap:10px}
+h2 .tag{font-size:12px;font-weight:600;color:var(--g300);letter-spacing:0}
+h2 .r{margin-left:auto;display:flex;gap:6px}
+.hbtn{font-size:13px;font-weight:500;color:var(--g500);border:1px solid rgba(0,0,0,.1);border-radius:4px;padding:5px 10px;background:#fff}
+.hbtn:hover{background:var(--warm)}
+.hbtn.pri{background:var(--blue);color:#fff;border-color:var(--blue)}
+.hbtn.pri:hover{background:#005bab}
+
+/* 数据库表格 */
+.db{border:var(--bd);border-radius:4px;overflow:hidden;font-size:14px;box-shadow:var(--sh)}
+.db-tabs{display:flex;align-items:center;gap:4px;padding:8px 10px;border-bottom:var(--bd)}
+.db-tabs .on{font-size:13.5px;font-weight:600;padding:4px 8px;border-bottom:2px solid var(--ink)}
+.db-tabs a{font-size:13.5px;color:var(--g500);padding:4px 8px;text-decoration:none}
+.db-tabs .sp{flex:1}
+.db-tabs .f{font-size:12.5px;color:var(--g500);padding:4px 7px;border-radius:4px}
+.db-tabs .f:hover{background:var(--warm)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;font-weight:500;color:var(--g500);font-size:12.5px;padding:8px 12px;border-bottom:var(--bd);border-right:var(--bd);white-space:nowrap;background:#fbfaf9}
+th:last-child{border-right:0}
+td{padding:9px 12px;border-bottom:var(--bd);border-right:var(--bd);vertical-align:top;line-height:1.45}
+td:last-child{border-right:0}
+tr:last-child td{border-bottom:0}
+tr:hover td{background:#fbfaf9}
+td .ttl{font-weight:500;display:flex;align-items:center;gap:7px}
+td .ttl em{font-style:normal;font-size:12px}
+.mono{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:12px;color:var(--g500);white-space:nowrap}
+.cell-desc{color:var(--ink);min-width:280px}
+.cell-sub{font-size:12px;color:var(--g300);margin-top:3px}
+.db-foot{display:flex;align-items:center;padding:9px 12px;border-top:var(--bd);font-size:13px;color:var(--g500);background:#fbfaf9}
+.db-foot .sp{flex:1}
+.db-foot span{color:var(--g300);font-size:12.5px}
+
+/* toggle 分镜卡 */
+.toggle{border:var(--bd);border-radius:4px;margin-top:18px;overflow:hidden}
+.toggle-h{display:flex;align-items:center;gap:9px;padding:11px 14px;font-size:14px;font-weight:600;cursor:pointer}
+.toggle-h:hover{background:var(--warm)}
+.toggle-h .ar{color:var(--g300);font-size:11px}
+.toggle-h .r{margin-left:auto;font-size:12.5px;font-weight:400;color:var(--g500)}
+.grid9{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(0,0,0,.08);border-top:var(--bd)}
+.grid9 .g{background:#fff;padding:11px 13px}
+.grid9 .g span{display:block;font-size:11.5px;color:var(--g300);margin-bottom:4px}
+.grid9 .g b{font-size:13px;font-weight:500;line-height:1.4}
+
+/* 提示词 block */
+.code{background:var(--warm);border-radius:4px;padding:14px 16px;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:12.5px;line-height:1.65;color:var(--dark);position:relative;margin-top:12px}
+.code .lang{position:absolute;right:10px;top:9px;font-size:10.5px;color:var(--g300);text-transform:uppercase;letter-spacing:.06em}
+.code em{color:var(--bluetx);font-style:normal;background:var(--bluebg);padding:0 3px;border-radius:2px}
+.note{font-size:13px;color:var(--g500);line-height:1.55;margin-top:10px}
+.divider{height:1px;background:rgba(0,0,0,.08);margin:30px 0}
+.tagmark{position:fixed;right:14px;bottom:10px;font-family:ui-monospace,monospace;font-size:10.5px;color:var(--g300);background:#fff;border:var(--bd);padding:4px 9px;border-radius:4px;z-index:9}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="ws"><span class="ic">分</span>分镜工场<span class="ar">⌄</span></div>
+    <div class="quick"><a href="#">⌕　搜索</a><a href="#">◷　最近访问</a><a href="#">✦　AI 助手</a></div>
+    <div class="sec-t">工作区</div>
+    <div class="tree">
+      <a href="#"><span class="em">📁</span>项目<span class="cnt">⌄</span></a>
+      <a href="#" class="sub"><span class="em">🎬</span>雨夜便利店<span class="cnt">⌄</span></a>
+      <a href="#" class="sub" style="padding-left:44px"><span class="em">📄</span>剧本文稿</a>
+      <a href="#" class="sub" style="padding-left:44px"><span class="em">🎭</span>角色与场景资产</a>
+      <a href="#" class="sub on" style="padding-left:44px"><span class="em">🎞️</span>分镜表</a>
+      <a href="#" class="sub" style="padding-left:44px"><span class="em">🖼️</span>起始帧提示词</a>
+      <a href="#" class="sub"><span class="em">🎬</span>雨夜便利店 · 第二季</a>
+      <a href="#"><span class="em">🧩</span>模板库</a>
+      <a href="#"><span class="em">🗂️</span>归档</a>
+    </div>
+    <div class="sfoot"><span class="dot"></span>已自动保存 · 全部数据在本机</div>
+  </aside>
+
+  <main class="main">
+    <div class="top"><span>项目</span><span class="sep">/</span><span>雨夜便利店</span><span class="sep">/</span><b>分镜表</b><div class="sp"></div><button>已自动保存</button><button>⋯</button><button class="share">分享</button></div>
+    <div class="scroll">
+      <div class="cover"></div>
+      <div class="page">
+        <div class="page-icon">🎞️</div>
+        <h1>雨夜便利店 · 分镜表</h1>
+        <p class="lede">导入剧本 → AI 自动分集 → 批量拆镜 → 预览 / 改 / 排 / 导出。点文字直接改，改动自动保存，随时可撤销。</p>
+
+        <div class="props">
+          <div class="prop"><div class="k"><i>◉</i>状态</div><span class="badge b-green">AI 已生成</span></div>
+          <div class="prop"><div class="k"><i>▦</i>分集</div><span class="badge b-blue">E01 雨夜来客</span><span class="badge b-gray">E02 未关的灯</span></div>
+          <div class="prop"><div class="k"><i>◫</i>画幅</div><span class="badge b-gray">16:9</span></div>
+          <div class="prop"><div class="k"><i>◷</i>总时长</div><span>约 100 秒 · 23 镜</span></div>
+          <div class="prop"><div class="k"><i>✦</i>模型</div><span class="mono">deepseek-flash</span>　<span class="badge b-purple">台词校验通过</span></div>
+        </div>
+
+        <div class="callout"><span class="ic">✦</span><div><b>分镜已生成完毕。</b>23 镜全部覆盖 9 项分镜描述卡，台词逐字一致，0 漏项。场景地点已由人工确认；规则引擎备份随时可回退。<br>资产包：2 角色 / 4 场景 / 8 道具，改一次全片同步。</div><span class="r">查看体检报告 ↗</span></div>
+
+        <h2>镜头数据库 <span class="tag">23 条</span><div class="r"><button class="hbtn">筛选</button><button class="hbtn">排序</button><button class="hbtn">＋ 新建</button><button class="hbtn pri">＋ AI 生成镜头</button></div></h2>
+        <div class="db">
+          <div class="db-tabs"><span class="on">表格视图</span><a href="#">卡片</a><a href="#">时间轴</a><div class="sp"></div><span class="f">☰ 筛选</span><span class="f">⇅ 排序</span><span class="f">⌕ 搜索</span></div>
+          <table>
+            <thead><tr><th style="width:110px">镜号</th><th>画面描述</th><th style="width:88px">景别</th><th style="width:66px">时长</th><th style="width:100px">来源</th><th style="width:96px">状态</th><th style="width:80px">分镜卡</th></tr></thead>
+            <tbody>
+              <tr><td><span class="ttl"><em>🎬</em><span class="mono">E01-001</span></span></td><td><div class="cell-desc">外景，便利店门口，夜。雨下得很急，霓虹招牌在水洼里碎成一片。</div><div class="cell-sub">第1场 · 建立镜头 · 固定机位</div></td><td><span class="badge b-gray">全景</span></td><td class="mono">5 s</td><td><span class="badge b-purple">AI</span></td><td><span class="badge b-green">已核对</span></td><td class="mono">9 / 9</td></tr>
+              <tr><td><span class="ttl"><em>🎬</em><span class="mono">E01-002</span></span></td><td><div class="cell-desc">林晚（27岁，便利店店员）把伞靠在门边，抬头看了眼雨。</div><div class="cell-sub">第1场 · 缓慢推拉 · 雨声 / 风铃</div></td><td><span class="badge b-gray">全景</span></td><td class="mono">8 s</td><td><span class="badge b-purple">AI</span> <span class="badge b-orange">补</span></td><td><span class="badge b-green">已核对</span></td><td class="mono">9 / 9</td></tr>
+              <tr><td><span class="ttl"><em>🎬</em><span class="mono">E01-003</span></span></td><td><div class="cell-desc">陈默（30岁，外套湿透）推门进来，风铃响了一声。</div><div class="cell-sub">第1场 · 台词：又是一整夜的雨。</div></td><td><span class="badge b-gray">中景</span></td><td class="mono">6 s</td><td><span class="badge b-purple">AI</span></td><td><span class="badge b-green">已核对</span></td><td class="mono">9 / 9</td></tr>
+              <tr><td><span class="ttl"><em>🎬</em><span class="mono">E01-004</span></span></td><td><div class="cell-desc">林晚侧脸，睫毛上沾着水汽，视线停在门口。</div><div class="cell-sub">第1场 · 台词：又是一整夜的雨。</div></td><td><span class="badge b-pink">近景</span></td><td class="mono">4 s</td><td><span class="badge b-purple">AI</span></td><td><span class="badge b-green">已核对</span></td><td class="mono">9 / 9</td></tr>
+              <tr><td><span class="ttl"><em>🎬</em><span class="mono">E01-005</span></span></td><td><div class="cell-desc">湿透的鞋尖在地砖上留下一小滩水。</div><div class="cell-sub">第2场 · 道具：黑伞</div></td><td><span class="badge b-blue">特写</span></td><td class="mono">3 s</td><td><span class="badge b-purple">AI</span></td><td><span class="badge b-green">已核对</span></td><td class="mono">9 / 9</td></tr>
+              <tr><td><span class="ttl"><em>🎬</em><span class="mono">E01-007</span></span></td><td><div class="cell-desc">林晚从收银台后看向货架，手指停在扫码枪上。</div><div class="cell-sub">第2场 · 正反打 · 对白起</div></td><td><span class="badge b-gray">过肩</span></td><td class="mono">5 s</td><td><span class="badge b-purple">AI</span></td><td><span class="badge b-orange">待核对</span></td><td class="mono">8 / 9</td></tr>
+            </tbody>
+          </table>
+          <div class="db-foot"><span>＋ 新建镜头</span><div class="sp"></div><span>显示 6 / 23 条 · 计数 23</span></div>
+        </div>
+
+        <h2>E01-002 · AI 分镜描述卡 <span class="tag">9 / 9 项可改</span><div class="r"><button class="hbtn">复制</button><button class="hbtn">撤销</button></div></h2>
+        <div class="toggle">
+          <div class="toggle-h"><span class="ar">▾</span>展开全部描述项<span class="r">主体 / 动作 / 构图 / 景别依据 / 运镜 / 光线 / 情绪 / 声音 / 剪辑衔接</span></div>
+          <div class="grid9">
+            <div class="g"><span>主体</span><b>林晚，27 岁，便利店店员</b></div>
+            <div class="g"><span>动作</span><b>收伞、靠门、抬头</b></div>
+            <div class="g"><span>构图</span><b>三分法，人物偏右</b></div>
+            <div class="g"><span>景别依据</span><b>交代空间关系</b></div>
+            <div class="g"><span>运镜</span><b>缓慢推拉</b></div>
+            <div class="g"><span>光线</span><b>霓虹冷光 + 雨水反光</b></div>
+            <div class="g"><span>情绪</span><b>疲惫、克制</b></div>
+            <div class="g"><span>声音</span><b>雨声、风铃</b></div>
+            <div class="g"><span>剪辑衔接</span><b>接雨景空镜，动作顺接</b></div>
+          </div>
+        </div>
+
+        <h2>这一镜的最终提示词 <span class="tag">现编译</span><div class="r"><button class="hbtn">中文</button><button class="hbtn">EN</button><button class="hbtn pri">复制</button></div></h2>
+        <div class="code"><span class="lang">Prompt · ZH</span>外景，便利店门口，夜，雨下得很急。<em>林晚，27岁，深蓝色店员制服，湿发贴在额角</em>，把伞靠在门边，抬头看了眼雨。缓慢推拉，全景，三分法构图人物偏右，霓虹招牌的粉紫冷光与雨水反光，疲惫克制，雨声与风铃，16:9 电影感。<br><br>道具：黑伞　｜　引用资产：character1 / scene1</div>
+        <p class="note">提示词在预览与导出时由资产包现编译。修改角色外观后，相关镜头会打「设定已改」徽标，一键刷新只重算提示词，不会动你手改过的画面描述。</p>
+        <div class="divider"></div>
+        <p class="note">剧本与密钥只留在本机 · AI 调用仅发送剧本文字到你配置的模型端点</p>
+      </div>
+    </div>
+  </main>
+</div>
+<div class="tagmark">D / notion</div>
+</body>
+</html>

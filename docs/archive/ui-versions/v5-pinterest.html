@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>E · Pinterest 风格 — 分镜工场</title>
+<link rel="preconnect" href="https://fonts.loli.net">
+<link href="https://fonts.loli.net/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--red:#e60023;--plum:#211922;--olive:#62625b;--silver:#91918c;--sand:#e5e5e0;--warm:#e0e0d9;--fog:#f6f6f3;--wash:hsla(60,20%,98%,.5);--blue:#2b48d4}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,system-ui,'PingFang SC','Microsoft YaHei',sans-serif;color:var(--plum);background:#fff;font-size:16px;line-height:1.4;-webkit-font-smoothing:antialiased;height:100vh;overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+a{text-decoration:none;color:inherit}
+
+/* 顶栏 */
+header{height:76px;display:flex;align-items:center;gap:12px;padding:0 20px;position:relative;z-index:5;background:#fff;flex:none}
+.logo{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--red);font-size:23px;font-weight:700;flex:none}
+.logo:hover{background:var(--sand)}
+.brand{font-size:15px;font-weight:700;letter-spacing:-.4px;white-space:nowrap;margin-right:6px}
+.tab{padding:12px 16px;border-radius:16px;font-size:14px;font-weight:600;white-space:nowrap}
+.tab.on{background:var(--plum);color:#fff}
+.tab:hover:not(.on){background:var(--sand)}
+.search{flex:1;height:46px;background:var(--sand);border-radius:16px;display:flex;align-items:center;gap:10px;padding:0 16px;color:var(--olive);font-size:14.5px;min-width:120px}
+.search:hover{background:var(--warm)}
+.search .k{margin-left:auto;font-size:11px;background:#fff;border-radius:8px;padding:3px 7px;color:var(--silver)}
+.icb{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--olive);font-size:18px;flex:none}
+.icb:hover{background:var(--sand)}
+.av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#ff9a6c,#e60023);display:grid;place-items:center;color:#fff;font-size:12px;font-weight:700;flex:none}
+
+/* 主体 */
+.wrap{height:calc(100vh - 76px);overflow:auto}
+.hd{padding:26px 32px 6px;text-align:center}
+.hd h1{font-size:28px;font-weight:700;letter-spacing:-1.2px;line-height:1.2}
+.hd p{font-size:14px;color:var(--olive);margin-top:8px}
+.hd .meta{display:flex;justify-content:center;gap:8px;margin-top:14px;flex-wrap:wrap}
+.hd .meta span{font-size:12px;color:var(--olive);background:var(--fog);border-radius:16px;padding:6px 12px}
+.filters{display:flex;justify-content:center;gap:8px;padding:18px 32px 8px;flex-wrap:wrap;position:sticky;top:0;background:linear-gradient(180deg,#fff 78%,rgba(255,255,255,0));z-index:4}
+.filters button{font-size:12.5px;font-weight:600;padding:8px 16px;border-radius:16px;background:var(--sand);color:var(--plum)}
+.filters button:hover{background:var(--warm)}
+.filters button.on{background:var(--plum);color:#fff}
+.filters button.red{background:var(--red);color:#000}
+.bar2{display:flex;align-items:center;gap:10px;padding:10px 32px 16px}
+.bar2 .n{font-size:12.5px;color:var(--olive)}
+.bar2 .sp{flex:1}
+.btn{font-size:12px;font-weight:600;padding:9px 16px;border-radius:16px;background:var(--sand);color:#000}
+.btn:hover{background:var(--warm)}
+.btn.red{background:var(--red);color:#000}
+.btn.red:hover{background:#c4001e}
+.btn.dark{background:var(--plum);color:#fff}
+
+/* 瀑布流 */
+.masonry{columns:4;column-gap:16px;padding:0 32px 60px}
+@media(max-width:1200px){.masonry{columns:3}}
+.pin{break-inside:avoid;margin-bottom:20px;position:relative;cursor:pointer}
+.pin .pic{position:relative;border-radius:18px;overflow:hidden;background:var(--fog)}
+.pin .pic .scene{width:100%;height:100%}
+.pin:hover .pic{filter:brightness(.82)}
+.pin:hover .hover{opacity:1}
+.hover{position:absolute;inset:0;opacity:0;transition:opacity .18s;pointer-events:none}
+.hover .save{position:absolute;left:12px;right:12px;top:12px;height:38px;background:var(--red);color:#000;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700}
+.hover .acts{position:absolute;left:12px;right:12px;bottom:12px;display:flex;gap:6px;justify-content:flex-end}
+.hover .acts span{width:32px;height:32px;border-radius:50%;background:var(--warm);display:grid;place-items:center;font-size:13px}
+.pin .info{padding:10px 6px 2px}
+.pin .r1{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.pin .id{font-size:11px;font-weight:700;font-family:ui-monospace,monospace;letter-spacing:.3px;color:var(--olive)}
+.chip{font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:16px;background:var(--sand);color:var(--plum)}
+.chip.ai{background:#f0eafd;color:#6845ab}
+.chip.fix{background:#fdf0e3;color:#b45309}
+.chip.ok{background:#e8f6ec;color:#187a37}
+.pin p{font-size:13.5px;line-height:1.42;font-weight:500;letter-spacing:-.1px}
+.pin .sub{font-size:11.5px;color:var(--olive);margin-top:6px;display:flex;gap:10px}
+.pin .sub b{font-weight:600;color:var(--plum)}
+.pin.sel .pic{outline:3px solid var(--red);outline-offset:3px}
+
+/* 取景示意（纯 CSS 电影画面） */
+.scene{position:relative;overflow:hidden;background:linear-gradient(180deg,#0b1122 0%,#1a2140 40%,#2b1b36 72%,#0b0e1d 100%);isolation:isolate}
+.scene::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 42% 32% at 21% 30%,rgba(255,64,120,.4),transparent 72%),radial-gradient(ellipse 34% 28% at 79% 26%,rgba(40,210,255,.34),transparent 74%),linear-gradient(180deg,transparent 50%,rgba(6,8,20,.8) 100%)}
+.scene .store{position:absolute;left:11%;top:22%;width:53%;height:50%;background:linear-gradient(180deg,rgba(184,230,255,.2),rgba(110,170,225,.06));border:1px solid rgba(190,225,255,.22);box-shadow:0 0 28px rgba(120,200,255,.2),inset 0 10px 16px rgba(255,255,255,.1)}
+.scene .sign{position:absolute;left:17%;top:27%;width:31%;height:9%;background:linear-gradient(90deg,#ff4d7d,#8b5cf6);box-shadow:0 0 20px rgba(255,77,125,.65);border-radius:2px}
+.scene .door{position:absolute;left:47%;top:37%;width:13%;height:35%;background:rgba(210,240,255,.13);border:1px solid rgba(210,240,255,.22)}
+.scene .fig{position:absolute;left:59%;bottom:10%;width:7%;height:35%;background:linear-gradient(180deg,#090d1c,#151b32);border-radius:44% 44% 16% 16%}
+.scene .fig::before{content:"";position:absolute;left:20%;top:-25%;width:60%;height:30%;border-radius:50%;background:#090d1c}
+.scene .rain{position:absolute;inset:-25%;background:repeating-linear-gradient(74deg,transparent 0 8px,rgba(200,225,255,.13) 8px 9px,transparent 9px 17px);opacity:.55}
+.scene .water{position:absolute;left:0;right:0;bottom:0;height:25%;background:linear-gradient(180deg,rgba(255,77,125,.15),rgba(40,210,255,.13))}
+.scene .water::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 19px,rgba(255,255,255,.07) 19px 21px)}
+.scene .ratio{position:absolute;right:9px;top:9px;font-family:ui-monospace,monospace;font-size:9px;color:rgba(255,255,255,.7);background:rgba(0,0,0,.34);padding:3px 6px;border-radius:8px}
+.h210{height:210px}.h260{height:260px}.h300{height:300px}.h180{height:180px}.h240{height:240px}.h280{height:280px}
+.a .fig{left:38%;width:6%;height:30%}
+.b .sign{background:linear-gradient(90deg,#00e0a0,#00b8ff)}.b .store{left:30%;width:60%}
+.c .sign{background:linear-gradient(90deg,#ffb347,#ff4d7d)}.c .fig{left:26%;width:8%;height:38%}
+.d .store{left:5%;width:42%}.d .fig{left:72%;width:6%;height:36%}
+.e .sign{background:linear-gradient(90deg,#a06bff,#ff4d7d)}.e .fig{left:46%;width:6%;height:32%}
+
+/* 详情浮层 */
+.detail{position:fixed;right:24px;bottom:24px;width:330px;background:#fff;border-radius:24px;box-shadow:0 12px 44px rgba(33,25,34,.2);z-index:8;overflow:hidden}
+.detail .top-pic{height:150px;position:relative}
+.detail .top-pic .scene{height:100%}
+.detail .x{position:absolute;right:10px;top:10px;width:30px;height:30px;border-radius:50%;background:var(--warm);display:grid;place-items:center;font-size:14px;z-index:2}
+.detail .body{padding:14px 18px 18px}
+.detail .r1{display:flex;align-items:center;gap:6px}
+.detail h3{font-size:16px;font-weight:700;letter-spacing:-.4px;margin:9px 0 6px}
+.detail p{font-size:12.5px;color:var(--olive);line-height:1.5}
+.detail .kv{display:flex;gap:8px;flex-wrap:wrap;margin:11px 0}
+.detail .kv span{font-size:11px;font-weight:600;background:var(--fog);border-radius:16px;padding:5px 10px}
+.detail .prompt{background:var(--fog);border-radius:14px;padding:10px 12px;font-family:ui-monospace,monospace;font-size:10.5px;line-height:1.6;color:var(--olive)}
+.detail .acts{display:flex;gap:8px;margin-top:13px}
+.detail .acts button{flex:1;font-size:12px;font-weight:700;padding:10px;border-radius:16px}
+.tagmark{position:fixed;left:14px;bottom:10px;font-family:ui-monospace,monospace;font-size:10.5px;color:var(--silver);background:#fff;border:1px solid var(--sand);padding:4px 9px;border-radius:16px;z-index:9}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">◈</div><div class="brand">分镜工场</div>
+  <button class="tab">首页</button><button class="tab on">创作</button><button class="tab">资产</button>
+  <div class="search">⌕　搜索镜头、角色、台词、场次<span class="k">⌘ K</span></div>
+  <button class="icb">◔</button><button class="icb">✉</button><button class="icb">⋯</button><div class="av">盖</div>
+</header>
+
+<div class="wrap">
+  <div class="hd">
+    <h1>雨夜便利店 · 分镜墙</h1>
+    <p>把每一镜当成一张 Pin。拖着看，点开改，选中的一起重生成。</p>
+    <div class="meta"><span>🎬 23 镜</span><span>⏱ 约 100 秒</span><span>◫ 16:9</span><span>✦ deepseek-flash</span><span>🎭 2 角色 · 4 场景</span></div>
+  </div>
+  <div class="filters">
+    <button class="on">全部</button><button>E01 雨夜来客</button><button>E02 未关的灯</button><button>全景</button><button>中景</button><button>近景 / 特写</button><button>AI 生成</button><button>待核对</button><button class="red">＋ 生成镜头</button>
+  </div>
+  <div class="bar2"><span class="n">23 个镜头 · 按镜号排序</span><div class="sp"></div><button>☑ 批量选择</button><button>⇅ 排序</button><button class="dark">导出 / 打印</button></div>
+
+  <div class="masonry">
+    <div class="pin"><div class="pic h300"><div class="scene"><div class="store"></div><div class="sign"></div><div class="door"></div><div class="rain"></div><div class="water"></div><div class="ratio">16:9</div></div><div class="hover"><div class="save">保存这一镜</div><div class="acts"><span>↗</span><span>⋯</span></div></div></div><div class="info"><div class="r1"><span class="id">E01-001</span><span class="chip">全景</span><span class="chip ai">AI</span></div><p>外景，便利店门口，夜。雨下得很急，霓虹招牌在水洼里碎成一片。</p><div class="sub"><span>第1场 · <b>5s</b></span><span>9/9 卡</span></div></div></div>
+
+    <div class="pin sel"><div class="pic h240"><div class="scene a"><div class="store"></div><div class="sign"></div><div class="door"></div><div class="fig"></div><div class="rain"></div><div class="water"></div><div class="ratio">16:9</div></div><div class="hover"><div class="save">保存这一镜</div><div class="acts"><span>↗</span><span>⋯</span></div></div></div><div class="info"><div class="r1"><span class="id">E01-002</span><span class="chip">全景</span><span class="chip ai">AI</span><span class="chip fix">补</span></div><p>林晚把伞靠在门边，抬头看了眼雨。</p><div class="sub"><span>第1场 · <b>8s</b></span><span>9/9 卡</span></div></div></div>
+
+    <div class="pin"><div class="pic h210"><div class="scene b"><div class="store"></div><div class="sign"></div><div class="door"></div><div class="fig"></div><div class="rain"></div><div class="water"></div></div><div class="hover"><div class="save">保存这一镜</div><div class="acts"><span>↗</span><span>⋯</span></div></div></div><div class="info"><div class="r1"><span class="id">E01-003</span><span class="chip">中景</span><span class="chip ai">AI</span></div><p>陈默（30岁，外套湿透）推门进来，风铃响了一声。</p><div class="sub"><span>第1场 · <b>6s</b></span><span>9/9 卡</span></div></div></div>
+
+    <div class="pin"><div class="pic h280"><div class="scene c"><div class="store"></div><div class="sign"></div><div class="fig"></div><div class="rain"></div><div class="water"></div></div><div class="hover"><div class="save">保存这一镜</div><div class="acts"><span>↗</span><span>⋯</span></div></div></div><div class="info"><div class="r1"><span class="id">E01-004</span><span class="chip">近景</span><span class="chip ok">已核对</span></div><p>林晚侧脸，睫毛上沾着水汽，视线停在门口。台词：又是一整夜的雨。</p><div class="sub"><span>第1场 · <b>4s</b></span><span>9/9 卡</span></div></div></div>
+
+    <div class="pin"><div class="pic h180"><div class="scene d"><div class="store"></div><div class="sign"></div><div class="fig"></div><div class="rain"></div><div class="water"></div></div><div class="hover"><div class="save">保存这一镜</div><div class="acts"><span>↗</span><span>⋯</span></div></div></div><div class="info"><div class="r1"><span class="id">E01-005</span><span class="chip">特写</span><span class="chip ai">AI</span></div><p>湿透的鞋尖在地砖上留下一小滩水。</p><div class="sub"><span>第2场 · <b>3s</b></span><span>道具 黑伞</span></div></div></div>
+
+    <div class="pin"><div class="pic h260"><div class="scene e"><div class="store"></div><div class="sign"></div><div class="door"></div><div class="fig"></div><div class="rain"></div><div class="water"></div></div><div class="hover"><div class="save">保存这一镜</div><div class="acts"><span>↗</span><span>⋯</span></div></div></div><div class="info"><div class="r1"><span class="id">E01-006</span><span class="chip">中景</span><span class="chip ai">AI</span></div><p>陈默站在货架尽头，没有抬头，外套往下滴水。冷白顶光，手持微晃。</p><div class="sub"><span>第2场 · <b>7s</b></span><span>9/9 卡</span></div></div></div>
+
+    <div class="pin"><div class="pic h240"><div class="scene a"><div class="store"></div><div class="sign"></div><div class="fig"></div><div class="rain"></div><div class="water"></div></div><div class="hover"><div class="save">保存这一镜</div><div class="acts"><span>↗</span><span>⋯</span></div></div></div><div class="info"><div class="r1"><span class="id">E01-007</span><span class="chip">过肩</span><span class="chip fix">待核对</span></div><p>林晚从收银台后看向货架，手指停在扫码枪上。</p><div class="sub"><span>第2场 · <b>5s</b></span><span>8/9 卡</span></div></div></div>
+
+    <div class="pin"><div class="pic h300"><div class="scene b"><div class="store"></div><div class="sign"></div><div class="door"></div><div class="fig"></div><div class="rain"></div><div class="water"></div></div><div class="hover"><div class="save">保存这一镜</div><div class="acts"><span>↗</span><span>⋯</span></div></div></div><div class="info"><div class="r1"><span class="id">E01-008</span><span class="chip">全景</span><span class="chip ai">AI</span></div><p>店内只剩一盏灯亮着，雨声隔着玻璃闷成一片。林晚：又是一整夜的雨。</p><div class="sub"><span>第2场 · <b>6s</b></span><span>9/9 卡</span></div></div></div>
+
+    <div class="pin"><div class="pic h210"><div class="scene c"><div class="store"></div><div class="sign"></div><div class="fig"></div><div class="rain"></div><div class="water"></div></div><div class="hover"><div class="save">保存这一镜</div><div class="acts"><span>↗</span><span>⋯</span></div></div></div><div class="info"><div class="r1"><span class="id">E02-001</span><span class="chip">特写</span><span class="chip ai">AI</span></div><p>收银台的灯闪了一下，价签上的字被水洇开。</p><div class="sub"><span>第3场 · <b>3s</b></span><span>9/9 卡</span></div></div></div>
+
+    <div class="pin"><div class="pic h260"><div class="scene d"><div class="store"></div><div class="sign"></div><div class="door"></div><div class="fig"></div><div class="rain"></div><div class="water"></div></div><div class="hover"><div class="save">保存这一镜</div><div class="acts"><span>↗</span><span>⋯</span></div></div></div><div class="info"><div class="r1"><span class="id">E02-002</span><span class="chip">中景</span><span class="chip ai">AI</span></div><p>两人隔着货架对视，谁都没先开口。风铃又响了一次。</p><div class="sub"><span>第3场 · <b>7s</b></span><span>集尾钩子</span></div></div></div>
+
+    <div class="pin"><div class="pic h180"><div class="scene e"><div class="store"></div><div class="sign"></div><div class="fig"></div><div class="rain"></div><div class="water"></div></div><div class="hover"><div class="save">保存这一镜</div><div class="acts"><span>↗</span><span>⋯</span></div></div></div><div class="info"><div class="r1"><span class="id">E02-003</span><span class="chip">空镜</span><span class="chip ai">AI</span></div><p>门口的伞还在滴水，霓虹照旧亮着。</p><div class="sub"><span>第4场 · <b>4s</b></span><span>9/9 卡</span></div></div></div>
+
+    <div class="pin"><div class="pic h280"><div class="scene a"><div class="store"></div><div class="sign"></div><div class="door"></div><div class="fig"></div><div class="rain"></div><div class="water"></div></div><div class="hover"><div class="save">保存这一镜</div><div class="acts"><span>↗</span><span>⋯</span></div></div></div><div class="info"><div class="r1"><span class="id">E02-004</span><span class="chip">全景</span><span class="chip ai">AI</span></div><p>镜头缓缓拉远，便利店的灯成为雨夜里唯一亮着的方块。</p><div class="sub"><span>第4场 · <b>9s</b></span><span>收束</span></div></div></div>
+  </div>
+</div>
+
+<!-- 选中镜头的详情浮层 -->
+<div class="detail">
+  <div class="top-pic"><div class="x">✕</div><div class="scene a"><div class="store"></div><div class="sign"></div><div class="door"></div><div class="fig"></div><div class="rain"></div><div class="water"></div></div></div>
+  <div class="body">
+    <div class="r1"><span class="id">E01-002</span><span class="chip">全景</span><span class="chip ai">AI</span><span class="chip fix">补</span></div>
+    <h3>林晚把伞靠在门边</h3>
+    <p>外景，便利店门口，夜。雨下得很急，霓虹招牌在水洼里碎成一片。</p>
+    <div class="kv"><span>⏱ 8s</span><span>◫ 16:9</span><span>缓慢推拉</span><span>霓虹冷光</span><span>疲惫克制</span><span>9/9 卡</span></div>
+    <div class="prompt">…<b>林晚，深蓝店员制服，湿发贴额</b>，把伞靠在门边，抬头看雨。缓慢推拉，全景，16:9 电影感。</div>
+    <div class="acts"><button class="btn">编辑分镜卡</button><button class="btn red">复制提示词</button></div>
+  </div>
+</div>
+<div class="tagmark">E / pinterest</div>
+</body>
+</html>
