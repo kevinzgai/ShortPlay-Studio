@@ -45,6 +45,7 @@ import sys
 import threading
 import time
 import zipfile
+import xml.etree.ElementTree as ET
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -1494,6 +1495,64 @@ def build_export_zip(payload):
         put("README.txt", "\n".join(lines))
 
     return buf.getvalue(), "%s_资产与分镜_%s.zip" % (safe, stamp)
+
+
+# --------------------------------------------------------------------------
+# 稿子导入：.docx（OOXML）只取正文纯文本，纯标准库，不落盘、不外传
+#   · .docx = zip 包，正文在 word/document.xml
+#   · 只取 w:p（段）里的 w:t（文本），w:br / w:tab 转成换行与空格
+#   · w:instrText（域代码）、w:delText（修订删除）跳过，否则会混进乱码
+#   · 连续空行最多留一行：场次分隔靠空行，全删会把剧本粘成一坨
+# --------------------------------------------------------------------------
+DOCX_W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
+
+
+def docx_extract_text(raw):
+    """bytes(.docx) → 纯文本。不是 docx / 加密 / 损坏时抛 ValueError 带人话原因。"""
+    if raw[:2] != b"PK":
+        raise ValueError("这不是 .docx 文件。老式 .doc 是二进制格式，标准库解不了，"
+                         "请在 Word 里「另存为」.docx 或 .txt 再上传")
+    try:
+        with zipfile.ZipFile(io.BytesIO(raw)) as z:
+            if "word/document.xml" not in z.namelist():
+                raise ValueError("这个文件里没有正文（缺 word/document.xml），可能加了密或已损坏")
+            xml = z.read("word/document.xml")
+    except zipfile.BadZipFile:
+        raise ValueError("文件损坏，zip 结构读不出来，请重新导出一次")
+    try:
+        root = ET.fromstring(xml)
+    except ET.ParseError as exc:
+        raise ValueError("正文 XML 解析失败：" + str(exc)[:100])
+    lines = []
+    for p in root.iter(DOCX_W + "p"):
+        buf = []
+        for node in p.iter():
+            if node.tag == DOCX_W + "t":
+                buf.append(node.text or "")
+            elif node.tag == DOCX_W + "tab":
+                buf.append(" ")
+            elif node.tag == DOCX_W + "br":
+                buf.append("\n")
+        lines.append("".join(buf).strip())
+    out, blank = [], 0
+    for ln in lines:
+        if ln:
+            blank = 0
+            out.append(ln)
+        else:
+            blank += 1
+            if blank <= 1:
+                out.append("")
+    text = "\n".join(out).strip()
+    if not text:
+        raise ValueError("这份 .docx 里没有可读文字（可能全是图片或文本框）")
+    # 给前端一个「这份稿子像什么」的判断依据，避免前端再算一遍
+    heads = len(re.findall(r"^\s*第\s*[0-9一二三四五六七八九十]+\s*场", text, re.M))
+    dlg = len(re.findall(r"^[^：:\s（）()【】\[\]]{1,12}\s*(?:[（(][^）)]*[）)])?\s*[：:]\s*\S",
+                          text, re.M))
+    return {"text": text, "chars": len(text.replace(" ", "").replace("\n", "")),
+            "sceneHeads": heads, "dialogueLines": dlg,
+            "kind": "scene" if heads else ("simple" if dlg >= 3 else "prose")}
 
 
 QUOTE_RE = re.compile(r"[“\"「]([^”\"」]{2,})[”\"」]")
@@ -3936,7 +3995,7 @@ class Handler(SimpleHTTPRequestHandler):
                         "/api/ai/adapt", "/api/ai/assets",
                         "/api/ai/frames", "/api/llm/parse",
                         "/api/ai/asset-fill", "/api/comfy/generate", "/api/comfy/prompt",
-                        "/api/parse/start", "/api/parse/cancel",
+                        "/api/parse/start", "/api/parse/cancel", "/api/import/docx",
                         "/api/llm/providers/save", "/api/llm/providers/activate",
                         "/api/llm/providers/delete", "/api/llm/test",
                         "/api/export/zip") + self.AGENT_POST_PATHS + self.PROJECT_POST_PATHS:
@@ -3960,6 +4019,23 @@ class Handler(SimpleHTTPRequestHandler):
                 return self._json({"detail": str(exc)[:200]}, 400)
             except OSError as exc:
                 return self._json({"detail": "项目写入失败：" + str(exc)[:200]}, 500)
+
+        if path == "/api/import/docx":
+            # 只做「docx → 纯文本」：不落盘、不入项目、不回显原始二进制
+            try:
+                raw = base64.b64decode(str(payload.get("dataB64") or ""), validate=False)
+            except Exception:
+                return self._json({"detail": "文件内容解码失败，请重新选择文件"}, 400)
+            if not raw:
+                return self._json({"detail": "文件是空的"}, 400)
+            if len(raw) > 24 * 1024 * 1024:
+                return self._json({"detail": "文件超过 24MB，请先删掉里面的图片再上传"}, 413)
+            try:
+                out = docx_extract_text(raw)
+            except ValueError as exc:
+                return self._json({"detail": str(exc)[:220]}, 400)
+            out["name"] = str(payload.get("name") or "")[:120]
+            return self._json(out)
 
         if path == "/api/parse/start":
             try:

@@ -63,6 +63,8 @@ function defaultState() {
     frames: [], frameStats: null,     // 每镜起始帧提示词（资产包 + 分镜表 → 出片首帧）
     // 剧本级视觉风格：独立于 assetPack，没跑 AI 分解也能定义；key/anchor/anchorEn 为空 = 跟随 AI 或内置默认
     styleConfig: { key: "", anchor: "", anchorEn: "" },
+    // 第一步「改剧本」：导入时的原文 / 稿件类型 / 最近一次规范化报告
+    rawSource: "", sourceKind: "", normReport: null,
     // 当前项目（Studio 式）：id 对应服务端 projects/<id>/，name 显示在顶栏
     projectId: "", projectName: ""
   };
@@ -78,7 +80,7 @@ export const ui = reactive({
   saveState: "idle",                // idle | saving | saved | error | local
   projects: [], projectBusy: false, projectError: "",
   openScenes: {}, fixInputs: {},
-  propDraft: "", assetOpen: false, refUpload: "",
+  propDraft: "", assetOpen: false, refUpload: "", importBusy: false,
   // 纯 UI 状态：ComfyUI 连接 / 批量出图队列，不进 localStorage
   comfy: {
     online: false, checked: false, checking: false, detail: "",
@@ -243,7 +245,8 @@ const PERSIST_KEYS = [
   "step", "script", "variant", "shots", "selected", "activeId", "view", "stale",
   "meta", "overwriteEdited", "episodes", "activeEpisode", "episodeMode",
   "aiEnabled", "aiSource", "episodeSource", "aiModel", "aiDegraded", "aiWarnings",
-  "assetTab", "assetPack", "assetWarnings", "assetModel", "frames", "frameStats"
+  "assetTab", "assetPack", "assetWarnings", "assetModel", "frames", "frameStats",
+  "rawSource", "sourceKind", "normReport"
 ];
 
 export function projectData() {
@@ -885,6 +888,11 @@ export const novelLike = computed(() => {
   const t = S.script || "";
   return t.replace(/\s/g, "").length > 200 && AI.isNovelScript(t);
 });
+/** 第一步的规范度检查（5 项格式项，和 diagnose 的内容体检互补）。 */
+export const sourceSpec = computed(() => E.scriptSpec(S.script, S.parsed));
+/** 当前稿件的类型：scene / simple / prose / empty */
+export const sourceKind = computed(() => S.sourceKind || E.classifySource(S.script).kind);
+
 export const visibleShots = computed(() => {
   if (S.activeEpisode === "all" || !S.episodes || !S.episodes.length) return S.shots;
   return S.shots.filter((s) => String(s.episode) === String(S.activeEpisode));
@@ -953,7 +961,7 @@ export const EPISODE_MODES = [
    注意：S.step 是对外契约（tools/verify_* 与已存项目都按它走），
    这里只重组导航层级，不改这四个数字的含义顺序。 */
 export const STEPS = [
-  { no: 1, stage: "script", stageName: "剧本阶段", label: "剧本原文", hint: "粘贴或上传原文" },
+  { no: 1, stage: "script", stageName: "剧本阶段", label: "改剧本", hint: "上传稿子 → 规范成场次剧本" },
   { no: 2, stage: "script", stageName: "剧本阶段", label: "AI 拆解确认", hint: "分集 · 场次 · 角色 · 体检" },
   { no: 3, stage: "production", stageName: "制作阶段", label: "资产定妆", hint: "角色 · 场景 · 道具出图" },
   { no: 4, stage: "production", stageName: "制作阶段", label: "分镜表", hint: "改字段 · 导出" }
@@ -979,7 +987,12 @@ export function goStep2() {
 }
 export function oneClick() { doGenerate(true); }
 export function setInputTab(tab) { S.inputTab = tab; }
-export function onScriptInput(e) { S.script = e.target.value; reparse(); save(); }
+export function onScriptInput(e) {
+  S.script = e.target.value;
+  S.sourceKind = E.classifySource(S.script).kind;
+  S.normReport = null;
+  reparse(); save();
+}
 
 export function setScript(text, note) {
   begin();
@@ -994,20 +1007,86 @@ export const loadProblem = () => setScript(E.SAMPLE_PROBLEM_SCRIPT, "已载入�
 export const loadGuihun = () => setScript(GUIHUN_SCRIPT, "已载入《鬼婚，逃命》第一章 · 10 场 19 句对白");
 export const clearScript = () => setScript("", "已清空剧本");
 
-/** 只跑到工作流 stage 1：把小说体忠实转写成场次剧本，原文进撤销栈可一键回退。 */
+/* --------------------------- 第一步：改剧本 --------------------------- */
+export const KIND_LABEL = { scene: "标准场次剧本", simple: "简易剧本", prose: "小说 / 散文体", empty: "空稿" };
+
+/** 导入一份新稿子：记原文、判类型、清掉上一份的规范化报告。 */
+export function setSource(text, note) {
+  begin();
+  S.script = String(text || "");
+  S.rawSource = S.script;
+  S.sourceKind = E.classifySource(S.script).kind;
+  S.normReport = null;
+  reparse();
+  markStale("script");
+  save();
+  if (note) toast(note, "ok", "撤销", undo);
+}
+
+/** 本地补场次头：只补「第N场」，不编内外景/地点/时间，零 AI 成本。 */
+export function normalizeNow() {
+  if (!S.script.trim()) { toast("先把稿子放进来", "warn"); return; }
+  const r = E.normalizeLocal(S.script);
+  if (!r.changed) {
+    toast(r.reason === "already" ? "已经有场次头了，不用再补" : "没识别到可切分的段落，先按空行分段", "warn");
+    return;
+  }
+  begin();
+  S.script = r.script;
+  S.sourceKind = E.classifySource(r.script).kind;
+  S.normReport = { mode: "local", scenes: r.scenes, at: Date.now() };
+  reparse(); markStale("script"); save();
+  toast("已按空行补出 " + r.scenes + " 个场次头；缺的内外景 / 地点 / 时间去第 2 步体检补",
+    "ok", "撤销", undo);
+}
+
+/** 还原到导入时的原文（转写 / 本地规范化之后想重来）。 */
+export function restoreRawSource() {
+  if (!S.rawSource || !S.rawSource.trim()) { toast("没有保留的原文", "warn"); return; }
+  begin();
+  S.script = S.rawSource;
+  S.sourceKind = E.classifySource(S.rawSource).kind;
+  S.normReport = null;
+  reparse(); markStale("script"); save();
+  toast("已还原到导入时的原文", "ok", "撤销", undo);
+}
+
+/**
+ * AI 忠实转写：把小说 / 散文体变成标准场次剧本。
+ * 服务端只让模型输出「哪几句属于哪一场」的结构，正文由原句逐字拼回，
+ * 所以这里能给出「句子保留 X/Y、引语保留 A/B」的可验证覆盖率。
+ */
 export function adaptNovel() {
   if (!S.script.trim()) { toast("先粘贴一段小说 / 散文原文", "warn"); return; }
   if (FORCE_LOCAL || !S.llmAvailable || !S.aiEnabled) {
     toast("小说转写需要开启 AI 模式（当前是离线规则引擎）", "err"); return;
   }
   if (S.aiBusy) return;
+  const src = S.script;
+  const keepRaw = S.rawSource && S.rawSource.trim() ? S.rawSource : src;
   S.aiBusy = true; S.aiStage = "adapt";
   busy(true, "AI 正在忠实转写成场次剧本…");
-  AI.adaptNovel(S.script).then((r) => {
+  AI.adaptNovel(src).then((r) => {
     busy(false); S.aiBusy = false; S.aiStage = "";
     if (!r.script || r.script.length < 40) throw new Error("转写结果为空");
     const cv = r.coverage || {};
-    setScript(r.script, "已转成 " + (cv.sceneHeads || 0) + " 场剧本；原文可用「撤销」恢复");
+    begin();
+    S.script = r.script;
+    S.rawSource = keepRaw;
+    S.sourceKind = E.classifySource(r.script).kind;
+    S.normReport = {
+      mode: "ai", at: Date.now(),
+      scenes: cv.sceneHeads || 0,
+      sentencesTotal: cv.sentencesTotal || 0,
+      sentencesCovered: cv.sentencesCovered || 0,
+      quotesTotal: cv.quotesTotal || 0,
+      quotesCovered: cv.quotesCovered || 0,
+      fromChars: src.replace(/\s/g, "").length,
+      toChars: r.script.replace(/\s/g, "").length,
+      warnings: (r.warnings || []).slice(0, 5)
+    };
+    reparse(); markStale("script"); save();
+    toast("已转成 " + (cv.sceneHeads || 0) + " 场剧本；原文可用「撤销」或「还原原文」找回", "ok");
     (r.warnings || []).forEach((w) => toast("转写校验：" + w, "warn"));
   }).catch((err) => {
     busy(false); S.aiBusy = false; S.aiStage = "";
@@ -1015,10 +1094,50 @@ export function adaptNovel() {
   });
 }
 
+/** 上传：.txt/.md 走浏览器直读；.docx 交后端用标准库解 OOXML；.doc 明确拒绝并给出路。 */
 export function readScriptFile(file) {
   if (!file) return;
+  const name = String(file.name || "");
+  const lower = name.toLowerCase();
+
+  if (/\.docx$/.test(lower)) {
+    if (ui.importBusy) return;
+    ui.importBusy = true;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const bytes = new Uint8Array(reader.result || new ArrayBuffer(0));
+      let bin = "";
+      for (let i = 0; i < bytes.length; i += 0x8000) {
+        bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+      }
+      AI.importDocx(name, btoa(bin)).then((r) => {
+        ui.importBusy = false;
+        S.inputTab = "paste";
+        setSource(r.text, "已从 " + name + " 读出 " + r.chars + " 字 · " + (KIND_LABEL[r.kind] || ""));
+      }).catch((err) => {
+        ui.importBusy = false;
+        toast("读 " + name + " 失败：" + err.message, "err");
+      });
+    };
+    reader.onerror = () => { ui.importBusy = false; toast("读文件失败，请重试", "err"); };
+    reader.readAsArrayBuffer(file);
+    return;
+  }
+
+  if (/\.(doc|wps|wpt)$/.test(lower)) {
+    toast("老式 .doc / .wps 是二进制格式，读不了。请在 Word 里「另存为」.docx 或 .txt 再上传", "warn");
+    return;
+  }
+  if (!/\.(txt|md|text|markdown)$/.test(lower) && file.type && !/^text\//.test(file.type)) {
+    toast("只支持 .txt / .md / .docx；其他格式请先另存为 .txt", "warn");
+    return;
+  }
+
   const reader = new FileReader();
-  reader.onload = () => { setScript(String(reader.result || ""), "已读取 " + file.name); S.inputTab = "paste"; };
+  reader.onload = () => {
+    S.inputTab = "paste";
+    setSource(String(reader.result || ""), "已读取 " + name);
+  };
   reader.onerror = () => toast("读文件失败，请换一个 .txt 试试", "err");
   reader.readAsText(file, "utf-8");
 }

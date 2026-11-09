@@ -55,6 +55,11 @@ import E from "./engine.js";
     return post("ai/adapt", { script: script }, 240000);
   }
 
+  /** .docx 抽正文：只取纯文本，服务端用标准库解 OOXML，不落盘、不外传。 */
+  function importDocx(name, dataB64) {
+    return post("import/docx", { name: name, dataB64: dataB64 }, 60000);
+  }
+
   /** 格式识别：没有场次行、且几乎没有「角色：台词」行，就当成小说体。 */
   function isNovelScript(script) {
     var t = String(script || "");
@@ -400,7 +405,7 @@ export const AIStudio = {
   fillAsset: fillAsset, comfyStatus: comfyStatus,
   comfyGenerate: comfyGenerate, comfyJob: comfyJob, comfyPrompt: comfyPrompt,
   uploadProjectRef: uploadProjectRef,
-  adaptNovel: adaptNovel, isNovelScript: isNovelScript,
+  adaptNovel: adaptNovel, isNovelScript: isNovelScript, importDocx: importDocx,
   localEpisodes: E.localEpisodes,
   startParseTask: startParseTask, watchParseTask: watchParseTask,
   parseTaskState: parseTaskState, parseTaskLatest: parseTaskLatest,

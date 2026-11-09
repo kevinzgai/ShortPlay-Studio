@@ -21,7 +21,7 @@ function jumpToShot(id) {
 }
 
 const base = computed(() => [
-  { id: "s1", group: "导航", icon: "①", label: "剧本原文", hint: "剧本阶段 · 1/2", run: () => goStep(1) },
+  { id: "s1", group: "导航", icon: "①", label: "改剧本", hint: "剧本阶段 · 1/2", run: () => goStep(1) },
   { id: "s2", group: "导航", icon: "②", label: "AI 拆解确认 · 分集", hint: "剧本阶段 · 2/2", run: () => goStep(2) },
   { id: "s3", group: "导航", icon: "③", label: "资产定妆", hint: "制作阶段 · 1/2", run: () => goStep(3) },
   { id: "s4", group: "导航", icon: "④", label: "分镜表", hint: "制作阶段 · 2/2", run: () => goStep(4) },

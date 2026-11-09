@@ -246,6 +246,112 @@
     });
   }
 
+  /* ------------------- 稿子规范化：类型判定 / 规范度 / 本地补场次 ------------------- */
+  var DLG_LINE_RE = /^[^：:\s（）()【】\[\]△▲]{1,12}\s*(?:[（(][^）)]*[）)])?\s*[：:]\s*\S/;
+
+  /**
+   * 稿子类型三档 —— 决定「上传的文件」走哪条路：
+   *   scene  已带场次头，本地规则直接解析，0 AI 成本
+   *   simple 有「角色：台词」但没场次头，本地补场次号即可，0 AI 成本
+   *   prose  小说 / 散文 / 公众号文，必须 AI 忠实转写，否则只能拆出 1 场 0 对白
+   */
+  function classifySource(text) {
+    var t = String(text || "");
+    var compact = t.replace(/\s/g, "");
+    if (!compact) return { kind: "empty", heads: 0, dialogues: 0, chars: 0 };
+    var heads = 0, dialogues = 0;
+    t.replace(/\r\n?/g, "\n").split("\n").forEach(function (rawLine) {
+      var line = trim(rawLine);
+      if (!line) return;
+      if (matchSceneHead(line)) { heads++; return; }
+      if (DLG_LINE_RE.test(line)) dialogues++;
+    });
+    var kind = heads ? "scene" : (dialogues >= 3 ? "simple" : "prose");
+    return { kind: kind, heads: heads, dialogues: dialogues, chars: compact.length };
+  }
+
+  /**
+   * 规范度：把「离能被 AI 正确拆解还差什么」拆成 5 项可执行检查。
+   * 与 diagnose 分工：diagnose 查「内容有没有错」，这里查「格式够不够用」。
+   */
+  function scriptSpec(text, parsed) {
+    var p = parsed || parseScript(String(text || ""));
+    var total = p.scenes.length || 0;
+    var items = [];
+    var hasTitle = !!p.title && p.title !== "未命名短剧";
+    items.push({
+      key: "title", label: "片名", state: hasTitle ? "ok" : "warn",
+      detail: hasTitle ? "《" + p.title + "》" : "没写《片名》，不影响拆解，导出时叫「未命名短剧」"
+    });
+    var withHead = p.scenes.filter(function (s) { return s.headLine; }).length;
+    items.push({
+      key: "head", label: "场次头",
+      state: !total || !withHead ? "bad" : (withHead === total ? "ok" : "warn"),
+      detail: !withHead ? "一场都没标，AI 只能把整篇当 1 场" : withHead + " / " + total + " 场有场次头"
+    });
+    var full = p.scenes.filter(function (s) { return s.intExt && s.location && s.time; }).length;
+    items.push({
+      key: "head3", label: "内外景·地点·时间",
+      state: total && full === total ? "ok" : (full ? "warn" : "bad"),
+      detail: total ? full + " / " + total + " 场写全" : "还没有场次"
+    });
+    items.push({
+      key: "dlg", label: "对白已标说话人", state: p.stats.lines ? "ok" : "bad",
+      detail: p.stats.lines
+        ? p.stats.lines + " 句对白，" + (p.stats.characters || 0) + " 个角色"
+        : "一句对白都没识别到，分镜会退化成空镜"
+    });
+    var pairs = [];
+    (p.characters || []).forEach(function (a, i) {
+      (p.characters || []).forEach(function (b, j) {
+        if (j <= i || a === b) return;
+        if (a.length !== b.length && (a.indexOf(b) >= 0 || b.indexOf(a) >= 0)) pairs.push([a, b]);
+      });
+    });
+    items.push({
+      key: "names", label: "角色名一致", state: pairs.length ? "warn" : "ok",
+      detail: pairs.length
+        ? pairs.slice(0, 3).map(function (x) { return x[0] + " / " + x[1]; }).join("、") + " 像同一个人，可用【角色别名：小明=明】合并"
+        : (p.characters || []).length + " 个角色，没有疑似重名"
+    });
+    var ok = items.filter(function (i) { return i.state === "ok"; }).length;
+    return { items: items, ok: ok, score: Math.round(ok / items.length * 100) };
+  }
+
+  /**
+   * 本地补场次号（只服务 simple 类型，不调 AI、不改一个字）。
+   * 按空行切块，单行块并回上一场，再逐块补「第N场」。
+   * 只补场号、不编内外景/地点/时间 —— 编错会污染参考图与提示词；
+   * 缺的三要素交给第 2 步体检卡一键补，或人工补。
+   */
+  function normalizeLocal(text) {
+    var t = String(text || "").replace(/\r\n?/g, "\n");
+    if (!t.trim()) return { script: t, scenes: 0, changed: false, reason: "empty" };
+    var lines = t.split("\n");
+    if (lines.some(function (l) { return !!matchSceneHead(trim(l)); })) {
+      return { script: t, scenes: 0, changed: false, reason: "already" };
+    }
+    var blocks = [], cur = [];
+    lines.forEach(function (l) {
+      if (!trim(l)) { if (cur.length) { blocks.push(cur); cur = []; } return; }
+      cur.push(l);
+    });
+    if (cur.length) blocks.push(cur);
+    if (!blocks.length) return { script: t, scenes: 0, changed: false, reason: "empty" };
+    var merged = [];
+    blocks.forEach(function (b) {
+      if (b.length <= 1 && merged.length) merged[merged.length - 1].push("", b[0]);
+      else merged.push(b.slice());
+    });
+    var out = [];
+    merged.forEach(function (b, i) {
+      if (i) out.push("");
+      out.push("第" + (i + 1) + "场");
+      b.forEach(function (l) { out.push(l); });
+    });
+    return { script: out.join("\n"), scenes: merged.length, changed: true, reason: "added" };
+  }
+
   /* ------------------------- 信息缺失 / 冲突体检 ------------------------- */
   function diagnose(text, parsed) {
     var issues = [];
@@ -1819,6 +1925,9 @@ export const Engine = {
     SAMPLE_SCRIPT: SAMPLE_SCRIPT,
     SAMPLE_PROBLEM_SCRIPT: SAMPLE_PROBLEM_SCRIPT,
     parseScript: parseScript,
+    classifySource: classifySource,
+    scriptSpec: scriptSpec,
+    normalizeLocal: normalizeLocal,
     diagnose: diagnose,
     applyFix: applyFix,
     buildStoryboard: buildStoryboard,
