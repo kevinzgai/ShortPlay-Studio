@@ -103,8 +103,13 @@
 .es-hint.warn{color:#b45309}
 .es-hint code{font-family:var(--mono);background:rgba(255,255,255,.05);border-radius:3px;padding:1px 4px}
 .es-acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+/* 保存栏吸附底部：两个引擎区块加起来会超出弹窗高度，
+   保存按钮滚出视野后用户会以为「改完就生效了」。
+   bottom 让开 .m-foot（本身也是 sticky bottom:0）的高度，否则两者会叠在一起。 */
 .es-foot{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-  padding-top:10px;border-top:1px dashed var(--line)}
+  position:sticky;bottom:54px;z-index:2;margin:0 -14px -6px;padding:10px 14px 8px;
+  background:var(--surface);border-top:1px dashed var(--line);
+  box-shadow:0 -10px 14px -12px rgba(0,0,0,.6)}
 
 /* 连接与诊断 */
 .dg{display:flex;flex-direction:column;gap:10px}
