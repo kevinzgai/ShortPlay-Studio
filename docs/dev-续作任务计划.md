@@ -1,6 +1,6 @@
 # dev 分支 · 续作任务计划（换机接手用）
 
-> 生成：2026-11-09 · 基线 `bf5e410`（main）· 适用分支 `dev`
+> 生成：2026-11-09 · 基线 `bf5e410`（main）· 适用分支 `dev` · **已推送 GitHub（main + dev）**
 > 本文自包含：**读完即可在另一台机器从 S3 接着做，不需要翻聊天记录。**
 > 完整设计依据见 `docs/分步开发路线-移除一键生成.md`（同一分支，已提交）。
 
@@ -18,9 +18,9 @@
 ## 1. 换机后 5 分钟自检
 
 ```bash
-git clone https://github.com/kevinzgai/ShortPlay-Studio.git
+git clone https://github.com/kevinzgai/ShortPlay-Studio.git   # 公开仓库，clone 免凭证
 cd ShortPlay-Studio
-git checkout dev                 # 若远程还没有 dev，见 §7
+git checkout dev                 # 远程已有 dev，直接切
 npm install                     # 或双击 start.bat，它会自动装 + 构建
 npm run build
 py server.py --no-browser       # 起 8177（服务只用 Python 标准库）
@@ -30,6 +30,7 @@ curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8177/   # 期望 200
 - 前端产物在 `dist/`（`server.py` 托管），**改了 `frontend/src` 必须 `npm run build` 才生效**；改 `server.py` 必须重启 8177。
 - 开发态：`py server.py --no-browser` + `npm run dev --prefix frontend`（5173 代理 /api 到 8177）。
 - 离线模式 `?ai=0`：强制规则引擎 + 不发任何模型请求，排查 UI 时优先用。
+- **推送凭证**：本机 `origin` 走 SSH（`git@github.com:...`），密钥 `~/.ssh/id_ed25519_github`。只 clone / 读代码不需要配置；要 push 就得在新机配自己的 SSH 公钥，或改用 HTTPS + PAT。
 
 ### 回归（重要：脚本不在 git）
 
@@ -141,36 +142,32 @@ Python 侧脚本（`verify_platform.py` 等）同样检查一次 playwright 路�
 | `examples/assets/`（71M 测试图） | 运行时出图产物、体积过大 | 不提交；新机跑出图时自动生成 |
 | `screenshots/`、`.tts/`、`.workbuddy/` | 运行/个人数据 | 忽略 |
 | `MIGRATION.md` | 含本机绝对路径的运维记录 | 忽略 |
+| `~/.ssh/id_ed25519_github` | 本机 GitHub 专用私钥，禁止外传 | 新机另生成一对，把公钥加到 GitHub 账号 |
 
 ---
 
 ## 7. 分支与提交状态
 
-- 当前从 `main@bf5e410` 新建本地分支 **`dev`**，包含：S0/S1/S2 全部代码改动、`README.md` 同步、`docs/` 两份文档、三份 `tools/baseline-*.txt`。
-- **远程 `origin` 没有 dev 分支**（`git ls-remote --heads origin dev` 返回空）。已用非交互方式试推，失败：
-  `fatal: unable to get password from user` —— HTTPS 推送需要 GitHub PAT，**本次只本地提交，未推送**。
-  在有凭证的机器上执行 `git push -u origin dev` 即可，之后新机直接 `git clone` + `git fetch origin dev`。
+- 本地分支 **`dev`**（从 `main@bf5e410` 新建），含 S0/S1/S2 全部代码改动、`README.md` 同步、`docs/` 两份文档、三份 `tools/baseline-*.txt`。
+- **✅ 已推送到 `github.com:kevinzgai/ShortPlay-Studio.git`**（2026-11-09）：`dev` → `7e3ca80`、`main` → `bf5e410`；`dev` 已设 upstream 跟踪 `origin/dev`。用 `git ls-remote --heads origin` 可自行核对。
+- `origin` 使用 **SSH**：`git@github.com:kevinzgai/ShortPlay-Studio.git`。本机 `~/.ssh/config` 的 `Host github.com` 段指向专用密钥 `~/.ssh/id_ed25519_github`（`IdentitiesOnly yes`）。
+- **坑**：本机原有的 `~/.ssh/id_rsa` 是绑定 `wd-hub` 仓库的 Deploy Key，`ssh -T git@github.com` 会显示 `Hi kevinzgai/wd-hub!` 看似认证成功，但推这个仓库报 `Permission ... denied to deploy key`。GitHub 不允许同一把 deploy key 复用到别的仓库，别再拿旧密钥试。
+- 新机 clone 用 HTTPS 即可（免凭证）；要 push 就配自己的 SSH 公钥，或改用 HTTPS + PAT。
 
-### 等不及配 PAT：用交接包（已导出到桌面）
+### 离线兜底：桌面交接包（仍保留，非必需）
 
-旧机桌面目录 `Desktop/ShortPlay-dev-handoff/` 内含 2 个 patch + 1 个 bundle（含完整 dev 历史，已 `git bundle verify`）：
+`Desktop/ShortPlay-dev-handoff/` 内有 3 个 patch + 1 个 bundle（含完整 dev 历史，`git bundle verify` 通过）。只有在不方便联网、想完全离线迁移时才需要：
 
 ```bash
-# 方案 A（推荐，单文件、保历史）：把 .bundle 拷到新机后
 git clone /path/to/ShortPlay-dev.bundle ShortPlay-Studio -b dev
 cd ShortPlay-Studio
-git remote set-url origin https://github.com/kevinzgai/ShortPlay-Studio.git
-
-# 方案 B：仅当 clone 下来的 main 已含基线 bf5e410 时可用（本机 main 的提交此前未推送过，多半不含）
-git checkout -b dev bf5e410
-git am 0001-*.patch 0002-*.patch 0003-*.patch     # 按编号顺序，有几个打几个
-# 若报「does not apply / 找不到基线提交」，直接用方案 A
+git remote set-url origin git@github.com:kevinzgai/ShortPlay-Studio.git
 ```
 
-> 交接包是**提交完成后重新导出**的，含 dev 上全部提交。若在旧机又追加了提交，重跑
+> 交接包在**最后一次提交后重新导出**，含 dev 上全部提交。若旧机又追加提交，重跑
 > `git format-patch main..dev -o <目录>` 与 `git bundle create <目录>/ShortPlay-dev.bundle dev`。
 > 补丁/bundle 只含 git 跟踪的文件，`tools/verify_*` 回归脚本仍需按 §1 单独拷贝。
-- `.gitignore` 的 `tools/verify_*` 策略**未改动**：脚本继续留在本机，理由见 §6。这意味 S3 起新增的验收脚本也要按 §1 手工同步到新机。
+> `.gitignore` 的 `tools/verify_*` 策略**未改动**：S3 起新增的验收脚本也要按 §1 手工同步到新机。
 
 ---
 
