@@ -64,8 +64,8 @@ onUnmounted(() => {
         <ParseProgress />
         <section class="view" id="view-1" :class="{ hidden: S.step !== 1 }"><StepOne v-if="S.step === 1" /></section>
         <section class="view" id="view-2" :class="{ hidden: S.step !== 2 }"><StepTwo v-if="S.step === 2 && S.parsed" /></section>
-        <section class="view" id="view-3" :class="{ hidden: S.step !== 3 }"><StepAsset v-if="S.step === 3" /></section>
-        <section class="view" id="view-4" :class="{ hidden: S.step !== 4 }"><StepShots v-if="S.step === 4" /></section>
+        <section class="view" id="view-3" :class="{ hidden: S.step !== 3 }"><StepShots v-if="S.step === 3" /></section>
+        <section class="view" id="view-4" :class="{ hidden: S.step !== 4 }"><StepAsset v-if="S.step === 4" /></section>
       </main>
     </div>
     <FeedbackLayer />

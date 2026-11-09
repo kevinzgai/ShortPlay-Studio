@@ -1,9 +1,9 @@
 <script setup>
-/* 制作阶段 · 第 1 步：资产定妆
+/* 制作阶段 · 第 2 步（工作区 4）：资产定妆
    把角色 / 场景 / 道具的参考图在这一层定死，分镜的画面描述与参考图槽位
    都从这里取。资产实体全片共享，改一次所有引用它的分镜同步生效。 */
 import { computed } from "vue";
-import { S, goStep, doGenerate, aiEnabledUi } from "../stores/studio.js";
+import { S, goStep } from "../stores/studio.js";
 import AssetPanel from "./AssetPanel.vue";
 import ExportMenu from "./ExportMenu.vue";
 
@@ -24,7 +24,6 @@ const packs = computed(() => {
 const totalCount = computed(() => packs.value.reduce((n, p) => n + p.total, 0));
 const readyCount = computed(() => packs.value.reduce((n, p) => n + p.ready, 0));
 const allReady = computed(() => totalCount.value > 0 && readyCount.value === totalCount.value);
-const hasShots = computed(() => (S.shots || []).length > 0);
 </script>
 
 <template>
@@ -52,13 +51,8 @@ const hasShots = computed(() => (S.shots || []).length > 0);
   <AssetPanel />
 
   <div class="cta-row">
-    <button class="btn" id="back-2" @click="goStep(2)">← 回看拆解结果</button>
-    <button v-if="hasShots" class="btn primary lg" id="go-step4" @click="goStep(4)">去排分镜 →</button>
-    <button v-else class="btn primary lg" id="asset-generate" @click="doGenerate(true)">
-      {{ aiEnabledUi ? "生成 " + (S.episodes.length || "") + " 集分镜 →" : "生成分镜 →" }}
-    </button>
-    <span class="cta-note">
-      {{ hasShots ? "分镜表里可以逐镜检查画面、台词与参考图槽位，随时回到这一步改设定" : "还没生成分镜，定妆后直接生成即可" }}
-    </span>
+    <button class="btn" id="back-3" @click="goStep(3)">← 回分镜表</button>
+    <button class="btn" id="back-2" @click="goStep(2)">回分集方案</button>
+    <span class="cta-note">这一页的参考图全片共享：改一次，第 3 步里所有引用它的镜头同步生效</span>
   </div>
 </template>

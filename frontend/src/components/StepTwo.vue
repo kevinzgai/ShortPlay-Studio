@@ -1,6 +1,6 @@
 <script setup>
 import {
-  S, E, ui, stats, issueCounts, hasFixable, aiEnabledUi,
+  S, E, ui, stats, issueCounts, hasFixable,
   applyFix, fixAll, toggleScene, goStep, toast, doGenerate
 } from "../stores/studio.js";
 import EpisodePlan from "./EpisodePlan.vue";
@@ -16,8 +16,8 @@ function gotoScript() {
 <template>
   <div class="view-head row" style="align-items:flex-end">
     <div>
-      <h1>剧本拆好了，先看一眼</h1>
-      <p class="sub">下面是自动识别的结果。有问题会明确列出来，并给你一键补全的入口；确认没问题再生成分镜。</p>
+      <h1>剧本拆好了 · 确认分集方案</h1>
+      <p class="sub">先看分集怎么切、场次和角色有没有漏，体检问题在这里补。确认后到第 3 步排分镜，最后第 4 步定妆。</p>
     </div>
     <div class="spacer"></div>
     <ExportMenu />
@@ -101,7 +101,7 @@ function gotoScript() {
 
   <div class="cta-row">
     <button class="btn" id="back-1" @click="goStep(1)">← 返回改剧本</button>
-    <button class="btn primary lg" id="generate" @click="doGenerate(true)">{{ aiEnabledUi ? "AI 生成 " + (S.episodes.length || "") + " 集分镜 →" : "生成 " + stats.scenes + " 场的分镜 →" }}</button>
-    <span class="cta-note">生成后进「资产定妆」：先给角色 / 场景出图，再去分镜表逐镜检查；每一步都能撤销</span>
+    <button class="btn primary lg" id="generate" @click="doGenerate(true)">按规则排分镜 →</button>
+    <span class="cta-note">临时桥接：当前用离线规则一次排完，AI 逐集分镜在后续阶段接入；生成后进第 3 步看镜头，再去第 4 步定妆</span>
   </div>
 </template>

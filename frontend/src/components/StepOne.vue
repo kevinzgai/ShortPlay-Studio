@@ -1,28 +1,13 @@
 <script setup>
 import { ref, computed } from "vue";
 import {
-  S, ui, liveStats, novelLike, aiEnabledUi, setInputTab, onScriptInput, loadSample, loadProblem, loadGuihun,
-  clearScript, goStep2, oneClick, readScriptFile, adaptNovel, normalizeNow, restoreRawSource,
+  S, ui, liveStats, aiEnabledUi, setInputTab, onScriptInput, loadSample, loadProblem, loadGuihun,
+  clearScript, goStep2, readScriptFile, adaptNovel, normalizeNow, restoreRawSource,
   sourceSpec, sourceKind, KIND_LABEL
 } from "../stores/studio.js";
 
 const SCRIPT_PLACEHOLDER = "把剧本文字粘贴到这里…\n\n支持这些写法（混用也行）：\n《片名》\n第1场 外景 · 便利店门口 · 夜\n△ 雨下得很急。\n林晚：又是一整夜的雨。\n陈默（压低声音）：你不是第一次来这儿。";
 const dragover = ref(false);
-
-/* 自动处理工作流的可见阶段；单独点「只转写」可停在 stage 1 人工确认 */
-const STAGES = [
-  { key: "detect", name: "识别格式" },
-  { key: "adapt", name: "忠实转写" },
-  { key: "check", name: "剧本体检" },
-  { key: "plan", name: "自动分集" },
-  { key: "shots", name: "逐集分镜" },
-  { key: "verify", name: "覆盖校验" }
-];
-const stageIdx = computed(() => {
-  if (!S.aiBusy) return novelLike.value ? 1 : 0;
-  const i = STAGES.findIndex((s) => s.key === S.aiStage);
-  return i < 0 ? 0 : i;
-});
 
 /* 建议动作：按稿件类型给唯一一条最省力的路 */
 const advice = computed(() => {
@@ -175,12 +160,6 @@ function onDrop(e) {
         </ul>
       </div>
 
-      <div class="flow" id="flow-stages">
-        <span class="flow-label">自动流程</span>
-        <span v-for="(s, i) in STAGES" :key="s.key" class="flow-step"
-          :class="{ done: i < stageIdx, active: i === stageIdx }"><i>{{ i + 1 }}</i>{{ s.name }}</span>
-      </div>
-
       <div class="quick-row">
         <button class="btn sm" id="load-sample" @click="loadSample">载入完整示例剧本</button>
         <button class="btn sm" id="load-problem" @click="loadProblem">试试「待补全」示例</button>
@@ -190,9 +169,8 @@ function onDrop(e) {
       </div>
 
       <div class="cta-row">
-        <button class="btn primary lg" id="go-step2" @click="goStep2">AI 自动拆解</button>
-        <button class="btn lg" id="one-click" @click="oneClick">{{ aiEnabledUi ? "⚡ AI 一键分集 + 分镜" : "⚡ 一键生成全部分镜" }}</button>
-        <span class="cta-note">{{ aiEnabledUi ? "会先由大模型规划分集，再逐集生成分镜；失败自动降级，不改动剧本原文" : "两种方式都不会改动你的剧本原文" }}</span>
+        <button class="btn primary lg" id="go-step2" @click="goStep2">去分集 →</button>
+        <span class="cta-note">下一步只看分集方案、确认切法；分镜在第 3 步按集生成，不再一把梭</span>
       </div>
     </div>
 
@@ -210,7 +188,7 @@ function onDrop(e) {
         </div>
         <div class="how-item"><div class="n">三种稿子 · 三条路</div><p><b>已有场次头</b>：直接拆解，零成本。<b>简易剧本</b>（有对白没场次头）：本地按空行补场号，不改字。<b>小说 / 散文</b>：AI 忠实转写，模型只判断「哪几句属于哪一场」，正文逐字拼回。</p></div>
         <div class="how-item"><div class="n">转写为什么可信</div><p>不让模型重写长文（会被 max_tokens 截断）。它只输出结构 JSON，正文由原句拼装，转完再按句比对：句子保留率、引语保留率都列出来，低于 90% 会直接告警。</p></div>
-        <div class="how-item"><div class="n">下一步做什么</div><p>格式齐了就去「AI 拆解确认」，看分集方案、场次清单和体检问题；缺内外景 / 地点 / 时间在那里一键补。</p></div>
+        <div class="how-item"><div class="n">下一步做什么</div><p>格式齐了就去「分集」，看分集方案、场次清单和体检问题；确认后第 3 步排镜头、第 4 步定妆。</p></div>
       </div>
     </aside>
   </div>

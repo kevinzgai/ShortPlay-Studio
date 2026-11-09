@@ -45,11 +45,20 @@ export const STYLE_PRESETS = [
 ];
 
 /* ------------------------------ 状态 ------------------------------ */
+/** 分步流程的每步状态：idle 没做 / running 正在做 / ready 已完成 / stale 上游改过、需重算 */
+function defaultSteps() {
+  return {
+    script: { status: "idle", at: 0 },
+    plan:   { status: "idle", at: 0, engine: "", model: "" },
+    shots:  { status: "idle", at: 0, byEp: {} },
+    assets: { status: "idle", at: 0 }
+  };
+}
 function defaultState() {
   return {
     step: 1, script: "", parsed: null, issues: [], shots: [],
     config: clone(E.DEFAULT_CONFIG), variant: 0,
-    selected: [], activeId: null, view: "card", stale: "",
+    selected: [], activeId: null, view: "card", stale: "", steps: defaultSteps(),
     overwriteEdited: false, aiMode: "local", llmAvailable: false, llmModel: "", llmProvider: "",
     meta: { title: "" },
     episodes: [], activeEpisode: "all", episodeMode: "auto",
@@ -128,7 +137,7 @@ function snapshot() {
     step: S.step, script: S.script, parsed: S.parsed, issues: S.issues,
     shots: S.shots, config: S.config, variant: S.variant, selected: S.selected,
     styleConfig: S.styleConfig,
-    activeId: S.activeId, stale: S.stale, meta: S.meta,
+    activeId: S.activeId, stale: S.stale, meta: S.meta, steps: S.steps,
     episodes: S.episodes, activeEpisode: S.activeEpisode, aiSource: S.aiSource,
     episodeSource: S.episodeSource, aiModel: S.aiModel,
     aiDegraded: S.aiDegraded, aiWarnings: S.aiWarnings,
@@ -242,7 +251,7 @@ export function redo() {
 
 /** 参与持久化的字段；新增状态字段时记得加到这里，否则刷新会丢。 */
 const PERSIST_KEYS = [
-  "step", "script", "variant", "shots", "selected", "activeId", "view", "stale",
+  "step", "script", "variant", "shots", "selected", "activeId", "view", "stale", "steps",
   "meta", "overwriteEdited", "episodes", "activeEpisode", "episodeMode",
   "aiEnabled", "aiSource", "episodeSource", "aiModel", "aiDegraded", "aiWarnings",
   "assetTab", "assetPack", "assetWarnings", "assetModel", "frames", "frameStats",
@@ -255,6 +264,7 @@ export function projectData() {
   out.config = S.config;
   out.styleConfig = S.styleConfig;
   out.assets = bankApply(S.assets, S.projectId);   // 兜底：缺图的资产先从图仓补回来
+  out.stepV = 2;   // 步骤号语义版本：2 = 工作区 3 分镜 / 4 定妆
   return out;
 }
 
@@ -268,6 +278,25 @@ function blankProjectData() {
   out.episodes = [];
   out.activeEpisode = "all";
   out.aiEnabled = S.aiEnabled;
+  out.stepV = 2;
+  return out;
+}
+
+/** 旧存档没有 steps：补默认值，并把旧 S.stale 字符串翻译成下游 stale。 */
+function normalizeSteps(raw, staleText) {
+  const out = defaultSteps();
+  const d = (raw && typeof raw === "object") ? raw : {};
+  Object.keys(out).forEach((k) => {
+    const v = (d[k] && typeof d[k] === "object") ? d[k] : {};
+    if (["idle", "running", "ready", "stale"].indexOf(v.status) >= 0) out[k].status = v.status;
+    out[k].at = Number(v.at) || 0;
+    if (k === "plan") { out[k].engine = String(v.engine || ""); out[k].model = String(v.model || ""); }
+    if (k === "shots" && v.byEp && typeof v.byEp === "object" && !Array.isArray(v.byEp)) {
+      out[k].byEp = { ...v.byEp };
+    }
+  });
+  if (!raw && staleText === "script") { out.plan.status = "stale"; out.shots.status = "stale"; }
+  if (!raw && staleText === "config") out.shots.status = "stale";
   return out;
 }
 
@@ -289,7 +318,12 @@ export function hydrate(data, info) {
   if (!S.meta || typeof S.meta !== "object") S.meta = { title: "" };
   if (!Array.isArray(S.shots)) S.shots = [];
   if (!Array.isArray(S.episodes)) S.episodes = [];
+  S.steps = normalizeSteps(d.steps, S.stale);
+  S.shots = E.keyShots(S.shots, S.episodes);   // 旧存档补稳定键，只加字段不改内容
   S.step = Number(S.step) || 1;
+  // S2 起 3/4 语义对调（3 分镜 / 4 定妆）。旧存档没有 stepV，按旧含义（3 定妆 / 4 分镜）换回来，
+  // 否则 29 个已存项目一打开就落在错的工作区。
+  if (Number(d.stepV) !== 2 && (S.step === 3 || S.step === 4)) S.step = S.step === 3 ? 4 : 3;
   S.undo = []; S.redo = [];
   if (S.script) reparse();
   // reparse 会重建资产对象（参考图 / 生成图可能被洗掉），用图仓补回来
@@ -588,6 +622,9 @@ function autoTitleProject() {
 }
 function markStale(reason) {
   S.stale = reason;
+  const staleIfReady = (k) => { if (S.steps[k].status === "ready") S.steps[k].status = "stale"; };
+  if (reason === "script") { staleIfReady("plan"); staleIfReady("shots"); }
+  else if (reason === "config") staleIfReady("shots");
   if (S.shots.length) save();
 }
 
@@ -601,7 +638,8 @@ export function doGenerate(goStep3) {
     toast("有 " + errs.length + " 处需要先补全，已在体检卡标出", "warn");
     return;
   }
-  if (!FORCE_LOCAL && S.aiEnabled && S.llmAvailable) return aiGenerate();
+  // 暂时移除「AI 一键分集 + 分镜」：后端 7 阶段流水线（/api/parse/start）休眠，
+  // 不再从任何 UI 入口触发。S4 会用「逐集闸门」替换；当前只保留离线规则兜底。
   return localGenerate();
 }
 
@@ -620,7 +658,7 @@ export function localGenerate() {
     S.activeId = S.shots.length ? S.shots[0].id : null;
     S.aiSource = "local"; S.episodeSource = "local"; S.aiModel = "";
     S.aiDegraded = []; S.aiWarnings = [];
-    S.stale = ""; S.step = 4;
+    S.stale = ""; S.step = 3;
     busy(false); window.scrollTo(0, 0); save();
     toast("已生成 " + (S.episodes.length ? S.episodes.length + " 集 / " : "") + S.shots.length +
       " 个分镜，约 " + E.totalDuration(S.shots) + " 秒", "ok", "撤销", undo);
@@ -762,7 +800,7 @@ function applyAiResult(result) {
   S.episodeSource = (episodes.length && episodes.every((e) => e.source === "local")) ? "local" : "ai";
   S.aiDegraded = degraded;
   S.aiWarnings = result.warnings || [];
-  S.stale = ""; S.step = 4;
+  S.stale = ""; S.step = 3;
   window.scrollTo(0, 0); save();
 
   const head = (S.episodes.length ? S.episodes.length + " 集 / " : "") + S.shots.length + " 镜";
@@ -955,16 +993,15 @@ export const EPISODE_MODES = [
 ];
 
 /* --------------------------- 两阶段 · 四个工作区 ---------------------------
-   剧本阶段：把文字整理成可信的结构（原文 → 拆解确认）
-   制作阶段：把结构做成能出片的资产与镜头（资产定妆 → 分镜表）
-   闸门：没有剧本进不了拆解；没有镜头进不了分镜表。
-   注意：S.step 是对外契约（tools/verify_* 与已存项目都按它走），
-   这里只重组导航层级，不改这四个数字的含义顺序。 */
+   剧本阶段：把文字整理成可信的结构（改剧本 → 分集）
+   制作阶段：先有镜头再定妆（分镜 → 定妆），因为分组视图与参考图都依赖 shots。
+   闸门：没有剧本进不了分集；没有镜头进不了定妆。
+   S.step 是对外契约；S2 把 3/4 语义对调，旧存档由 hydrate 的 stepV 迁移。 */
 export const STEPS = [
   { no: 1, stage: "script", stageName: "剧本阶段", label: "改剧本", hint: "上传稿子 → 规范成场次剧本" },
-  { no: 2, stage: "script", stageName: "剧本阶段", label: "AI 拆解确认", hint: "分集 · 场次 · 角色 · 体检" },
-  { no: 3, stage: "production", stageName: "制作阶段", label: "资产定妆", hint: "角色 · 场景 · 道具出图" },
-  { no: 4, stage: "production", stageName: "制作阶段", label: "分镜表", hint: "改字段 · 导出" }
+  { no: 2, stage: "script", stageName: "剧本阶段", label: "分集", hint: "确认分集方案 · 场次 · 体检" },
+  { no: 3, stage: "production", stageName: "制作阶段", label: "分镜", hint: "按集生成 · 改字段 · 导出" },
+  { no: 4, stage: "production", stageName: "制作阶段", label: "定妆", hint: "按镜头给角色 / 场景 / 道具出图" }
 ];
 export const STAGES = [
   { key: "script", name: "剧本阶段", note: "把文字整理成结构", steps: [1, 2] },
@@ -977,7 +1014,7 @@ export function goStep(n) {
   n = Math.max(1, Math.min(4, Number(n) || 1));
   if (n > 1 && !S.script.replace(/\s/g, "")) { toast("先导入剧本文字", "warn"); return; }
   if (n >= 3 && !S.parsed) { toast("先在第 2 步完成 AI 拆解", "warn"); return; }
-  if (n === 4 && !S.shots.length) { toast("还没有生成分镜，先在「资产定妆」页点生成", "warn"); return; }
+  if (n === 4 && !S.shots.length) { toast("还没有镜头，先在第 3 步排分镜，再来定妆", "warn"); return; }
   S.step = n; window.scrollTo(0, 0); save();
   if (n === 2) planOnly();
 }
@@ -985,7 +1022,6 @@ export function goStep2() {
   if (!S.script.replace(/\s/g, "")) { toast("先放一段剧本文字进来", "warn"); return; }
   reparse(); S.step = 2; window.scrollTo(0, 0); save(); planOnly();
 }
-export function oneClick() { doGenerate(true); }
 export function setInputTab(tab) { S.inputTab = tab; }
 export function onScriptInput(e) {
   S.script = e.target.value;

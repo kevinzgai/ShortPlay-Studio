@@ -198,6 +198,7 @@
     result.stats.lines = result.scenes.reduce(function (a, s) { return a + s.lines.length; }, 0);
     result.stats.actions = result.scenes.reduce(function (a, s) { return a + s.actions.length; }, 0);
     if (!result.title) result.title = inferTitle(raw) || "未命名短剧";
+    result.scenes = keyScenes(result.scenes);
     return result;
   }
 
@@ -667,8 +668,44 @@
       counter[ep] = (counter[ep] || 0) + 1;
       return Object.assign({}, s, {
         no: i + 1,
-        code: ep ? "E" + pad2(ep) + "-" + pad3(counter[ep]) : pad3(i + 1)
+        code: ep ? "E" + pad2(ep) + "-" + pad3(counter[ep]) : pad3(i + 1),
+        key: shotKeyOf(ep, s.sceneNo, counter[ep])
       });
+    });
+  }
+
+  /* ---------------------- 稳定键（分步流程的地基） ----------------------
+   * 以后「只重算受影响的那一场 / 那一集」全靠这两个键。
+   * sceneKey 只看场次头 + 首条动作 + 首位说话人，不含台词正文：
+   *   改一句台词不变，追加新场次也不改变已有场次的键。
+   * shotKey 只看集号 + 场号 + 集内镜序，不看全局 no：
+   *   某一集增删镜头，其它集的键不动。
+   * 重复内容（同头 + 同首动作 + 同首位说话人）用 -2/-3 后缀消歧。
+   */
+  function sceneStableKey(s) {
+    var head = trim(s && s.raw);
+    var firstAction = s && s.actions && s.actions.length ? trim(s.actions[0].text) : "";
+    var firstSpeaker = s && s.lines && s.lines.length ? trim(s.lines[0].speaker) : "";
+    return "sc-" + hash(head + "|" + firstAction + "|" + firstSpeaker).toString(36);
+  }
+  function keyScenes(scenes) {
+    var seen = {};
+    return (scenes || []).map(function (s) {
+      var base = sceneStableKey(s);
+      seen[base] = (seen[base] || 0) + 1;
+      return Object.assign({}, s, { key: seen[base] > 1 ? base + "-" + seen[base] : base });
+    });
+  }
+  function shotKeyOf(ep, sceneNo, seq) {
+    return "e" + pad2(ep || 0) + "-s" + (Number(sceneNo) || 0) + "-" + pad3(seq || 0);
+  }
+  /** 旧存档补键：只加 key，不动 no / code / 任何内容。 */
+  function keyShots(shots, episodes) {
+    var counter = {};
+    return (shots || []).map(function (s) {
+      var ep = episodes && episodes.length ? (Number(s.episode) || 0) : 0;
+      counter[ep] = (counter[ep] || 0) + 1;
+      return Object.assign({}, s, { key: s.key || shotKeyOf(ep, s.sceneNo, counter[ep]) });
     });
   }
 
@@ -1943,6 +1980,10 @@ export const Engine = {
     episodeOf: episodeOf,
     assignEpisodes: assignEpisodes,
     renumberShots: renumberShots,
+    sceneStableKey: sceneStableKey,
+    keyScenes: keyScenes,
+    shotKeyOf: shotKeyOf,
+    keyShots: keyShots,
     /* 资产层 */
     ASSET_KIND_LABEL: ASSET_KIND_LABEL,
     ASSET_FIELDS: ASSET_FIELDS,
