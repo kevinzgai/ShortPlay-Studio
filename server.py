@@ -45,6 +45,7 @@ import json
 import os
 import random
 import re
+import socket
 import sys
 import threading
 import time
@@ -378,13 +379,36 @@ class StudioServer(ThreadingHTTPServer):
     daemon_threads = True
 
 
+def _lan_ip():
+    """取本机局域网出口 IP：UDP connect 只让内核选路由，不实际发包，跨网卡/跨平台。
+    取不到返回 None，横幅只显示本机地址，不影响服务启动。
+    """
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        sock.connect(("8.8.8.8", 80))
+        ip = sock.getsockname()[0]
+        return ip if ip and not ip.startswith("127.") else None
+    except OSError:
+        return None
+    finally:
+        sock.close()
+
+
 def main():
     no_browser = "--no-browser" in sys.argv
-    server = StudioServer(("127.0.0.1", PORT), Handler)
+    # 默认监听所有网卡 → 同一局域网的其他设备可直接访问。
+    # 只想本机用时：SHORTPLAY_HOST=127.0.0.1 python3 server.py
+    host = os.environ.get("SHORTPLAY_HOST", "0.0.0.0")
+    server = StudioServer((host, PORT), Handler)
     base, key, model = llm_settings()
     print("=" * 62)
     print("  分镜工场 ShortPlay Studio 已启动")
-    print("  打开： http://127.0.0.1:%d/" % PORT)
+    print("  监听： %s:%d" % (host, PORT))
+    print("  本机： http://127.0.0.1:%d/" % PORT)
+    if host in ("0.0.0.0", "::"):
+        lan = _lan_ip()
+        print("  局域网： " + ("http://%s:%d/  ← 同一 WiFi 下其他设备用这个" % (lan, PORT)
+                              if lan else "已监听所有网卡，请用本机 IP + 端口访问"))
     print("  AI 模式： " + ("已接入 %s（AI 分集 + AI 分镜）" % model if base and key else "离线规则引擎（无需联网）"))
     print("  停止服务：按 Ctrl+C，或直接关掉这个窗口")
     print("=" * 62, flush=True)
