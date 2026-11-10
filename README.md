@@ -13,9 +13,13 @@
 
 **双击 `start.bat`（Windows）** —— 脚本会：首次自动 `npm install` → 每次自动 `npm run build` → 启动本机服务并打开 `http://127.0.0.1:8177/`。
 
+**macOS：双击 `start-mac.command`**（或终端 `./start-mac.command`）—— 自动带 `NO_PROXY=127.0.0.1,localhost` 启动、自检 8177、打开 `http://127.0.0.1:8177/`，并打印局域网 / 组网设备各自该用的地址。换端口用 `SHORTPLAY_PORT`，不自动开浏览器用 `SHORTPLAY_NO_OPEN=1`。
+
+> macOS 装了 WideWired / VPN 时，**本机浏览器不要填虚拟 IP**（如 `http://172.30.242.10:8177/`）：`NEPacketTunnelProvider` 会把发往自身虚拟 IP 的包送进 utun 隧道，必然超时，与服务是否启动无关。本机固定用 `127.0.0.1`；虚拟 IP 只留给组网里**其他设备**访问。
+
 运行时不需要 Node；Node 只在构建前端时用一次（`start.bat` 已经替你做了）。服务端只用 Python 标准库，无需 pip 安装。端口可用 `SHORTPLAY_PORT` 改，8177 与 ComfyUI 网关（8000 / 8188）不冲突。
 
-> 工程化后不再支持双击 `index.html` 的 `file://` 纯离线路径：Vue SFC 需要构建产物，请统一走 `start.bat`。
+> 工程化后不再支持双击 `index.html` 的 `file://` 纯离线路径：Vue SFC 需要构建产物，请统一走 `start.bat` / `start-mac.command`。
 > 想对比规则引擎与 AI 的结果，访问 `http://127.0.0.1:8177/?ai=0`：强制离线规则引擎 + 不分集，且**不发任何模型请求**。
 
 开发模式（改前端热更新）：
@@ -38,7 +42,7 @@ set "SHORTPLAY_LLM_MODEL=deepseek-flash"
 set "SHORTPLAY_LLM_MAX_TOKENS=16384"
 ```
 
-> `llm-config.bat` 含私钥，已写进 `.gitignore`，**不要提交或分享**。密钥只在 `server.py` 进程内使用，不会写进网页、日志或导出文件。
+> `llm-config.bat` 含私钥，已写进 `.gitignore`，**不要提交或分享**。密钥只在后端服务进程内使用，不会写进网页、日志或导出文件。
 
 ### 多模型接入（可存多条，界面里切换）
 
@@ -358,7 +362,7 @@ shortplay-studio/
 │                                ShotsTable / PreviewPanel / FeedbackLayer / AgentWorkbench
 ├─ projects/                      项目库（每个项目一个目录 + project.json，已 gitignore）
 │  └─ .trash/                     删除的项目移到这里，不直接抹掉
-├─ dist/                          npm run build 产物，server.py 托管它
+├─ dist/                          npm run build 产物，app/main.py 托管它
 ├─ docs/archive/ui-versions/      5 版 UI 原型（历史留档，代码里 0 引用，已从根目录移走）
 ├─ reference/                     分镜平台相关资料（不参与运行，见 reference/README.md）
 │  ├─ 00-项目沿革/                 按天记的开发日志：决策理由与踩过的坑，接手先读
@@ -369,20 +373,21 @@ shortplay-studio/
 │  ├─ 05-外部工具链/               Toonflow 源码（已剔除 data/ 与依赖）
 │  └─ 06-设计原型/                 指向 docs/archive/ui-versions/（唯一真源）
 ├─ MIGRATION.md                   迁移记录：路径处理、合并策略、验证结果
-├─ server.py                      标准库静态托管 + 3 个模型接口 + 结果校验
+├─ server.py                      启动入口（薄壳，只有 from app.main import run）
+├─ app/                           后端实现：main.py 装配 / web 路由 / services 业务 / config 配置
 ├─ start.bat                      一键启动（GBK，自动装依赖 + 构建 + 起服务）
 ├─ llm-config.bat                 本机模型配置（含密钥，已 gitignore）
 ├─ tools/gen_example.js           刷新离线示例（直接 import src/lib/engine.js）
 ├─ tools/gen_ai_example.js        真模型刷新 AI 示例（import src/lib/ai.js）
 ├─ tools/verify_platform.py       离线主流程回归 43 项
 ├─ tools/verify_ai.py             AI 主流程回归（DEPRECATED · 休眠流水线，已从 SUITES 摘除）
-├─ tools/verify_all.mjs           全量串行跑 25 套回归，输出汇总表（node tools/verify_all.mjs [关键字]）
+├─ tools/verify_all.mjs           全量串行跑 26 套回归，输出汇总表（node tools/verify_all.mjs [关键字]）
 ├─ tools/verify_assets.mjs        资产层 + 提示词编译 + 出片端契约 + H3 提示词纯逻辑回归 69 项（node，无浏览器）
 ├─ tools/verify_asset_ui.py       资产层 + 导出契约 + H3 UI 回归 45 项（Playwright 有窗口）
 └─ examples/                      示例剧本 + 两套批量分镜结果
 ```
 
-**分层**：`lib/` 是浏览器与 Node 共用的纯逻辑（零 DOM），`stores/` 只管数据与流程（零 innerHTML），`components/` 只负责声明式渲染。改编排规则只动 `lib/engine.js`，改 AI 链路只动 `lib/ai.js` + `server.py`，改界面只动对应 `.vue`，彼此不耦合。
+**分层**：`lib/` 是浏览器与 Node 共用的纯逻辑（零 DOM），`stores/` 只管数据与流程（零 innerHTML），`components/` 只负责声明式渲染。改编排规则只动 `lib/engine.js`，改 AI 链路只动 `lib/ai.js` + `app/web/routes_post.py`，改界面只动对应 `.vue`，彼此不耦合。
 
 **DOM 契约**：所有 id / class / 文案与旧版保持一致，因此 `tools/verify_*.py` 两个点测脚本无需改动即可回归。
 
@@ -401,14 +406,14 @@ shortplay-studio/
 
 重新生成：离线版 `node tools/gen_example.js`；AI 版先 `py server.py --no-browser`，再 `node tools/gen_ai_example.js`。
 
-> 下表是各套件的**历史点测基线**；当前口径以 `node tools/verify_all.mjs` 的 25 套串行汇总为准（`tools/verify_*` 不在 git，换机同步见 `docs/dev-续作任务计划.md` §1）。
+> 下表是各套件的**历史点测基线**；当前口径以 `node tools/verify_all.mjs` 的 26 套串行汇总为准（`tools/verify_*` 不在 git，换机同步见 `docs/dev-续作任务计划.md` §1）。
 
 | 验证 | 覆盖 | 结果 |
 | --- | --- | --- |
 | `npm run build --prefix frontend` | Vue SFC 编译 / 产物输出 dist | 47 模块通过 |
 | `tools/verify_platform.py` | 离线主流程（`?ai=0`）：导入 → 拆解 → 23 镜 → 编辑 → 删除撤销 → 排序 → 重生成 → 导出 → 体检补全 → 表格；**跑完只删本次创建的项目**，不会往项目库里堆「雨夜便利店」 | 43/43 |
 | `tools/verify_ai.py` | **DEPRECATED**（休眠流水线，已从 SUITES 摘除，勿跑）；历史基线为真模型 32/32 | — |
-| `tools/verify_all.mjs` | **全量串行 25 套**：各套件串行执行（并发跑会互相改变项目数量，让「项目列表条数」类断言假失败），最后打一张通过汇总表；加关键字只跑匹配的，例 `node tools/verify_all.mjs assets` | 25/25 |
+| `tools/verify_all.mjs` | **全量串行 26 套**：各套件串行执行（并发跑会互相改变项目数量，让「项目列表条数」类断言假失败），最后打一张通过汇总表；加关键字只跑匹配的，例 `node tools/verify_all.mjs assets` | 26/26 |
 | `tools/verify_assets.mjs` | 资产层纯逻辑：括注抽外观 / 手改与锁定不被覆盖 / 说话人优先绑定 / 槽位编号 / 提示词去重 / 过期签名 / 出片端契约 / **H3 提示词（禁名、<d> 块、段分组）** | 69/69 |
 | `tools/verify_asset_layout.mjs` | **资产清单密度**：行高 ≤36px / 左 264 右吃满 / 只渲染 1 个详情 / 点行切换 / 搜索过滤 / 定高不撑破 / 无横向溢出 | 13/13 |
 | `tools/verify_assets_panel.mjs` | **资产包面板 + 整包导出**：空态引导 / 编号与优先级 / 三锚点 / 关键词串注入 / 覆盖率 / 提示词正文 / 参考图挂载 / ZIP 下载 / 无 JS 报错 | 12/12 |
@@ -427,7 +432,7 @@ shortplay-studio/
 
 | 层 | 做什么 | 落点 |
 | --- | --- | --- |
-| 资产生产 | 剧本 / 小说全文 + 场次索引 → 结构 JSON（编号 C01/S01、P0/P1、三锚点、别名、溯源），服务端渲染三视图 / 四视图 / 概念图长提示词 | `server.py: build_asset_pack`、`TURNAROUND_TMPL` / `FACE_SHEET_TMPL` / `CONCEPT_TMPL` |
+| 资产生产 | 剧本 / 小说全文 + 场次索引 → 结构 JSON（编号 C01/S01、P0/P1、三锚点、别名、溯源），服务端渲染三视图 / 四视图 / 概念图长提示词 | `app/services/assets.py: build_asset_pack`、`TURNAROUND_TMPL` / `FACE_SHEET_TMPL` / `CONCEPT_TMPL` |
 | 资产合并 | 资产包叠进界面资产层：**用户手改与锁定优先**，剧本里有但包漏掉的角色自动补位 | `engine.js: applyAssetPack` |
 | 一致性注入 | 角色的 `keyword`（固定关键词串）在 `assemblePrompt()` 里原样注入，所有镜头一字不改 | `engine.js: appearanceText` |
 | 起始帧 | 资产包 + 分镜表 → 每镜中英文起始帧提示词（`/api/ai/frames`，纯模板秒回） | `build_frame_prompts` |
@@ -522,14 +527,14 @@ STEP 01 的稿件规范化仍是显式流水线：**识别格式 → 忠实转�
 
 - **自动识别**：`AI.isNovelScript()` 判断「无场次行 + 几乎无「角色：台词」行 + 长文本」；命中就显示提示条，此时直接拆解只会得到 1 场 / 0 句对白。
 - **转写仍是单步**：点「AI 忠实转写」时调用 `/api/ai/adapt`，转写后**重新 `parseScript` 并重算本地兜底镜头**；产物回填输入框并落在撤销栈里（`Ctrl+Z` 可回到小说原文）。这一步与分集、分镜彼此独立。
-- **休眠保留的一键链路**：原先 `AI.run()` → `/api/parse/start` 会把 adapt / assets / plan / storyboard / frames / verify 一次跑完，现为休眠状态（后端代码保留、前端无任何入口、`server.py` 顶部已标「勿删」）。`tools/verify_ai.py`、`verify_parse_progress.mjs`、`verify_parse_resume.mjs` 在 S7 统一标记 **DEPRECATED 并销账**：被测对象没有 UI 入口，逐集 AI 链路已由 S4/S5/S6 三套回归脚本覆盖，不再重写。
+- **休眠保留的一键链路**：原先 `AI.run()` → `/api/parse/start` 会把 adapt / assets / plan / storyboard / frames / verify 一次跑完，现为休眠状态（后端代码保留、前端无任何入口、`app/main.py` 与 `app/services/parse_task.py` 均已标「勿删」）。`tools/verify_ai.py`、`verify_parse_progress.mjs`、`verify_parse_resume.mjs` 在 S7 统一标记 **DEPRECATED 并销账**：被测对象没有 UI 入口，逐集 AI 链路已由 S4/S5/S6 三套回归脚本覆盖，不再重写。
 - **服务端 `/api/ai/adapt` 的设计要点**：模型**只输出结构 JSON**（场次 `start/end` 闭区间、内外景/地点/时间、台词句子索引与原文子串），正文由 `split_source_sentences` + `build_adapted_script` 按原文逐句重组 —— 逐字保真、输出极短、不会被 `max_tokens` 截断。`check_adaptation` 按句核对保真率、直接引语保留数与截断风险，异常以 `warnings` 返回。
 - 真模型产物：`examples/鬼婚逃命-原文.txt` → `examples/鬼婚逃命-AI转写剧本.txt`（9 场 / 19 句对白 / 42 条动作，原文句子 90/99 逐字可查、8 句直接引语全保留、0 警告，约 17 秒）。手工金标准在 `examples/鬼婚逃命-分镜剧本.txt`（10 场 / 19 句对白 / 55 条动作）。
 - 已知取舍：自动版更保守（原文没写时间就标「未注明」，不脑补「日」）；模型偶尔只给半句台词，服务端会补齐到句末。
 
 ## 剧本拆解任务 · 后端实时进度（休眠保留，2026-11-09）
 
-> **本节描述的是已休眠的 7 阶段后端流水线，不是当前主流程。** 代码保留、`server.py` 顶部标注「无 UI 入口，勿删（旧项目恢复用）」，仅用于旧存档刷新时恢复进度；当前生成路径见「二、四个工作区 · 每步人工确认」。本节接口与数据结构均保持原样，不要据此新建 UI 入口。
+> **本节描述的是已休眠的 7 阶段后端流水线，不是当前主流程。** 代码保留、`app/services/parse_task.py` 顶部标注「无 UI 入口，勿删（旧项目恢复用）」，仅用于旧存档刷新时恢复进度；当前生成路径见「二、四个工作区 · 每步人工确认」。本节接口与数据结构均保持原样，不要据此新建 UI 入口。
 
 拆解从「前端串 6 个请求 + 一行 busy 文案」改成**后端任务 + 事件流**：
 
@@ -644,7 +649,7 @@ queued ──▶ running ──▶ done
 
 ## Agent 工作台 · 角色与技能注册表
 
-参考 `huobao-drama` 的做法（Agent 注册表 + 文件化 `SKILL.md` + 界面在线编辑），把原先写死在 `server.py` 里的 6 个 `SYSTEM_*` 提示词抽成了**可插拔角色**。仍然是零第三方依赖、单文件 Python 服务，没有引入 LangChain / Mastra。
+参考 `huobao-drama` 的做法（Agent 注册表 + 文件化 `SKILL.md` + 界面在线编辑），把原先写死在 `server.py` 里的 6 个 `SYSTEM_*` 提示词抽成了**可插拔角色**。仍然是零第三方依赖的 Python 服务（入口 `server.py` 薄壳 + `app/` 包），没有引入 LangChain / Mastra。
 
 ```
 agents/

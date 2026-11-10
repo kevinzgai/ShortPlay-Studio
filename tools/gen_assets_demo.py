@@ -17,7 +17,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
-import server as srv  # noqa: E402
+# 直接引 app/ 下的实现模块，不要 `import server`：
+# server.py 已是薄壳（只剩 from app.main import run），不再对外 re-export 业务符号。
+# 这里原先靠 server.py 的命名空间顺带拿到这些函数，属于隐式依赖。
+from app.constants import SYSTEM_ASSETS  # noqa: E402
+from app.services.assets import build_asset_pack, build_frame_prompts  # noqa: E402
+from app.services.llm_json import call_llm_json  # noqa: E402
 
 SRC = ROOT / "examples" / "鬼婚逃命-AI转写剧本.txt"
 STORYBOARD = ROOT / "examples" / "guihun-storyboard.json"
@@ -134,10 +139,10 @@ def main():
             "剧本 / 小说全文：\n%s" % (scene_list, text[:26000]))
 
     t0 = time.time()
-    data, model = srv.call_llm_json(srv.SYSTEM_ASSETS, user, "characters", 240)
+    data, model = call_llm_json(SYSTEM_ASSETS, user, "characters", 240)
     elapsed = time.time() - t0
     print("模型返回 %.1fs / %s" % (elapsed, model), flush=True)
-    pack = srv.build_asset_pack(data, scenes)
+    pack = build_asset_pack(data, scenes)
     pack["model"] = model
     pack["generatedAt"] = datetime.now().isoformat(timespec="seconds")
     pack["elapsedSeconds"] = round(elapsed, 1)
@@ -148,7 +153,7 @@ def main():
 
     sb = json.loads(STORYBOARD.read_text(encoding="utf-8"))
     shots = sb.get("shots") or []
-    frames = srv.build_frame_prompts(shots, pack, sb.get("config", {}).get("aspect", "9:16"))
+    frames = build_frame_prompts(shots, pack, sb.get("config", {}).get("aspect", "9:16"))
     (OUT / "guihun-first-frames.json").write_text(
         json.dumps(frames, ensure_ascii=False, indent=2), encoding="utf-8")
     (OUT / "guihun-first-frames.md").write_text(
