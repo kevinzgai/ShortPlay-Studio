@@ -441,7 +441,8 @@ D4 无批量按钮；`npm run build` 通过。
 
 - 本地分支 **`dev`**（从基线分支 `main` 新建），含 S0/S1/S2/S3 全部代码改动、`README.md` 同步、`docs/` 两份文档、三份 `tools/baseline-*.txt`。S3 以 Conventional Commits 提交（subject 小写开头），验证脚本按 `.gitignore` 不入库。
 - **✅ 已推送到 `github.com:kevinzgai/ShortPlay-Studio.git`**（2026-11-09）：`dev` 与 `main` 均已推送，`dev` 已设 upstream 跟踪 `origin/dev`。用 `git ls-remote --heads origin` 核对。
-- **⚠️ 2026-11-10 起有本地提交尚未推送**：S3.5 之后的 `feat(settings)` / `style(settings)` / `feat(shots)` / `feat(assets)` / `feat(frames)` 及各阶段 `docs(plan)` 都只在本机 `dev` 上（用户明确选择「先不推」）。换机 clone 前先确认是否需要 push，用 `git log --oneline origin/dev..HEAD` 核对；`tools/verify_*` 与 `engine-config.json` 本来就不入库。
+- **✅ 2026-11-10 已推送**：S3.5~S7 的 12 个提交（`feat(settings)` / `style(settings)` / `feat(plan)` / `feat(shots)` / `feat(assets)` / `feat(frames)` 及各阶段 `docs(plan)`）已推到 `origin/dev`，本地与远程同步。换机 clone 后用 `git log --oneline origin/dev..HEAD` 核对，正常应为空。
+- 入库范围提醒：`tools/verify_*` 与 `engine-config.json` 按 `.gitignore` **不入库**，clone 下来没有回归脚本与本机引擎配置，需按 §1 自行同步。
 - **⚠️ 2026-11-09 做过一次历史重写**（剔除 51 张示例 PNG，仓库 47.6 MB → 约 1 MB）：**所有旧 commit hash 全部失效**，本文不再写死 hash，以远程当前值为准；桌面 bundle / patch 也已按新历史重导。
 - `origin` 使用 **SSH**：`git@github.com:kevinzgai/ShortPlay-Studio.git`。本机 `~/.ssh/config` 的 `Host github.com` 段指向专用密钥 `~/.ssh/id_ed25519_github`（`IdentitiesOnly yes`）。
 - **坑**：本机原有的 `~/.ssh/id_rsa` 是绑定 `wd-hub` 仓库的 Deploy Key，`ssh -T git@github.com` 会显示 `Hi kevinzgai/wd-hub!` 看似认证成功，但推这个仓库报 `Permission ... denied to deploy key`。GitHub 不允许同一把 deploy key 复用到别的仓库，别再拿旧密钥试。
