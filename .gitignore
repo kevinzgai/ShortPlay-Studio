@@ -21,6 +21,8 @@ dist/
 projects/
 .tts/
 .workbuddy/
+.venv/
+data/
 
 # ---- 内部运维记录（含本机绝对路径）----
 MIGRATION.md

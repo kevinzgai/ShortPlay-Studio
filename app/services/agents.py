@@ -10,7 +10,7 @@ from pathlib import Path
 
 from app.infra.coerce import _as, s
 from app.paths import ROOT
-from app.services.llm_json import call_llm_json
+from app.services.llm_gateway import call_llm_json
 
 SYSTEM_PLAN = """你是短剧总导演助理，负责把一部剧本切成若干集。只输出严格 JSON，不要解释文字，不要 Markdown 代码块。
 

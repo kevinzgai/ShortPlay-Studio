@@ -11,6 +11,7 @@
 |---|---|---|
 | 2026-11-11 | **推翻** | §5.3「暂不引入 LangChain/LangGraph」决策被明确推翻 |
 | 2026-11-11 | **新立** | 采用**两步绞杀者模式**接入：现有 `llm_json.py` 抽象层是唯一替换接缝 |
+| 2026-11-11 | **修订** | owner 拍板：步骤一立即执行；步骤二（LangGraph）挂触发器待命不排期，触发条件见 §5 |
 
 推翻动机（评审确认的三条）：
 1. **可观测**：现状 LLM 调用零记录，出问题只能靠用户口述复现；需要 `llm_calls` 表落库。
@@ -56,7 +57,7 @@
 |---|---|---|
 | `langchain-core` | **1.7.6** | 消息类型 / callback 契约（直接 import，故列为直接依赖） |
 | `langchain-openai` | **1.7.4** | `ChatOpenAI`，OpenAI 兼容网关统一接入 |
-| `langgraph` | **1.2.20** | 第二步起的编排状态机 |
+| `langgraph` | （1.2.20，**暂不引入**） | 步骤二依赖，随触发器达成再加入（见 §5 排期修订） |
 
 - **不引入** `langchain` 全家桶（1.4.9）：create_agent/middleware 那层我们不用，角色注册表继续自己的。
 - Python ≥ 3.10（本机 3.13.12 ✅）。
@@ -112,17 +113,22 @@
 
 ## 5. 实施步骤（两步绞杀 + 流式后置）
 
+> **排期修订（2026-11-11 owner 拍板）**：步骤一立即执行；**步骤二不排期、挂触发器待命**。触发条件（二选一先到）：
+> a) P3「评估 Agent 打回」的打回条件 + 收敛条件定义清楚；
+> b) 第二个需要工具循环的 skill 立项。
+> 理由：可观测与流式不绑定 LangGraph，步骤一即兑现；LangGraph 独有价值（状态机/断点续跑/条件边）在评审回环定义清楚前只有成本没有收益。触发达成前，直接依赖仅 langchain-core + langchain-openai 两个。
+
 ### 步骤一：绞杀第一步 —— gateway 落地 + llm_calls 落库（G1/G2/G3）
 
-1. **venv 引导**：新增 `requirements.txt`（3 个直接依赖，钉版本）；`start.bat` 加
+1. **venv 引导**：新增 `requirements.txt`（**2 个直接依赖**，钉版本；langgraph 待触发器达成再加入）；`start.bat` 加
    `py -m venv .venv` + `.venv\Scripts\python -m pip install -r requirements.txt`，
    启动改 `.venv\Scripts\python server.py`；`start-mac.command` 同理。仓库 `.gitignore` 加 `.venv/`。
 2. **建表**：`app/config/db.py` 新增 SQLite 初始化（`data/llm_calls.db`，WAL 模式，见 §6）。
-3. **写 gateway**：`app/services/llm_gateway.py`，`LlmCallsHandler(BaseCallbackHandler)` 在 `on_llm_end/on_llm_error` 写表；`call_path` 由调用方传入（如 `parse_task.adapt`、`agents.run:adapt`）。
+3. **写 gateway**：`app/services/llm_gateway.py`。落库采用**函数级埋点**（`call_llm` 返回前/异常时写表）而非 `BaseCallbackHandler`——绞杀保证 `call_llm` 是唯一出口，函数埋点等价于全链路埋点，且避免 handler 与各家网关 usage 字段差异的解析泥潭；`call_path` v1 自动取调用方模块名（`sys._getframe` 回溯），role 级粒度留待调用方显式传入。
 4. **切流量**：`parse_task.py` / `assets.py` / `agents.py` 的 `from app.services.llm_json import call_llm_json` 改为从 gateway import——**三个文件各改一行 import，调用行零改动**。
 5. **回归放行**：26 套 `tools/verify_*.mjs` 全绿 → 提交。挂了 → revert 本提交，回到纯 stdlib。
 
-### 步骤二：绞杀第二步 —— LangGraph 状态机接管编排（G4）
+### 步骤二：绞杀第二步 —— LangGraph 状态机接管编排（G4）【触发器待命，未排期】
 
 1. 把 `parse_task.py` 休眠保留的 7 阶段流水线改造为 `StateGraph`：节点 = 现有阶段函数，状态 = 快照 dict（沿用 `/api/parse/state` 的结构）。
 2. **降级语义显式保留**：每个节点内部自带 try/except + 降级产出；LangGraph 不配自动重试（`retry_policy` 不用），避免与「逐集降级」打架。

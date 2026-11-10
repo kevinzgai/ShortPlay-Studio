@@ -1,0 +1,4 @@
+# LangChain 接入（两步绞杀 · 步骤一）。版本钉死，升级先跑 26 套回归。
+# 步骤二（langgraph）挂触发器待命，触发条件见 docs/LangChain接入-技术方案.md §5。
+langchain-core==1.7.6
+langchain-openai==1.7.4

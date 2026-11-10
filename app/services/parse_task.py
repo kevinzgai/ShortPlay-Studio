@@ -15,7 +15,7 @@ import urllib.request
 from app.infra.coerce import _as, s
 from app.services.agents import AgentDisabledError, agent_system
 from app.services.assets import build_asset_pack, build_frame_prompts
-from app.services.llm_json import call_llm_json
+from app.services.llm_gateway import call_llm_json
 from app.services.plan import (_local_plan, _script_slice_for_ep,
                                build_script_index, normalize_plan)
 from app.services.script_text import (_clean_scenes, _parse_stats,

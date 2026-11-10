@@ -40,7 +40,27 @@ pause
 exit /b 1
 
 :RUN_PY
+REM LangChain 接入（2026-11-11）：后端改走 .venv，缺失时自动创建
+set "PY_BIN=.venv\Scripts\python.exe"
+if not exist "%PY_BIN%" (
+  echo   首次启动：正在创建 Python 虚拟环境...
+  py -m venv .venv 2>nul
+)
+if exist "%PY_BIN%" (
+  "%PY_BIN%" -c "import langchain_openai" >nul 2>nul
+  if errorlevel 1 (
+    echo   正在安装 Python 依赖（约 1-2 分钟）...
+    "%PY_BIN%" -m pip install --quiet --disable-pip-version-check -r requirements.txt
+  )
+  "%PY_BIN%" -c "import langchain_openai" >nul 2>nul
+  if not errorlevel 1 goto RUN_VENV
+)
+echo   [提示] venv 不可用，使用系统 Python（AI 调用不可用）
 py server.py
+goto END
+
+:RUN_VENV
+"%PY_BIN%" server.py
 goto END
 
 :RUN_PYTHON

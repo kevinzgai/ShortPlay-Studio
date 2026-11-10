@@ -10,7 +10,7 @@ from app.infra.coerce import _alist, _as, _ints, _priority
 from app.constants import (ASSET_KIND_CN, CONCEPT_TMPL, FACE_SHEET_TMPL, FRAME_TMPL,
                             NEGATIVE_DEFAULT, SIZE_EN, STYLE_ANCHOR_DEFAULT,
                             STYLE_ANCHOR_EN_DEFAULT, SYSTEM_ASSET_FILL, TURNAROUND_TMPL)
-from .llm_json import call_llm_json
+from .llm_gateway import call_llm_json
 from .script_text import clean_placeholder
 
 
