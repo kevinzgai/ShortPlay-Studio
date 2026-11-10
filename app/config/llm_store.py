@@ -4,6 +4,7 @@
 Key 一律经 _mask_key 脱敏后才允许出现在接口返回里。
 """
 
+import hashlib
 import json
 import os
 import re

@@ -26,6 +26,15 @@ from app.infra.coerce import _as, s
 from app.paths import ROOT
 from app.services.qwen_image import qwen_image_generate
 
+# ComfyUI 一定在本机（127.0.0.1:8188），必须绕过代理。
+# macOS 上 urllib 会读系统代理设置，且系统代理优先级高于 NO_PROXY 环境变量：
+# 用户开了 Clash/Surge 之类工具时，连 127.0.0.1 的请求会被转到代理端口
+# （实测被转到 127.0.0.1:18900 后 ECONNREFUSED），表现为出图全部失败，
+# 而界面上状态灯却是绿的（状态探测同样失败时会被判成 offline，更难查）。
+# 用空 ProxyHandler 明确声明「不走代理」，与是否设置环境变量无关。
+_LOCAL_OPENER = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+
+
 STYLE_ANCHOR_EN_OBJECT = ("photorealistic, 35mm film grain, "
                           "cool desaturated color grade, no beautification filter")
 
@@ -84,7 +93,7 @@ COMFY_SUFFIX_OBJECT = ("highly detailed, sharp focus, no text, no watermark, "
 def comfy_status():
     """探测本机 ComfyUI；不在线时前端把出图按钮置灰并给出明确原因。"""
     try:
-        with urllib.request.urlopen(comfy_host() + "/system_stats", timeout=4) as r:
+        with _LOCAL_OPENER.open(comfy_host() + "/system_stats", timeout=4) as r:
             st = json.load(r)
         dev = (st.get("devices") or [{}])[0]
         return {
@@ -232,7 +241,7 @@ def comfy_submit(prompt, w, h, seed):
                        "client_id": "shortplay-assets"}).encode("utf-8")
     req = urllib.request.Request(comfy_host() + "/prompt", data=body,
                                  headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=30) as r:
+    with _LOCAL_OPENER.open(req, timeout=30) as r:
         out = json.load(r)
     if out.get("node_errors"):
         raise RuntimeError("ComfyUI 工作流校验失败：" + json.dumps(out["node_errors"], ensure_ascii=False)[:220])
@@ -244,7 +253,7 @@ def comfy_wait(pid, timeout=300):
     while True:
         time.sleep(1.2)
         try:
-            with urllib.request.urlopen(comfy_host() + "/history/" + pid, timeout=20) as r:
+            with _LOCAL_OPENER.open(comfy_host() + "/history/" + pid, timeout=20) as r:
                 hist = json.load(r)
         except Exception:
             if time.time() - t0 > timeout:
@@ -267,7 +276,7 @@ def comfy_download(info):
     q = urllib.parse.urlencode({"filename": info["filename"],
                                 "subfolder": info.get("subfolder", ""),
                                 "type": info.get("type", "output")})
-    with urllib.request.urlopen(comfy_host() + "/view?" + q, timeout=60) as r:
+    with _LOCAL_OPENER.open(comfy_host() + "/view?" + q, timeout=60) as r:
         return r.read()
 
 
