@@ -1069,6 +1069,79 @@
     return { characters: characters, scenes: scenesOut, props: ((prev && prev.props) || []).slice() };
   }
 
+  /* ------------------------- S5 · 资产改以分镜为准 -------------------------
+   * 以下三个函数都是新增的纯逻辑：不碰 parseScript / diagnose / buildStoryboard，
+   * 也不改 buildAssets 内部的一条规则。buildAssets 仍是「剧本 → 骨架」，
+   * assetsFromShots 只负责把「镜头引用过、但剧本骨架里没有」的资产补回来，
+   * 因此正常路径的返回内容与旧版逐字段一致，旧回归脚本不会因为多一层而变红。
+   */
+  /** 收集 shots 的 charIds / sceneId / propIds，id → { count, eps }。 */
+  function shotRefIds(shots) {
+    var refs = {};
+    (shots || []).forEach(function (s) {
+      if (!s) return;
+      var ids = [].concat(s.charIds || [], s.sceneId ? [s.sceneId] : [], s.propIds || []);
+      ids.forEach(function (id) {
+        if (!id) return;
+        var r = refs[id] || (refs[id] = { count: 0, eps: {} });
+        r.count += 1;
+        var ep = Number(s.episode) || 0;
+        if (ep) r.eps[ep] = 1;
+      });
+    });
+    return refs;
+  }
+  /** 镜头 → 资产引用统计。零引用的资产由界面层补 orphan 说明，这里只算被引用的。 */
+  function assetUsage(shots) {
+    var out = {};
+    var refs = shotRefIds(shots);
+    Object.keys(refs).forEach(function (id) {
+      var r = refs[id];
+      var eps = Object.keys(r.eps).map(Number).sort(function (a, b) { return a - b; });
+      var epText = !eps.length ? "未分集"
+        : (eps.length === 1 ? "第 " + eps[0] + " 集" : "第 " + eps[0] + "–" + eps[eps.length - 1] + " 集");
+      var epShort = !eps.length ? "未分集"
+        : (eps.length === 1 ? eps[0] + "集" : eps[0] + "-" + eps[eps.length - 1] + "集");
+      out[id] = {
+        count: r.count, episodes: eps, orphan: false,
+        label: "出现在 " + r.count + " 个镜头 · " + epText,
+        short: r.count + "镜 · " + epShort
+      };
+    });
+    return out;
+  }
+  /**
+   * 资产清单以分镜为准，剧本只兜底：
+   *   1) 先用旧规则 buildAssets(parsed, prev) 出剧本骨架（角色/场景/道具，顺序与旧版一致）；
+   *   2) 镜头引用过却不在骨架里的资产：优先从 prev 认领，认领不到按 id 前缀造最小条目；
+   *   3) 骨架里有但没有任何镜头引用的资产一律保留（由界面标成「剧本兜底」）。
+   * 这样「只在已删镜头里出现」的资产不会被改一次剧本就静默清掉。
+   */
+  function assetsFromShots(shots, parsed, prev) {
+    var base = buildAssets(parsed, prev);
+    var have = {};
+    ["characters", "scenes", "props"].forEach(function (k) {
+      (base[k] || []).forEach(function (a) { if (a && a.id) have[a.id] = 1; });
+    });
+    var prevById = {};
+    [].concat((prev && prev.characters) || [], (prev && prev.scenes) || [], (prev && prev.props) || [])
+      .forEach(function (a) { if (a && a.id && !prevById[a.id]) prevById[a.id] = a; });
+
+    Object.keys(shotRefIds(shots)).forEach(function (id) {
+      if (have[id]) return;
+      var a = prevById[id];
+      if (!a) {
+        var kind = id.indexOf("c:") === 0 ? "character" : (id.indexOf("sc:") === 0 ? "scene" : "prop");
+        var name = id.replace(/^(c:|sc:|p:)/, "").split("|")[0].replace(/-/g, " ");
+        a = { id: id, kind: kind, name: name || id, source: "shots", sceneNos: [] };
+      }
+      var bucket = a.kind === "character" ? "characters" : (a.kind === "scene" ? "scenes" : "props");
+      base[bucket] = (base[bucket] || []).concat([a]);
+      have[id] = 1;
+    });
+    return base;
+  }
+
   /**
    * AI 资产包 → 界面资产层。
    * 资产包负责「有内容的设定」（编号 / 优先级 / 三锚点 / 固定关键词串 / 提示词 / 溯源），
@@ -1989,6 +2062,10 @@ export const Engine = {
     ASSET_FIELDS: ASSET_FIELDS,
     assetId: assetId,
     buildAssets: buildAssets,
+    /* S5：以分镜为准的资产来源 + 引用统计 */
+    assetsFromShots: assetsFromShots,
+    assetUsage: assetUsage,
+    shotRefIds: shotRefIds,
     applyAssetPack: applyAssetPack,
     findAsset: findAsset,
     boundOf: boundOf,

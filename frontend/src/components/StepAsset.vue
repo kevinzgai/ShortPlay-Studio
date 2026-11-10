@@ -30,7 +30,7 @@ const allReady = computed(() => totalCount.value > 0 && readyCount.value === tot
   <div class="view-head row" style="align-items:flex-end">
     <div>
       <h1>资产定妆</h1>
-      <p class="sub">先把角色、场景、道具的参考图定下来。分镜的画面描述和参考图槽位都读这一层，改一次全片同步。</p>
+      <p class="sub">先把角色、场景、道具的参考图定下来。分镜的画面描述和参考图槽位都读这一层，改一次全片同步。资产清单以分镜引用为准，剧本只兜底。</p>
     </div>
     <div class="spacer"></div>
     <span class="chip" :class="allReady ? 'ok' : ''">{{ readyCount }} / {{ totalCount }} 已定妆</span>
@@ -43,8 +43,9 @@ const allReady = computed(() => totalCount.value > 0 && readyCount.value === tot
       <span>{{ p.ready }} / {{ p.total }}</span>
       <i>{{ !p.total ? "无" : (p.ready === p.total ? "全部就绪" : "差 " + (p.total - p.ready) + " 张") }}</i>
     </div>
-    <div class="asset-strip-note">
+    <div class="asset-strip-note" id="asset-source-note">
       定妆 = 有参考图或生成图。上传的参考图保留原图不压缩；生成的图可设为主图，导出时进参考图槽位。
+      资产清单以分镜引用为准，剧本只兜底：每条资产都标了「出现在几个镜头 / 第几集」；标「兜底」的是剧本里写过、当前没有镜头引用的资产，不会被自动删除。
     </div>
   </div>
 

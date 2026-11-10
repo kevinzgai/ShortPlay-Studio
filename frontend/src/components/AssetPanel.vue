@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref, watch, nextTick, onMounted, onUnmounted } from "vue";
 import {
-  S, ui, assetTabs, assetSummary, staleAssetCount, refreshAssets, setAssetTab,
+  S, ui, assetTabs, assetSummary, assetUsage, staleAssetCount, refreshAssets, setAssetTab,
   onAssetFocusin, onAssetChange, toggleAssetLock, uploadAssetRef, clearAssetRef,
   addProp, delAsset, assetPackStats, buildAssetPack, regenFrames,
   copyAssetPrompt, copyAllAssetPrompts, assetPromptBlocks, saveAssetAnchor, saveAssetKeyword, copyText,
@@ -207,6 +207,12 @@ const sceneMeta = computed(() => {
   return ext + (tm ? " · " + tm : "");
 });
 function rowCls(a) { return ["ap-row", "k-" + a.kind, a.id === sel.value?.id ? "on" : ""]; }
+/* S5 · 资产引用信息：左清单给短徽标（行高不能超 36px，见 verify_asset_layout），
+   完整文案放 title 与分组卡。零引用标琥珀色，说明它来自剧本/旧镜头、不会被自动删除。 */
+function usageOf(a) { return (a && assetUsage.value[a.id]) || null; }
+function usageShort(a) { const u = usageOf(a); return u ? u.short : "0镜 · 兜底"; }
+function usageLabel(a) { const u = usageOf(a); return u ? u.label : "现无镜头引用 · 剧本兜底保留"; }
+function usageOrphan(a) { const u = usageOf(a); return !!(u && u.orphan); }
 function stepBy(n) {
   const t = shown.value[idx.value + n];
   if (t) selId.value = t.id;
@@ -700,6 +706,8 @@ watch(() => sel.value && sel.value.id, () => { closePreview(); ui.comfy.preview 
               <span v-if="a.code" class="ap-row-cd">{{ a.code }}</span>
               <span v-if="(a.priority || 'P1') === 'P0'" class="ap-row-dot" title="P0 · 先出图">P0</span>
               <span v-if="a.locked" class="ap-row-lk" title="已锁定">🔒</span>
+              <span class="ap-row-us" :class="{ orphan: usageOrphan(a) }"
+                :data-asset-usage="a.id" :title="usageLabel(a)">{{ usageShort(a) }}</span>
             </div>
 
             <div v-if="!shown.length" class="ap-row-none">
@@ -776,6 +784,8 @@ watch(() => sel.value && sel.value.id, () => { closePreview(); ui.comfy.preview 
                   <div class="ap-shot-card-b">
                     <div class="ap-shot-card-t"><b>{{ a.name }}</b><span>{{ cardSub(a) }}</span></div>
                     <div class="ap-shot-card-m">{{ a.code || "—" }} · {{ a.priority || "P1" }}</div>
+                    <div class="ap-shot-us" :class="{ orphan: usageOrphan(a) }"
+                      :title="usageLabel(a)">{{ usageLabel(a) }}</div>
                     <div class="ap-shot-card-d">最终提示词 · {{ cardVariant(a) }}<br>{{ cardDesc(a) }}</div>
                   </div>
                   <div class="ap-shot-card-act">

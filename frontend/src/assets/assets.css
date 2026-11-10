@@ -127,6 +127,13 @@
 .ap-row-dot{flex:none;font:510 9px/1.5 var(--mono);color:#ffb3b3;background:rgba(255,107,107,.12);
   border:1px solid rgba(255,107,107,.28);border-radius:3px;padding:0 3px}
 .ap-row-lk{flex:none;font-size:9px;opacity:.75}
+/* S5 · 资产引用徽标：行内、不换行、行高 18px（清单行必须 ≤36px）。零引用用琥珀色区分。 */
+.ap-row-us{flex:none;font:9.5px/18px var(--mono);color:var(--text-4);white-space:nowrap;
+  padding:0 4px;border-radius:3px;background:rgba(255,255,255,.045)}
+.ap-row-us.orphan{color:#e8b96a;background:rgba(232,185,106,.12)}
+.ap-shot-us{margin-top:2px;font:9.5px/1.5 var(--mono);color:var(--text-4);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ap-shot-us.orphan{color:#e8b96a}
 /* 行由 button 改成 div（内层要放复制按钮），把按钮的默认排版补回来 */
 .ap-row{font-family:inherit;color:inherit;font-size:inherit}
 .ap-row:focus-visible{outline:none;border-color:var(--primary-line);background:rgba(255,255,255,.05)}

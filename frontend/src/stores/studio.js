@@ -633,13 +633,17 @@ function syncShotLabels() {
   return n;
 }
 
-export function reparse() {
+export function reparse(opts) {
   S.parsed = E.parseScript(S.script);
   S.issues = E.diagnose(S.script, S.parsed);
   S.meta.title = S.parsed.title;
   syncShotLabels();
-  // 资产随剧本重建；用户改过的外观/服装/参考图/锁定会被保留（见 engine.buildAssets）
-  S.assets = E.buildAssets(S.parsed, S.assets);
+  // S5：资产来源可配置。默认以分镜引用为准（shots），剧本只兜底，
+  // 避免改一句剧本就把「只在已删镜头里出现」的资产静默清掉。
+  // 传 reparse({ assetsFrom: "script" }) 可退回纯剧本重建，便于对照与排错。
+  S.assets = (opts && opts.assetsFrom === "script")
+    ? E.buildAssets(S.parsed, S.assets)
+    : E.assetsFromShots(S.shots, S.parsed, S.assets);
   // buildAssets 只认规则字段，会把资产包的编号/锚点/关键词串洗掉 —— 有包就叠回去，
   // 否则刷新页面或改一句剧本，资产包就白做了。
   if (S.assetPack) S.assets = E.applyAssetPack(S.assets, S.assetPack, S.parsed);
@@ -1261,6 +1265,26 @@ export const assetTabs = computed(() => [
   { kind: "scene", label: "场景", items: S.assets.scenes },
   { kind: "prop", label: "道具", items: S.assets.props }
 ]);
+/** S5：id → { count, episodes, label, short, orphan }。
+ *  被引用的资产由 E.assetUsage 统计；零引用的资产按剧本场次换算集号，
+ *  给出「曾属哪集 / 剧本兜底」的明确归属，而不是让它在界面上凭空消失。 */
+export const assetUsage = computed(() => {
+  const u = E.assetUsage(S.shots);
+  [].concat(S.assets.characters, S.assets.scenes, S.assets.props).forEach((a) => {
+    if (!a || !a.id || u[a.id]) return;
+    const eps = [...new Set((a.sceneNos || []).map((n) => E.episodeOf(S.episodes, n)).filter(Boolean))]
+      .sort((x, y) => x - y);
+    const at = eps.length
+      ? "第 " + (eps.length === 1 ? eps[0] : eps[0] + "–" + eps[eps.length - 1]) + " 集"
+      : "剧本";
+    u[a.id] = {
+      count: 0, episodes: eps, orphan: true,
+      label: "现无镜头引用 · " + at + " · 剧本兜底保留",
+      short: "0镜 · 兜底"
+    };
+  });
+  return u;
+});
 export const assetSummary = computed(() => ({
   characters: S.assets.characters.length,
   scenes: S.assets.scenes.length,
