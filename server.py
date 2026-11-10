@@ -16,7 +16,11 @@
        GET  /api/agents、/api/agents/prompt、/api/skills、/api/skills/detail
        POST /api/agents/run、/api/agents/save、/api/agents/patch、
             /api/agents/add、/api/agents/delete、/api/skills/save 等
- 10. 剧本拆解任务（后端执行 + 事件流实时进度）：
+ 10. 【休眠保留 · 无 UI 入口，勿删（旧项目恢复用）】剧本拆解任务（后端执行 + 事件流）：
+       S2 起「AI 一键分集 + 分镜」的一键入口已从前端移除，改为
+       ① 改剧本 → ② 分集 → ③ 分镜 → ④ 定妆 四步人工确认（单步接口 /api/ai/*）。
+       下面这条 7 阶段流水线代码保留、前端无任何入口，仅用于旧项目刷新时恢复进度；
+       删掉会让旧存档报错。不要把它当主流程，也不要新建 UI 入口。
        POST /api/parse/start  开任务，秒回 taskId
        GET  /api/parse/events SSE 推送阶段 / 工具调用事件（since 续传）
        GET  /api/parse/state  整份快照（刷新页面靠它恢复）
@@ -2858,6 +2862,8 @@ def fill_asset_with_ai(payload):
 
 # --------------------------------------------------------------------------
 # 剧本拆解任务（后端实时进度 + 事件流）
+#   【休眠保留 · 无 UI 入口，勿删（旧项目恢复用）】S2 起一键入口已移除，
+#   当前主流程是四个工作区逐步人工确认 + /api/ai/* 单步接口；本段仅供旧项目恢复进度。
 #   为什么放后端：拆解是 6 个阶段、串行几十秒的活。前端自己 Promise 串联时，
 #   刷新页面 / 换标签页进度就没了，也没法在关掉页面后继续。改成「后端任务 + 事件流」：
 #     POST /api/parse/start   → { taskId }，后端线程开跑，立刻返回
