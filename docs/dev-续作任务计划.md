@@ -1,7 +1,7 @@
 # dev 分支 · 续作任务计划（换机接手用）
 
 > 生成：2026-11-09 · 基线分支 `main` · 适用分支 `dev` · **已推送 GitHub（main + dev）** · 历史已剔除示例 PNG
-> 本文自包含：**读完即可在另一台机器从 S7 接着做，不需要翻聊天记录。**
+> 本文自包含：**S0~S7 全部阶段已完成；本文档转维护手册，读完即可接手，不需要翻聊天记录。**
 > 完整设计依据见 `docs/分步开发路线-移除一键生成.md`（同一分支，已提交）。
 
 ---
@@ -21,25 +21,24 @@ docs/dev-续作任务计划.md 和 docs/分步开发路线-移除一键生成.md
   S4 分镜逐集闸门（storyboardStep / byEp 集级状态 / 按 key 只替换本集 / 失败隔离）、
   S5 定妆消费分镜（assetsFromShots / reparse 来源可配置 / 资产卡引用数 / 零引用兜底说明）、
   S6 出片归位（framesGate 硬闸门 / withRefSlots 参考图槽位 / 第 3 步只读预览不发 frames）。
-- 下一步 = S7「收尾与文档」：休眠流水线注释、README 工作区章节、套件登记复核、死脚本处置。
-- 实测：`verify_all.mjs` 24 套全绿（5m05s）；各阶段细项见 §3。
+- S7「收尾与文档」已完成：休眠流水线标注、README 工作区章节 +「为什么不做一键」、套件登记复核、
+  两个死脚本标 DEPRECATED 销账。**S0~S7 全部阶段收尾完毕。**
+- 实测：`verify_all.mjs` 25 套全绿（5m15s）；各阶段细项见 §3。
   注意其中 `ComfyUI 出图 UI` 因本机 8188 离线是「0 通过/0 失败 · 环境跳过」，不是完整 26/26。
 
-【本次只做 S7，照 docs/分步开发路线-移除一键生成.md「阶段 7」的改动执行】
-1. 休眠流水线处置：`/api/parse/start` 与 `ParseProgress.vue`、`ui.parse` 系列保留，
-   在 `server.py` 顶部注释标「无 UI 入口，勿删（旧项目恢复用）」；
-   `verify_parse_progress.mjs` / `verify_parse_resume.mjs` 两个死脚本按新流程重写或删除。
-2. `README.md` 工作区章节从「两个阶段 · 四个工作区」改为「四个工作区 · 每步人工确认」，
-   补「为什么不做一键」一段；与阶段 1~6 的实现对齐。
-3. 复核 `verify_all.mjs` 已登记 `verify_no_oneclick` / `verify_plan_step` / `verify_shot_gate` /
-   `verify_asset_from_shots` / `verify_frames_after_assets`（现 24 套），跑完给出逐项结果。
-> 依赖 S6 的「首帧提示词定妆后生成」。后端 7 阶段流水线保持休眠不删，不新建 AI 接口，
-> D4 仍不给「剩余全部」按钮。
+【全部阶段已完成，本提示词转为维护模式】
+- S0~S7 已全部落地并验收，不要重做任何阶段。要改功能就按新需求开新阶段，先报计划再动手。
+- 四条红线仍然有效（见下）；改动前先跑一次基线：node tools/verify_all.mjs（25 套串行，实测 5m15s）。
+- 休眠的 /api/parse/start 流水线：代码保留、无 UI 入口、已标「勿删（旧项目恢复用）」，
+  不要新建入口，也不要删；两个 DEPRECATED 回归脚本不跑。
+- README 的「四个工作区 · 每步人工确认」与「为什么不做一键」是产品口径，改实现必须同步改它，
+  verify_final_docs.mjs 会拦。
 
 【硬约束，违反即返工】
 - 四项已锁决策：D1 分集/分镜各为独立 AI 步 + 人工闸门；D2 整步作废 + 显式重跑（不做按场增量）；
   D3 顺序 剧本→分集→分镜→定妆；D4 只有单集闸门，第一版不给「剩余全部」按钮。
-- 阶段严格串行，S6 没验收完不许碰 S7；不改 engine.js 的解析/体检/buildStoryboard 规则
+- 阶段已全部完成（S2 定死步骤号、S3 定死集号、S4 依赖集号、S5 依赖镜头、S6 依赖资产），新阶段仍须串行；
+  不改 engine.js 的解析/体检/buildStoryboard 规则
   （S5 起允许新增资产来源层纯函数，但既有规则一行不许删改，见 verify_plan_contract.mjs）；
   不新建 AI 接口，复用 /api/ai/plan、/api/ai/storyboard、/api/ai/assets、/api/ai/frames；
   后端 7 阶段流水线保持休眠不删。
@@ -48,7 +47,7 @@ docs/dev-续作任务计划.md 和 docs/分步开发路线-移除一键生成.md
 
 【环境与容易踩的坑】
 - 服务是 Python 标准库后端 8177：py server.py --no-browser；改 frontend/src 必须 npm run build，
-  改 server.py 必须重启 8177。回归：node tools/verify_all.mjs（24 套串行，实测 5m05s）。
+  改 server.py 必须重启 8177。回归：node tools/verify_all.mjs（25 套串行，实测 5m15s）。
 - .gitignore 排除 tools/verify_*：这些回归脚本不随仓库走，若新机没有，先从旧机拷 tools/ 整目录，
   并把脚本头部的 playwright-core file:/// 路径与 Chromium executablePath 换成新机实际路径。
   本机（Mac）还额外改了 py→python3、verify_all.mjs 的 py→python3、stage_split 的 fixture 项目 ID，
@@ -71,13 +70,13 @@ docs/dev-续作任务计划.md 和 docs/分步开发路线-移除一键生成.md
 
 「AI 一键分集 + 分镜」的 7 阶段自动流水线已**休眠**；四个工作区顺序翻转为
 **① 改剧本 → ② 分集 → ③ 分镜 → ④ 定妆**。
-**S0 / S1 / S2 / S3 / S3.5 / S4 / S5 / S6 已完成**。`verify_all.mjs` 的 SUITES 为
-**24 套（原 17 + S3 的 2 + S3.5 的 2 + S4 的 1 + S5 的 1 + S6 的 1）**，本机实测 **24/24 套全绿**（5m05s）。
+**S0 / S1 / S2 / S3 / S3.5 / S4 / S5 / S6 / S7 全部完成**。`verify_all.mjs` 的 SUITES 为
+**25 套（原 17 + S3 的 2 + S3.5 的 2 + S4 的 1 + S5 的 1 + S6 的 1 + S7 的 1）**，本机实测 **25/25 套全绿**（5m15s）。
 第 2 步的临时桥接已在 S4 移除，第 3 步只保留逐集闸门与只读提示词预览；第 4 步资产清单以分镜引用为准，
-首帧提示词在定妆完成后才生成。逐项结果见 §3。
-**下一步 = S7「收尾与文档」**（休眠流水线注释 / README 工作区章节 / 套件登记复核 / 死脚本处置）。
-> 口径说明：24/24 里 `ComfyUI 出图 UI` 是 **0 通过/0 失败的环境跳过**（本机 8188 离线），
-> 不是完整 26/26 真实出图断言；启动 8188 后重跑该套即可拿回。其余 23 套全绿。
+首帧提示词在定妆完成后才生成；README 已与实现对齐，休眠流水线已标注「勿删」。逐项结果见 §3。
+**下一步 = 无**（路线收尾）。后续新需求另开阶段，仍须遵守下面四条红线与串行门槛。
+> 口径说明：25/25 里 `ComfyUI 出图 UI` 是 **0 通过/0 失败的环境跳过**（本机 8188 离线），
+> 不是完整 26/26 真实出图断言；启动 8188 后重跑该套即可拿回。其余 24 套全绿。
 
 ---
 
@@ -101,7 +100,7 @@ curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8177/   # 期望 200
 ### 回归（重要：脚本不在 git）
 
 ```bash
-node tools/verify_all.mjs        # 24 套串行（原 17 + S3 的 2 + S3.5 的 2 + S4 的 1 + S5 的 1 + S6 的 1），实测 5m05s
+node tools/verify_all.mjs        # 25 套串行（原 17 + S3 的 2 + S3.5 的 2 + S4 的 1 + S5 的 1 + S6 的 1 + S7 的 1），实测 5m15s
 node tools/verify_all.mjs assets # 只跑名字含 assets 的
 ```
 
@@ -158,7 +157,7 @@ Python 侧脚本（`verify_platform.py` 等）同样检查一次 playwright 路�
 | S4 分镜逐集闸门 | ✅ | `storyboardStep(epKey)` / byEp 集级状态 / 按 `shots[].key` 只替换本集 / 失败隔离与 running 归一 / 第 2 步桥接移除；`verify_shot_gate.mjs` 21/21；全量 **22/22** |
 | S5 定妆消费分镜 | ✅ | `assetsFromShots()` + `assetUsage()` / `reparse(opts)` 来源可配置 / 资产卡「N 镜 · 第 X–Y 集」与零引用兜底说明 / `#asset-source-note`；`verify_asset_from_shots.mjs` 27/27；全量 **23/23** |
 | S6 出片归位 | ✅ | `framesGate` computed + `regenFrames(silent)` 第 4 步硬闸门 / `withRefSlots()` 参考图槽位 / `#frames-gate` / `#pv-frames-note` 只读预览 / 回第 3 步不发 frames；`verify_frames_after_assets.mjs` 24/24；全量 **24/24（5m05s，含 1 套环境跳过）** |
-| **S7 收尾与文档** | ⬜ **下一步** | 休眠流水线注释、README 工作区章节、套件登记复核、`verify_parse_progress/resume` 死脚本处置 |
+| S7 收尾与文档 | ✅ | `server.py` 顶部 + 分区注释标「无 UI 入口，勿删」/ README 改「四个工作区 · 每步人工确认」+「为什么不做一键」并修掉 4 处过时口径 / 死脚本标 DEPRECATED 销账 / `verify_final_docs.mjs` 38/38；全量 **25/25（5m15s，含 1 套环境跳过）** |
 
 **依赖严格串行**：S2 定死步骤号 → S3 定死集号 → S4 依赖集号 → S5 依赖镜头 → S6 依赖资产。不许跳步。
 **S3.5 是正交层**：只动 UI 与配置读写，不参与上面这条依赖链，也不改 `engine.js` 与生成逻辑。
@@ -276,6 +275,24 @@ Python 侧脚本（`verify_platform.py` 等）同样检查一次 playwright 路�
   同因「系统设置三栏」为 29/30（1 项诊断不可用），按不可用记录，不算失败。
 - **未改**：`server.py`、后端 7 阶段流水线、AI 接口、`engine.js` 解析/体检/分镜规则；D4 仍无批量按钮。
 
+### S7 实测结果（对照用）
+
+`node tools/verify_all.mjs`：**25/25 套全绿（5m15s）**，`npm run build` 47 模块通过。
+
+- **新增 `verify_final_docs.mjs` 38/38**（无浏览器，纯读文件，5 组断言）：
+  A. README 与实现一致（新标题 / 有「为什么不做一键」/ 四步顺序 / 不再有「临时桥接」/
+  「AI 同步给出」等过时表述 / S5、S6 口径已写入）；B. 休眠流水线保留且标「勿删」
+  （docstring + 分区注释 + handler + SSE + `ui.parse`/`resumeParseTask` + `ParseProgress.vue` + 五个单步接口）；
+  C. 四个工作区顺序锁定（view-1..4 → StepOne/Two/Shots/Asset、`storyboardStep` 与 `framesGate` 仍在）；
+  D. SUITES 25 套且六个关键脚本都已登记、三个死脚本不在其中；E. 两个死脚本标 DEPRECATED 且不再挂账。
+- **旧 24 套全部保持全绿**：S6 24/24、S5 27/27、S4 21/21、S3 契约 25/25、离线 43/43、项目管理 30/30 等。
+- **ComfyUI 仍环境跳过**：`0 通过/0 失败`（8188 `Connection refused`）；「系统设置三栏」29/30，
+  少的那 1 项就是 ComfyUI 诊断不可用。启动 8188 后重跑两套即可拿回完整断言。
+- **按约定重启了 8177**：本次只改 `server.py` 的 docstring 与分区注释，运行时行为不变；
+  重启后 `root=200`、`/api/projects` 200（13KB）、`/api/comfy/status` 返回 `online:false` 而非 502。
+- **验证口径**：清场护栏输出里的 `[安全拦截] 项目列表为空` / `HTTP 500` / `delete refused`
+  是它刻意构造的负面用例，不是服务故障（该套 15/15）。
+
 ---
 
 ## 4. S3 执行清单（可直接照做）
@@ -348,6 +365,23 @@ Python 侧脚本（`verify_platform.py` 等）同样检查一次 playwright 路�
 **硬约束复核**：`/api/ai/frames` 仍是既有单步接口、未新建 AI 接口；`server.py` 与后端 7 阶段流水线未改；
 `engine.js` 的解析 / 体检 / 分镜规则未动；D4 无批量按钮。
 
+### S7 执行清单（已完成 · 2026-11-10）
+
+**目标**：README 与实现一致，休眠流水线处置明确，套件登记不留挂账。
+
+1. `server.py`：顶部 docstring 第 10 项改成「【休眠保留 · 无 UI 入口，勿删（旧项目恢复用）】」
+   并说明当前主流程；分区注释同样加一条。**代码一行未删**。
+2. `README.md`：章节标题改「二、四个工作区 · 每步人工确认」，表格改成「序 / 工作区 / 人工确认什么 / 产出」，
+   新增「为什么不做一键」小节；同时修掉 4 处过时口径（临时桥接、AI 同步给出分集方案卡、
+   第 3 步「最终提示词」、死脚本 16/16 与 14/14 的现状）。
+3. `verify_all.mjs`：复核 6 个关键脚本已登记，注释从「S4 接入后再重写」改为 S7 销账口径；
+   新增第 25 套 `verify_final_docs.mjs`。
+4. 两个死脚本：头部由 `PAUSED (S2)` 改为 `DEPRECATED (S7 已销账)`，写明「不重写、不删除」的理由
+   与「不在 SUITES 内，勿作为回归跑」。**文件保留**，供旧项目恢复排查。
+
+**硬约束复核**：未改任何生成逻辑；`engine.js` / `studio.js` / AI 接口 / 后端流水线全部未动；
+D4 无批量按钮；`npm run build` 通过。
+
 ---
 
 ## 5. 关键代码坐标（别重新找）
@@ -367,6 +401,9 @@ Python 侧脚本（`verify_platform.py` 等）同样检查一次 playwright 路�
 | `studio.js` `framesGate` / `regenFrames(silent)` | **S6**：第 4 步硬闸门；静默重算在闸门未放行时不发请求，非第 4 步直接返回 |
 | `studio.js` `withRefSlots()` | **S6**：`refAssets` → `refSlots`，把「参考图槽位」追加进首帧提示词 |
 | `StepAsset.vue` `#frames-gate` / `PreviewPanel.vue` `#pv-frames-note` | **S6**：定妆后的生成按钮与槽位 chip / 第 3 步只读预览说明，回归脚本的稳定钩子 |
+| `README.md` 二章 +「为什么不做一键」 | **S7**：产品口径正文；改实现必须同步改它，`verify_final_docs.mjs` 会拦 |
+| `server.py` 顶部 docstring 第 10 项 / 分区注释 | **S7**：休眠流水线「无 UI 入口，勿删（旧项目恢复用）」，代码保留 |
+| `tools/verify_final_docs.mjs` | **S7**：无浏览器契约（README 一致 / 流水线保留 / 顺序锁定 / SUITES 登记 / 死脚本销账） |
 | `frontend/src/lib/ai.js:140-148` | `storyboard(script, parsed, ep, config)` **本来就按集切片**（`ep.sceneFrom..sceneTo` + `E.scriptSlice`），`AI.run` 是 `episodes.forEach` 逐集调 → S4 零架构成本 |
 | `server.py` | `/api/parse/start` 7 阶段流水线**代码保留、无 UI 入口**；`resumeParseTask` 也留着（旧项目刷新不炸）。单步接口 `/api/ai/{adapt,plan,storyboard,assets,frames}` 全部可用 |
 | `frontend/src/App.vue` | `view-3` 挂 StepShots，`view-4` 挂 StepAsset |
@@ -388,7 +425,7 @@ Python 侧脚本（`verify_platform.py` 等）同样检查一次 playwright 路�
 | 路径 | 原因 | 换机怎么办 |
 |---|---|---|
 | `tools/verify_*`（本机 31 个 `verify_*.mjs`，含 PAUSED 死脚本） | `.gitignore` 明确排除「硬编码本机路径」 | 拷 `tools/` 整目录 + 按 §1 的 Mac 适配清单改路径 / 命令 / fixture |
-| `tools/verify_all.mjs`（24 套 SUITES） | 原 17 套已从旧机同步，另登记 S3 的 2 套 / S3.5 的 2 套 / S4 的 1 套 / S5 的 1 套 / S6 的 1 套 | 见 §3；换机后同样把新增脚本一起拷 |
+| `tools/verify_all.mjs`（25 套 SUITES） | 原 17 套已从旧机同步，另登记 S3 的 2 套 / S3.5 的 2 套 / S4 的 1 套 / S5 的 1 套 / S6 的 1 套 / S7 的 1 套 | 见 §3；换机后同样把新增脚本一起拷 |
 | `projects/p_fixture_stage_split` | `verify_stage_split.mjs` 需要「含分镜的既有项目」，旧机 fixture 未随仓库迁移 | 用 `engine.js` 造一个 23 镜项目，字段要点见 §1 |
 | `llm-config.bat` / `llm-providers.json` / `.env*` | **含真实 API Key，禁止提交** | 在新机按 README 第 49 行说明重建；万相 key 走这里。**本机缺这个 → 3 套 AI 资产用例被按钮闸门挡住** |
 | `projects/`（29 个真实项目） | 本机运行数据 | 不迁移也能开发；要测旧存档迁移就拷几个 `project.json` |
@@ -440,8 +477,9 @@ git remote set-url origin git@github.com:kevinzgai/ShortPlay-Studio.git
 - **S5 起 engine.js 允许新增资产来源层函数**：`verify_plan_contract.mjs` 不再用「git status 干净」判断（那是假绿），
   改为检查 `git diff HEAD` 删除行必须为 0 + 三个已锁函数仍在。若将来要删改既有规则，这条会先红。
 - **道具分组的新建项目默认仍为空**：`buildAssets` 的 props 只从 prev 继承，S5 的验收脚本通过界面 `#add-prop`
-  加一条道具来代表「资产分解后」的状态；若要求「走完阶段 4 就自动有道具」，需要在 S7 补一条道具推断规则。
-- `verify_parse_progress.mjs` / `verify_parse_resume.mjs` 不在 SUITES 内，S2 后是死脚本；S4 未动它们（不碰流水线），留到 S7 收尾时按新流程重写或删除。
+  加一条道具来代表「资产分解后」的状态；若要「走完阶段 4 就自动有道具」，需另开阶段补一条道具推断规则。
+- **死脚本已销账（S7）**：`verify_parse_progress.mjs` / `verify_parse_resume.mjs` / `verify_ai.py` 标 **DEPRECATED**，
+  不在 SUITES；不重写也不删除（被测对象无 UI 入口，逐集链路由 S4/S5/S6 覆盖），保留供旧项目恢复排查。
 - **万相 Key 只判「有没有填」不判真伪**：`qwen_image_status()` / `engine_probe("qwen")` 让无效 Key 也显示「可用」，实际出图 401。2026-11-10 实测发现，尚未修；修时建议用不计费的 `/compatible-mode/v1/models` 做真实鉴权探测，并同步系统设置契约脚本。
 - **本机 ComfyUI 8188 当前离线**（2026-11-10 S6 全量时）：`verify_comfy_ui.mjs` 已做环境降级，
   打印 `[环境跳过]` 并以 0 通过/0 失败退出；`系统设置三栏` 因此是 29/30（1 项诊断不可用）。
