@@ -9,6 +9,7 @@
 
 import base64
 import hashlib
+import http.client
 import io
 import json
 import random
@@ -272,12 +273,38 @@ def comfy_wait(pid, timeout=300):
             raise RuntimeError("等待 ComfyUI 出图超时（%ds）" % timeout)
 
 
-def comfy_download(info):
+def comfy_download(info, attempts=2):
+    """从 ComfyUI 取回生成的 PNG 原图。
+
+    【为什么带重试】本机回环本该一跳直达，但实测偶发短读：
+    Content-Length 说 620KB、实际只收到 480KB 连接就断了，`urlopen().read()`
+    抛 `IncompleteRead(491520 bytes read, 128724 more expected)`，整张已经出好的图
+    被丢掉，界面显示「出图失败」——用户只能重跑，白等十几秒 GPU。
+    成因在 ComfyUI 侧（并发写盘 / 内存吃紧时提前关连接），不是我们的请求有问题；
+    图已经落在它的 output/ 里，重取是幂等的，成本远低于重跑。
+
+    只对「短读 / 连接被重置 / 读超时」重试；HTTPError（404 之类）不重试，那是真错。
+    """
     q = urllib.parse.urlencode({"filename": info["filename"],
                                 "subfolder": info.get("subfolder", ""),
                                 "type": info.get("type", "output")})
-    with _LOCAL_OPENER.open(comfy_host() + "/view?" + q, timeout=60) as r:
-        return r.read()
+    url = comfy_host() + "/view?" + q
+    retryable = (http.client.HTTPException, ConnectionResetError, TimeoutError)
+    last = None
+    for i in range(max(1, attempts)):
+        try:
+            with _LOCAL_OPENER.open(url, timeout=60) as r:
+                body = r.read()
+                want = r.headers.get("Content-Length", "")
+                # read() 少数情况下不抛而是静默短读，这里补一道长度校验
+                if want.isdigit() and len(body) != int(want):
+                    raise http.client.IncompleteRead(body, int(want) - len(body))
+                return body
+        except retryable as exc:
+            last = exc
+            if i + 1 < attempts:
+                time.sleep(0.4 * (i + 1))
+    raise last if last is not None else RuntimeError("图片下载失败")
 
 
 def thumb_datauri(png):
