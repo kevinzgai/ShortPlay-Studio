@@ -1,7 +1,7 @@
 <script setup>
 import {
   S, E, ui, stats, issueCounts, hasFixable,
-  applyFix, fixAll, toggleScene, goStep, toast, doGenerate, planStep
+  applyFix, fixAll, toggleScene, goStep, toast, planStep
 } from "../stores/studio.js";
 import EpisodePlan from "./EpisodePlan.vue";
 import AssetPanel from "./AssetPanel.vue";
@@ -121,7 +121,7 @@ function gotoScript() {
 
   <div class="cta-row">
     <button class="btn" id="back-1" @click="goStep(1)">← 返回改剧本</button>
-    <button class="btn primary lg" id="generate" @click="doGenerate(true)">按规则排分镜 →</button>
-    <span class="cta-note">临时桥接：当前用离线规则一次排完，AI 逐集分镜在后续阶段接入；生成后进第 3 步看镜头，再去第 4 步定妆</span>
+    <button class="btn primary lg" id="generate" @click="goStep(3)">去第 3 步逐集排分镜 →</button>
+    <span class="cta-note">确认分集后进第 3 步：每集一个闸门，点一次只生成一集，出完即停；失败可单独重试，再去第 4 步定妆</span>
   </div>
 </template>

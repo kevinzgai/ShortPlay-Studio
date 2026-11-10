@@ -4,6 +4,7 @@
 import { computed } from "vue";
 import {
   S, totalDuration, staleMsg, visibleShots, episodeTabs, shotsNeedRecalc,
+  shotGates, shotGateRunning, storyboardStep,
   allSelected, someSelected, aiRedo, setActiveEpisode, setView, selectAll,
   printPage, doGenerate, goStep, regenBatch,
   delSelected, insertShot
@@ -28,6 +29,17 @@ const assetTip = computed(() => {
   if (s.ready === s.total) return "资产已全部定妆";
   return "还有 " + (s.total - s.ready) + " 个资产没定妆，参考图槽位会空着";
 });
+
+/* S4：每集一个闸门，按钮三态；没有任何「剩余」批量入口。 */
+const SG_STATUS = { idle: "未生成", running: "生成中…", ready: "已生成", stale: "需重算", failed: "生成失败" };
+function sgStatus(s) { return SG_STATUS[s] || "未生成"; }
+function sgButton(s) {
+  if (s === "running") return "生成中…";
+  if (s === "ready") return "重跑本集";
+  if (s === "failed") return "重试";
+  if (s === "stale") return "重排本集";
+  return "生成本集";
+}
 </script>
 
 <template>
@@ -48,6 +60,29 @@ const assetTip = computed(() => {
     <span class="sab-txt"><b>资产</b> {{ assetStat.ready }} / {{ assetStat.total }} 已定妆</span>
     <span class="sab-note">{{ assetTip }}</span>
     <button class="btn sm quiet" id="to-assets" @click="goStep(4)">去定妆 / 改设定 →</button>
+  </div>
+
+  <!-- S4：逐集闸门。一次点击只排一集，出完即停；失败只影响这一集 -->
+  <div id="shot-gates" class="card pad" style="margin-bottom:14px">
+    <div class="row">
+      <b>逐集闸门</b>
+      <span class="muted" style="font-size:11px">一次点击只排一集，出完即停；失败只影响这一集</span>
+      <div class="spacer"></div>
+      <span v-if="S.episodes.length > 8" class="chip warn">需逐集确认，共 {{ S.episodes.length }} 集</span>
+    </div>
+    <div class="sg-list">
+      <div v-for="g in shotGates" :key="g.key" class="sg-item" :class="'sg-' + g.status"
+        :data-gate="g.key" :data-gate-status="g.status">
+        <span class="sg-dot" aria-hidden="true"></span>
+        <span class="sg-name">{{ g.label }}</span>
+        <span class="sg-status">{{ sgStatus(g.status) }}</span>
+        <span class="sg-count">{{ g.count }} 镜</span>
+        <button class="btn sm" :class="{ primary: g.status === 'idle' || g.status === 'stale' }"
+          :data-shot-gate="g.key" :disabled="shotGateRunning"
+          @click="storyboardStep(g.key)">{{ sgButton(g.status) }}</button>
+        <div v-if="g.status === 'failed' && g.error" class="sg-error">{{ g.error }}</div>
+      </div>
+    </div>
   </div>
 
   <!-- S3：分集改过 → 所有集需重算，但镜头仍在表里 -->
@@ -89,7 +124,9 @@ const assetTip = computed(() => {
         <button v-for="ep in episodeTabs" :key="ep.no" class="ep-tab"
           :class="{ active: String(S.activeEpisode) === String(ep.no), 'needs-recalc': ep.stale }"
           :data-episode="ep.no" :data-recalc="ep.stale ? '1' : null"
+          :data-shot-status="ep.status"
           :title="ep.stale ? '需重算' : ''" @click="setActiveEpisode(ep.no)">
+          <span class="ep-gate-dot" :class="'ep-gate-' + ep.status" aria-hidden="true"></span>
           {{ ep.label }}<span class="ep-count">{{ ep.count }}</span>
         </button>
       </div>

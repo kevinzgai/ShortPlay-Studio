@@ -50,7 +50,7 @@ function defaultSteps() {
   return {
     script: { status: "idle", at: 0 },
     plan:   { status: "idle", at: 0, engine: "", model: "" },
-    shots:  { status: "idle", at: 0, byEp: {} },
+    shots:  { status: "idle", at: 0, byEp: {}, errors: {} },
     assets: { status: "idle", at: 0 }
   };
 }
@@ -293,11 +293,17 @@ function normalizeSteps(raw, staleText) {
   const d = (raw && typeof raw === "object") ? raw : {};
   Object.keys(out).forEach((k) => {
     const v = (d[k] && typeof d[k] === "object") ? d[k] : {};
-    if (["idle", "running", "ready", "stale"].indexOf(v.status) >= 0) out[k].status = v.status;
+    if (["idle", "running", "ready", "stale", "failed"].indexOf(v.status) >= 0) out[k].status = v.status;
     out[k].at = Number(v.at) || 0;
     if (k === "plan") { out[k].engine = String(v.engine || ""); out[k].model = String(v.model || ""); }
-    if (k === "shots" && v.byEp && typeof v.byEp === "object" && !Array.isArray(v.byEp)) {
-      out[k].byEp = { ...v.byEp };
+    if (k === "shots") {
+      if (v.byEp && typeof v.byEp === "object" && !Array.isArray(v.byEp)) {
+        out[k].byEp = { ...v.byEp };
+      }
+      // S4：单集失败原因随项目落盘，刷新后仍能看到「为什么红」和重试入口
+      if (v.errors && typeof v.errors === "object" && !Array.isArray(v.errors)) {
+        out[k].errors = { ...v.errors };
+      }
     }
   });
   if (!raw && staleText === "script") { out.plan.status = "stale"; out.shots.status = "stale"; }
@@ -328,6 +334,26 @@ export function hydrate(data, info) {
   if (S.steps.plan.status === "running") S.steps.plan.status = S.episodes.length ? "ready" : "idle";
   // 旧存档已有分集方案却没有 steps，按「已就绪」归一，别让第 2 步显示「尚未分集」
   if (S.steps.plan.status === "idle" && S.episodes.length) S.steps.plan.status = "ready";
+  // S4：running 是瞬时态。刷新/重开页面一律归一为 failed，避免按钮永久卡在「生成中」；
+  // 同时补一句人话原因，用户才知道要重新点一次，而不是以为成功了。
+  Object.keys(S.steps.shots.byEp).forEach((k) => {
+    if (S.steps.shots.byEp[k] === "running") {
+      S.steps.shots.byEp[k] = "failed";
+      S.steps.shots.errors[k] = "上次生成被中断，重新点一次即可";
+    }
+  });
+  // 旧存档有镜头但还没有逐集状态：按每集是否已有镜头推断，别把已排好的集显示成「未生成」
+  if (S.shots.length && !Object.keys(S.steps.shots.byEp).length) {
+    if (S.episodes.length) {
+      S.episodes.forEach((ep) => {
+        S.steps.shots.byEp[ep.no] = S.shots.some((s) => String(s.episode) === String(ep.no))
+          ? "ready" : "idle";
+      });
+    } else {
+      S.steps.shots.byEp.all = "ready";
+    }
+    S.steps.shots.status = "ready";
+  }
   S.shots = E.keyShots(S.shots, S.episodes);   // 旧存档补稳定键，只加字段不改内容
   S.step = Number(S.step) || 1;
   // S2 起 3/4 语义对调（3 分镜 / 4 定妆）。旧存档没有 stepV，按旧含义（3 定妆 / 4 分镜）换回来，
@@ -1051,6 +1077,111 @@ export function deleteEpisode(no) {
   toast("已删掉一集；镜头仍在表里，第 3 步逐集重排后归位", "ok");
 }
 
+/* ---------------------- S4 · 分镜逐集闸门 ----------------------
+   只请求一集（复用 AI.storyboard 本来的按集切片）；成功只替换 shots[].key 属于该集的镜头，
+   其它集一个不动；失败只把该集标 failed，不弹全屏遮罩、不降级覆盖别人的镜头。
+   D4：没有「剩余全部 / 全部生成」入口，一次点击只推进一集。 */
+
+/** 未分集时整部片子当作一个隐式闸门，key 用 "all"，集号记 0（保持全局镜号）。 */
+function shotGateEp(key) {
+  if (String(key) === "all") {
+    const nos = ((S.parsed && S.parsed.scenes) || []).map((s) => Number(s.no) || 0);
+    return { no: 0, title: "本片", sceneFrom: nos.length ? Math.min(...nos) : 1,
+             sceneTo: nos.length ? Math.max(...nos) : 1 };
+  }
+  return S.episodes.find((e) => String(e.no) === String(key)) || null;
+}
+
+/** 离线规则：只取这一集场次范围内的镜头，字段与 AI 回包对齐后交给 AI.toShots。 */
+function localGateShots(ep) {
+  const all = E.buildStoryboard(S.parsed, S.config, S.variant);
+  const picked = ep.no ? all.filter((s) => s.sceneNo >= ep.sceneFrom && s.sceneNo <= ep.sceneTo) : all;
+  return picked.map((s) => ({
+    sceneNo: s.sceneNo, kind: s.kind, visual: s.visual, size: s.size,
+    duration: s.duration, dialogue: s.dialogue, speaker: s.speaker,
+    notes: s.notes, ai: false, detail: E.normalizeDetail(s.detail)
+  }));
+}
+
+/** 该集镜头的归属：优先用稳定键前缀，旧数据退回 episode 字段。 */
+function shotBelongsToGate(shot, key, ep) {
+  if (String(key) === "all") return true;
+  const prefix = "e" + E.pad2(Number(ep.no)) + "-";
+  const k = String(shot.key || "");
+  return k ? k.indexOf(prefix) === 0 : String(shot.episode) === String(ep.no);
+}
+
+/** 逐集闸门：一次只处理一集，返回 Promise<boolean>。 */
+export function storyboardStep(epKey) {
+  const key = String(epKey);
+  const byEp = S.steps.shots.byEp;
+  if (Object.keys(byEp).some((k) => byEp[k] === "running")) {
+    toast("有一集正在生成，等这一集结束再点", "warn"); return Promise.resolve(false);
+  }
+  if (!S.script.replace(/\s/g, "")) { toast("先放一段剧本文字进来", "warn"); return Promise.resolve(false); }
+  if (!S.parsed) reparse();
+  if (!S.parsed || !S.parsed.scenes.length) { toast("剧本还没解析出场次，先整理稿子", "warn"); return Promise.resolve(false); }
+  const ep = shotGateEp(key);
+  if (!ep) { toast("找不到这一集，可能分集方案已改", "warn"); return Promise.resolve(false); }
+  begin();
+  byEp[key] = "running";
+  S.steps.shots.at = Date.now();
+  if (!S.steps.shots.errors) S.steps.shots.errors = {};
+  delete S.steps.shots.errors[key];
+  save();
+
+  const apply = (raws, engine, model) => {
+    const fresh = E.bindAssets(AI.toShots([raws], [ep], S.parsed, S.config), S.assets);
+    const kept = S.shots.filter((s) => !shotBelongsToGate(s, key, ep));
+    let at = kept.length;
+    if (ep.no) {
+      const later = kept.findIndex((s) => Number(s.episode) > Number(ep.no));
+      if (later >= 0) at = later;
+    }
+    const merged = kept.slice(0, at).concat(fresh, kept.slice(at));
+    S.shots = E.renumberShots(merged, S.episodes);   // 统一重排镜号与稳定键
+    S.shots.forEach((s) => { s.originCode = s.code; });
+    const ids = {};
+    S.shots.forEach((s) => { ids[s.id] = 1; });
+    S.selected = (S.selected || []).filter((id) => ids[id]);
+    S.activeId = ids[S.activeId] ? S.activeId : (S.shots.length ? S.shots[0].id : null);
+    S.activeEpisode = "all";
+    byEp[key] = "ready";
+    delete S.steps.shots.errors[key];
+    S.steps.shots.status = "ready";
+    S.steps.shots.at = Date.now();
+    if (engine === "ai") { S.aiSource = "ai"; if (model) S.aiModel = model; }
+    else if (!S.aiSource) S.aiSource = "local";
+    save();
+    toast((ep.no ? "第 " + ep.no + " 集" : "本片") + "已生成 " + fresh.length +
+      " 镜；其它集未改动", "ok", "撤销", undo);
+  };
+  const fail = (err) => {
+    byEp[key] = "failed";
+    S.steps.shots.errors[key] = (err && err.message) || "生成失败";
+    save();
+    toast((ep.no ? "第 " + ep.no + " 集" : "本片") + "生成失败，可单独重试：" +
+      S.steps.shots.errors[key], "warn");
+    return false;
+  };
+  const useAI = !FORCE_LOCAL && S.llmAvailable && S.aiEnabled;
+  if (!useAI) {
+    // 离线 / 没配模型：本地规则只排这一集，仍然是一集一个闸门
+    return new Promise((resolve) => setTimeout(() => {
+      try { apply(localGateShots(ep), "local", ""); resolve(true); }
+      catch (err) { resolve(fail(err)); }
+    }, 0));
+  }
+  return AI.storyboard(S.script, S.parsed, ep, S.config)
+    .then((r) => {
+      const raws = (r && r.shots) || [];
+      if (!raws.length) throw new Error("AI 没有给出这一集的镜头");
+      apply(raws, "ai", (r && r.model) || S.llmModel || "");
+      return true;
+    })
+    .catch(fail);
+}
+
 /* ------------------------------ 计算属性 ------------------------------ */
 export const stats = computed(() => S.parsed ? S.parsed.stats : null);
 export const liveStats = computed(() => {
@@ -1097,11 +1228,32 @@ export const aiEnabledUi = computed(() => S.llmAvailable && S.aiEnabled);
 export const episodeTabs = computed(() => S.episodes.map((ep) => ({
   no: ep.no, label: "E" + E.pad2(ep.no) + " · " + (ep.title || ("第" + ep.no + "集")),
   count: S.shots.filter((s) => s.episode === ep.no).length,
-  stale: S.steps.shots.byEp[ep.no] === "stale"
+  stale: S.steps.shots.byEp[ep.no] === "stale",
+  status: S.steps.shots.byEp[ep.no] || "idle"
 })));
 /** S3：分集改过且已有镜头时，第 3 步给一条「全部需重算」的提示。 */
 export const shotsNeedRecalc = computed(() =>
   S.shots.length > 0 && S.episodes.some((ep) => S.steps.shots.byEp[ep.no] === "stale"));
+
+/** S4：每个集一个闸门。没分集时整部片子是一个隐式闸门（key="all"），仍只有一个按钮。 */
+export const shotGates = computed(() => {
+  const byEp = S.steps.shots.byEp || {};
+  const errors = S.steps.shots.errors || {};
+  if (!S.episodes.length) {
+    return [{ key: "all", no: "all", label: "本片 · 未分集",
+      status: byEp.all || (S.shots.length ? "ready" : "idle"),
+      count: S.shots.length, error: errors.all || "" }];
+  }
+  return S.episodes.map((ep) => ({
+    key: ep.no, no: ep.no,
+    label: "E" + E.pad2(ep.no) + " · " + (ep.title || ("第" + ep.no + "集")),
+    status: byEp[ep.no] || "idle",
+    count: S.shots.filter((s) => s.episode === ep.no).length,
+    error: errors[ep.no] || ""
+  }));
+});
+/** 串行闸门：有一集在跑时其余按钮置灰，避免并发打爆上游限流。 */
+export const shotGateRunning = computed(() => shotGates.value.some((g) => g.status === "running"));
 
 /* ------------------------------ 资产 ------------------------------ */
 export const assetTabs = computed(() => [

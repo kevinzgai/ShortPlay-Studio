@@ -507,7 +507,7 @@ table.shots .detail-brief{min-width:210px;max-width:280px;font-size:11px;color:v
   .sub,.muted,.cell.notes,.cell-label{color:#555 !important}
   h1,h2,h3,.pv-title,.scene-head .title{color:#111 !important}
   h1{font-size:20px}
-  .episode-filter,.ai-status,.episode-card{display:none !important}
+  .episode-filter,.ai-status,.episode-card,#shot-gates{display:none !important}
 }
 
 /* ==========================================================================
@@ -660,3 +660,27 @@ table.shots .detail-brief{min-width:210px;max-width:280px;font-size:11px;color:v
   .spec-list{grid-template-columns:1fr}
   .spec-list li span{white-space:normal}
 }
+
+/* ---------------------- S4 · 逐集闸门 ---------------------- */
+.sg-list{display:flex;flex-direction:column;gap:7px;margin-top:10px}
+.sg-item{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 10px;
+  background:rgba(255,255,255,.02);border:1px solid var(--line);border-radius:8px}
+.sg-dot{width:7px;height:7px;border-radius:50%;background:var(--text-4);flex:0 0 auto}
+.sg-item.sg-running .sg-dot{background:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
+.sg-item.sg-ready .sg-dot{background:var(--ok)}
+.sg-item.sg-stale .sg-dot{background:var(--warn)}
+.sg-item.sg-failed .sg-dot{background:var(--err)}
+.sg-name{font-size:12px;color:var(--text);min-width:150px;max-width:260px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sg-status{font:510 10.5px/1.5 var(--mono);color:var(--text-4)}
+.sg-item.sg-ready .sg-status{color:var(--ok)}
+.sg-item.sg-stale .sg-status{color:var(--warn)}
+.sg-item.sg-failed .sg-status{color:var(--err)}
+.sg-count{font:10.5px/1.5 var(--mono);color:var(--text-4)}
+.sg-item .btn{margin-left:auto}
+.sg-error{flex-basis:100%;font-size:11px;line-height:1.6;color:var(--err);padding-left:17px}
+.ep-gate-dot{width:5px;height:5px;border-radius:50%;background:var(--text-4);flex:0 0 auto}
+.ep-gate-ready{background:var(--ok)}
+.ep-gate-running{background:var(--primary)}
+.ep-gate-stale{background:var(--warn)}
+.ep-gate-failed{background:var(--err)}
