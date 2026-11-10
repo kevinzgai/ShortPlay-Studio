@@ -81,7 +81,34 @@ export async function snapshotProjects(opt = {}) {
   }
   const snap = { ids: new Set(rows.map((p) => p.id)), startedAt: localStamp(), count: rows.length, base };
   console.log("[清场] " + label + " 开跑快照：" + snap.count + " 个项目，起点 " + snap.startedAt);
+  installCrashGuard(snap, label);
   return snap;
+}
+
+/* 崩溃也要清场（2026-11-10 加）。
+ *
+ * 为什么必须有：cleanupNewProjects 只删「不早于开跑时刻」的项目，这是防误删真实项目的安全规则；
+ * 但它有个副作用——某次崩溃/超时跳过了清场，那些临时项目在下一轮就变成「老项目」，
+ * 从此永远没人清，会一直堆在 projects/ 里。实测三次崩溃漏了 97 个。
+ *
+ * 这里在拍快照时就挂上进程级兜底：脚本抛未捕获异常 / Promise 未处理拒绝时，
+ * 先按同一套规则清场，再以 1 退出。20 个套件都调 snapshotProjects，所以不用逐个改。
+ */
+let _guardInstalled = false;
+function installCrashGuard(snap, label) {
+  if (_guardInstalled) return;
+  _guardInstalled = true;
+  const bail = (err) => {
+    console.error("\n[清场] 脚本异常退出，先清场再退：" + ((err && err.message) || err));
+    Promise.resolve()
+      .then(() => cleanupNewProjects(snap, { label: label + " · 异常清场" }))
+      .catch(() => {})
+      .then(() => reportBalance(snap))
+      .catch(() => {})
+      .then(() => process.exit(1));
+  };
+  process.on("uncaughtException", bail);
+  process.on("unhandledRejection", bail);
 }
 
 /**
