@@ -1,7 +1,7 @@
 # dev 分支 · 续作任务计划（换机接手用）
 
 > 生成：2026-11-09 · 基线分支 `main` · 适用分支 `dev` · **已推送 GitHub（main + dev）** · 历史已剔除示例 PNG
-> 本文自包含：**读完即可在另一台机器从 S5 接着做，不需要翻聊天记录。**
+> 本文自包含：**读完即可在另一台机器从 S6 接着做，不需要翻聊天记录。**
 > 完整设计依据见 `docs/分步开发路线-移除一键生成.md`（同一分支，已提交）。
 
 ---
@@ -15,38 +15,42 @@ docs/dev-续作任务计划.md 和 docs/分步开发路线-移除一键生成.md
 
 【当前状态】
 - 代码已推送 GitHub：https://github.com/kevinzgai/ShortPlay-Studio.git，分支 dev（main 是基线分支）。
-- S0/S1/S2/S3/S3.5/S4 已完成：engine.js 稳定键、studio.js 的 S.steps 状态机与存档迁移、
+- S0/S1/S2/S3/S3.5/S4/S5 已完成：engine.js 稳定键、studio.js 的 S.steps 状态机与存档迁移、
   移除一键 + 工作区顺序翻转、S3 分集独立成步（显式 planStep / 可编辑分集表 / stale 条 /
   二次确认 + byEp 全 stale）、S3.5 设置分层（全局系统设置三栏 + engine-config.json）、
-  S4 分镜逐集闸门（storyboardStep / byEp 集级状态 / 按 key 只替换本集 / 失败隔离）。
-- 下一步 = S5「定妆消费分镜」。S6 出片归位 / S7 收尾在后面。
-- 实测：`verify_all.mjs` 22 套全绿（3m58s）；各阶段细项见 §3。
+  S4 分镜逐集闸门（storyboardStep / byEp 集级状态 / 按 key 只替换本集 / 失败隔离）、
+  S5 定妆消费分镜（assetsFromShots / reparse 来源可配置 / 资产卡引用数 / 零引用兜底说明）。
+- 下一步 = S6「出片归位」。S7 收尾在后面。
+- 实测：`verify_all.mjs` 23 套全绿（4m05s）；各阶段细项见 §3。
 
-【本次只做 S5，照 docs/分步开发路线-移除一键生成.md「阶段 5」的 3 条改动执行】
-1. `engine.buildAssets(parsed, prev)` 增加第三参或新函数 `assetsFromShots(shots, parsed)`：
-   以 shots 的 charIds/sceneId/propIds 为准，parsed 只补未被任何镜头引用的资产。
-2. `reparse()` 的资产重建改为可配置来源，避免改剧本时把「只在已删镜头里出现」的资产瞬间清掉。
-3. 资产卡增加引用信息「出现在 N 个镜头 / 第 X–Y 集」；新建 tools/verify_asset_from_shots.mjs 并登记 SUITES。
-> 依赖 S4 的逐集镜头（没有镜头就没有分组依据）。第 2 步的临时桥接已在 S4 移除，
-> 第 3 步只有单集闸门，D4 不给「剩余全部」按钮。
+【本次只做 S6，照 docs/分步开发路线-移除一键生成.md「阶段 6」的改动执行】
+1. 把 `/api/ai/frames` 的触发从第 3 步挪到第 4 步末尾（「资产齐了，生成 N 个镜头的首帧提示词」）；
+   第 3 步只保留提示词预览的只读态，不再用空参考图算提示词。
+2. 新建 `tools/verify_frames_after_assets.mjs` 并登记 SUITES：第 3 步无 frames 请求；
+   第 4 步定妆完整后可生成，且提示词里引用了参考图槽位。
+3. 若选择不做 S6，必须在 README「已知限制」写明：第 3 步看到的提示词可能缺资产描述。
+> 依赖 S5 的「资产以分镜为准」。后端 7 阶段流水线保持休眠不删，不新建 AI 接口，
+> D4 仍不给「剩余全部」按钮。
 
 【硬约束，违反即返工】
 - 四项已锁决策：D1 分集/分镜各为独立 AI 步 + 人工闸门；D2 整步作废 + 显式重跑（不做按场增量）；
   D3 顺序 剧本→分集→分镜→定妆；D4 只有单集闸门，第一版不给「剩余全部」按钮。
-- 阶段严格串行，S4 没验收完不许碰 S5；不改 engine.js 的解析/体检/buildStoryboard 规则；
-  不新建 AI 接口，复用 /api/ai/plan、/api/ai/storyboard；后端 7 阶段流水线保持休眠不删。
+- 阶段严格串行，S5 没验收完不许碰 S6；不改 engine.js 的解析/体检/buildStoryboard 规则
+  （S5 起允许新增资产来源层纯函数，但既有规则一行不许删改，见 verify_plan_contract.mjs）；
+  不新建 AI 接口，复用 /api/ai/plan、/api/ai/storyboard、/api/ai/frames；后端 7 阶段流水线保持休眠不删。
 - 本阶段新增脚本必须全绿才进下一阶段；旧脚本若因步骤号变化而红，必须在同阶段内修完，不许挂账。
 - 已知缺陷允许保留：重跑会覆盖手工修改，靠二次确认缓解。
 
 【环境与容易踩的坑】
 - 服务是 Python 标准库后端 8177：py server.py --no-browser；改 frontend/src 必须 npm run build，
-  改 server.py 必须重启 8177。回归：node tools/verify_all.mjs（22 套串行，实测 3m58s）。
+  改 server.py 必须重启 8177。回归：node tools/verify_all.mjs（23 套串行，实测 4m05s）。
 - .gitignore 排除 tools/verify_*：这些回归脚本不随仓库走，若新机没有，先从旧机拷 tools/ 整目录，
   并把脚本头部的 playwright-core file:/// 路径与 Chromium executablePath 换成新机实际路径。
   本机（Mac）还额外改了 py→python3、verify_all.mjs 的 py→python3、stage_split 的 fixture 项目 ID，
   且 8177 要带 NO_PROXY=127.0.0.1,localhost 启动（详见 §1 的 Mac 适配清单）。
-- engine.js / studio.js / .vue 都是 CRLF，改 .vue 用 Python io.open(..., newline='') + assert count==1
-  精确替换；engine.js:918 早有同名 sceneKey(intExt,time,name)，新函数只能叫 sceneStableKey。
+- 旧机 engine.js / studio.js / .vue 是 CRLF，本机（Mac）当前工作区已统一 LF；改前先统计 `\r\n`
+  确认行尾，再用 Python io.open(..., newline='') + assert count==1 精确替换；
+  engine.js:918 早有同名 sceneKey(intExt,time,name)，新函数只能叫 sceneStableKey。
 - Playwright 用 JS API（allTextContents/innerText），默认有窗口模式 headless:false。
 - verify_ai.py 与 verify_parse_progress/resume 已标 PAUSED 并移出 SUITES，别跑旧断言。
 
@@ -62,10 +66,10 @@ docs/dev-续作任务计划.md 和 docs/分步开发路线-移除一键生成.md
 
 「AI 一键分集 + 分镜」的 7 阶段自动流水线已**休眠**；四个工作区顺序翻转为
 **① 改剧本 → ② 分集 → ③ 分镜 → ④ 定妆**。
-**S0 / S1 / S2 / S3 / S3.5 / S4 已完成**。`verify_all.mjs` 的 SUITES 为
-**22 套（原 17 + S3 的 2 + S3.5 的 2 + S4 的 1）**，本机实测 **22/22 套全绿**（3m58s）。
-第 2 步的临时桥接已在 S4 移除，第 3 步只保留逐集闸门。逐项结果见 §3。
-**下一步 = S5「定妆消费分镜」**（分组视图以 shots 为准，剧本只兜底）。
+**S0 / S1 / S2 / S3 / S3.5 / S4 / S5 已完成**。`verify_all.mjs` 的 SUITES 为
+**23 套（原 17 + S3 的 2 + S3.5 的 2 + S4 的 1 + S5 的 1）**，本机实测 **23/23 套全绿**（4m05s）。
+第 2 步的临时桥接已在 S4 移除，第 3 步只保留逐集闸门；第 4 步资产清单已改为以分镜引用为准。逐项结果见 §3。
+**下一步 = S6「出片归位」**（frames 挪到定妆之后，不做就在 README 写已知限制）。
 
 ---
 
@@ -89,11 +93,11 @@ curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8177/   # 期望 200
 ### 回归（重要：脚本不在 git）
 
 ```bash
-node tools/verify_all.mjs        # 22 套串行（原 17 + S3 的 2 + S3.5 的 2 + S4 的 1），实测 3m58s
+node tools/verify_all.mjs        # 23 套串行（原 17 + S3 的 2 + S3.5 的 2 + S4 的 1 + S5 的 1），实测 4m05s
 node tools/verify_all.mjs assets # 只跑名字含 assets 的
 ```
 
-`.gitignore` 有 `tools/verify_*`，**全部 31 个回归脚本不随仓库走**。换机后从旧机器拷整个 `tools/` 目录，并替换其中两处本机绝对路径（脚本头部）：
+`.gitignore` 有 `tools/verify_*`，**全部回归脚本不随仓库走**。换机后从旧机器拷整个 `tools/` 目录，并替换其中两处本机绝对路径（脚本头部）：
 
 | 原值 | 改成 |
 |---|---|
@@ -144,11 +148,11 @@ Python 侧脚本（`verify_platform.py` 等）同样检查一次 playwright 路�
 | S3 分集独立成步 | ✅ | `planStep()` 显式按钮 / 可编辑分集表（`source="manual"`）/ stale 条 / 二次确认 + `byEp` 全 stale 不删镜头；`verify_plan_step.mjs` 36/36 |
 | S3.5 设置分层（插队） | ✅ | 双入口（生成设置 / 系统设置）、三栏（文字模型 / 出图引擎 / 连接与诊断）、引擎可配且热生效（`engine-config.json`）、修 `SHORTPLAY_COMFY` 白名单 bug；契约 48/48 + 三栏 30/30；全量 **21/21** |
 | S4 分镜逐集闸门 | ✅ | `storyboardStep(epKey)` / byEp 集级状态 / 按 `shots[].key` 只替换本集 / 失败隔离与 running 归一 / 第 2 步桥接移除；`verify_shot_gate.mjs` 21/21；全量 **22/22** |
-| **S5 定妆消费分镜** | ⬜ **下一步** | 分组视图才有数据 |
-| S6 出片归位（可选） | ⬜ | frames 挪到第 4 步末尾，不做就在 README 写已知限制 |
+| S5 定妆消费分镜 | ✅ | `assetsFromShots()` + `assetUsage()` / `reparse(opts)` 来源可配置 / 资产卡「N 镜 · 第 X–Y 集」与零引用兜底说明 / `#asset-source-note`；`verify_asset_from_shots.mjs` 27/27；全量 **23/23** |
+| **S6 出片归位（可选）** | ⬜ **下一步** | frames 挪到第 4 步末尾，不做就在 README 写已知限制 |
 | S7 收尾 | ⬜ | 休眠流水线注释、README、套件登记 |
 
-**依赖严格串行**：S2 定死步骤号 → S3 定死集号 → S4 依赖集号 → S5 依赖镜头。不许跳步。
+**依赖严格串行**：S2 定死步骤号 → S3 定死集号 → S4 依赖集号 → S5 依赖镜头 → S6 依赖资产。不许跳步。
 **S3.5 是正交层**：只动 UI 与配置读写，不参与上面这条依赖链，也不改 `engine.js` 与生成逻辑。
 **门槛规则**：本阶段新增脚本全绿才进下一阶段；旧脚本因步骤号变红必须**同阶段内修完，不许挂账**。
 
@@ -226,6 +230,25 @@ Python 侧脚本（`verify_platform.py` 等）同样检查一次 playwright 路�
   本身 401 无效、却让诊断变 `ok`。清掉无效 Key 后该套 30/30、全量复跑 22/22。
   「只要填了 Key 就显示可用、不校验真伪」仍是已知缺陷，留待后续单独修（见 §8）。
 
+### S5 实测结果（对照用）
+
+`node tools/verify_all.mjs`：**23/23 套全绿**（首轮 22/23、修正契约脚本后复跑 4m05s）；`npm run build` 通过（47 模块）。
+
+- **新增 `verify_asset_from_shots.mjs` 27/27**（Node 纯函数 11 项 + Playwright 16 项，AI 接口全 mock）：
+  旧规则会清掉「剧本里没有、但镜头引用过」的纯规则角色，`assetsFromShots` 能补回；道具不被重建清掉；
+  引用数 / 集号范围 / 短徽标文案正确；正常路径输出与旧规则逐字段一致（旧脚本零回归风险）。
+  浏览器段走完阶段 4 → 第 4 步，三个分组非空、每行都有 `[data-asset-usage]`；
+  真删第 3 集全部镜头后，该集独占场景资产仍在，显示 `0镜 · 兜底`，title 为
+  「现无镜头引用 · 第 3 集 · 剧本兜底保留」。
+- **旧 22 套全部保持全绿**。唯一一次红灯是 `verify_plan_contract.mjs` 的
+  「engine.js 在 S3 未被改动」——它用 `git status` 判断，**提交后就变绿、与内容无关**，是历史假绿。
+  S5 明确允许在 engine.js 新增资产来源层函数，已改成检查 `git diff HEAD` 删除行必须为 0、
+  且 `parseScript` / `diagnose` / `buildStoryboard` 三个已锁函数仍在；25/25。
+- **验收口径**：删镜头走界面 `#del-selected` 真删，不用 localStorage 注入 + reload
+  （应用会从服务端项目恢复，注入会被覆盖，那是假删）。
+- **未改**：`buildAssets` 内部、`parseScript` / `diagnose` / `buildStoryboard` 规则、`server.py`、
+  AI 接口；D4 仍无批量按钮。
+
 ---
 
 ## 4. S3 执行清单（可直接照做）
@@ -264,6 +287,23 @@ Python 侧脚本（`verify_platform.py` 等）同样检查一次 playwright 路�
 **硬约束复核**：未改 `engine.js`；未新建 AI 接口（只调 `/api/ai/storyboard`）；
 后端 7 阶段流水线仍休眠；D4 无任何批量按钮；`npm run build` 通过。
 
+### S5 执行清单（已完成 · 2026-11-10）
+
+**目标**：资产清单以分镜引用为准，剧本只兜底；删镜头不牵连资产。
+
+1. `engine.js` 新增 `shotRefIds()` / `assetUsage()` / `assetsFromShots()` 三个纯函数并导出；
+   `buildAssets(parsed, prev)` 内部一行未动，正常路径输出逐字段一致。
+2. `studio.js` 的 `reparse(opts)` 可配置资产来源（默认 `shots`，`{ assetsFrom: "script" }` 退回旧行为）；
+   新增 `assetUsage` computed，给零引用资产按 `sceneNos` 换算集号、生成 orphan 说明。
+3. `AssetPanel.vue` 的 `.ap-row` 加行内短徽标（行高必须 ≤36px，见 `verify_asset_layout.mjs`）、
+   分组卡加完整文案；`assets.css` 加 `.ap-row-us` / `.ap-shot-us` 与琥珀色 orphan；
+   `StepAsset.vue` 加 `#asset-source-note` 说明条。
+4. `tools/verify_asset_from_shots.mjs` 登记 SUITES（22 → 23 套）；
+   `verify_plan_contract.mjs` 的过期断言改为真契约。
+
+**硬约束复核**：`engine.js` 的 diff 为「0 删除 / 77 新增」，全部落在资产来源层；
+未新建 AI 接口；后端 7 阶段流水线仍休眠；D4 无批量按钮；`npm run build` 通过。
+
 ---
 
 ## 5. 关键代码坐标（别重新找）
@@ -277,6 +317,9 @@ Python 侧脚本（`verify_platform.py` 等）同样检查一次 playwright 路�
 | `studio.js` `storyboardStep()` | **S4 逐集闸门**：一次只请求一集，按 `shots[].key` 只替换本集；未分集用隐式 `all` 闸门 |
 | `studio.js` `doGenerate()` / `localGenerate()` | 第 2 步的临时桥接已在 S4 移除；现在只服务于生成设置的「按当前参数重排（本地规则）」与 stale 条，不再是主路径 |
 | `StepShots.vue` `#shot-gates` | 每集一张卡，`[data-shot-gate]` 是回归脚本的稳定钩子；D4 无批量按钮 |
+| `engine.js` `assetsFromShots()` / `assetUsage()` | **S5**：前者以 shots 引用为准补回资产、剧本只兜底；后者统计「N 镜 / 第 X–Y 集」。都不碰 `buildAssets` 内部 |
+| `studio.js` `reparse(opts)` / `assetUsage` computed | **S5**：资产来源可配置（`{ assetsFrom: "script" }` 退回旧行为）；零引用资产按 `sceneNos` 换算集号给 orphan 说明 |
+| `AssetPanel.vue` `[data-asset-usage]` / `StepAsset.vue` `#asset-source-note` | **S5**：列表短徽标（行高 ≤36px）+ 分组卡完整文案 + 第 4 步来源说明条，回归脚本的稳定钩子 |
 | `frontend/src/lib/ai.js:140-148` | `storyboard(script, parsed, ep, config)` **本来就按集切片**（`ep.sceneFrom..sceneTo` + `E.scriptSlice`），`AI.run` 是 `episodes.forEach` 逐集调 → S4 零架构成本 |
 | `server.py` | `/api/parse/start` 7 阶段流水线**代码保留、无 UI 入口**；`resumeParseTask` 也留着（旧项目刷新不炸）。单步接口 `/api/ai/{adapt,plan,storyboard,assets,frames}` 全部可用 |
 | `frontend/src/App.vue` | `view-3` 挂 StepShots，`view-4` 挂 StepAsset |
@@ -297,8 +340,8 @@ Python 侧脚本（`verify_platform.py` 等）同样检查一次 playwright 路�
 
 | 路径 | 原因 | 换机怎么办 |
 |---|---|---|
-| `tools/verify_*`（26 个 `verify_*.mjs`） | `.gitignore` 明确排除「硬编码本机路径」 | 拷 `tools/` 整目录 + 按 §1 的 Mac 适配清单改路径 / 命令 / fixture |
-| `tools/verify_all.mjs`（22 套 SUITES） | 原 17 套已从旧机同步，另登记 S3 的 2 套 / S3.5 的 2 套 / S4 的 1 套 | 见 §3；换机后同样把新增脚本一起拷 |
+| `tools/verify_*`（27 个 `verify_*.mjs`） | `.gitignore` 明确排除「硬编码本机路径」 | 拷 `tools/` 整目录 + 按 §1 的 Mac 适配清单改路径 / 命令 / fixture |
+| `tools/verify_all.mjs`（23 套 SUITES） | 原 17 套已从旧机同步，另登记 S3 的 2 套 / S3.5 的 2 套 / S4 的 1 套 / S5 的 1 套 | 见 §3；换机后同样把新增脚本一起拷 |
 | `projects/p_fixture_stage_split` | `verify_stage_split.mjs` 需要「含分镜的既有项目」，旧机 fixture 未随仓库迁移 | 用 `engine.js` 造一个 23 镜项目，字段要点见 §1 |
 | `llm-config.bat` / `llm-providers.json` / `.env*` | **含真实 API Key，禁止提交** | 在新机按 README 第 49 行说明重建；万相 key 走这里。**本机缺这个 → 3 套 AI 资产用例被按钮闸门挡住** |
 | `projects/`（29 个真实项目） | 本机运行数据 | 不迁移也能开发；要测旧存档迁移就拷几个 `project.json` |
@@ -314,6 +357,7 @@ Python 侧脚本（`verify_platform.py` 等）同样检查一次 playwright 路�
 
 - 本地分支 **`dev`**（从基线分支 `main` 新建），含 S0/S1/S2/S3 全部代码改动、`README.md` 同步、`docs/` 两份文档、三份 `tools/baseline-*.txt`。S3 以 Conventional Commits 提交（subject 小写开头），验证脚本按 `.gitignore` 不入库。
 - **✅ 已推送到 `github.com:kevinzgai/ShortPlay-Studio.git`**（2026-11-09）：`dev` 与 `main` 均已推送，`dev` 已设 upstream 跟踪 `origin/dev`。用 `git ls-remote --heads origin` 核对。
+- **⚠️ 2026-11-10 起有本地提交尚未推送**：S3.5 之后的 `feat(settings)` / `style(settings)` / `feat(shots)` / `docs(plan)` / S5 的代码与文档提交都只在本机 `dev` 上。换机 clone 前先确认是否需要 push，用 `git log --oneline origin/dev..HEAD` 核对；`tools/verify_*` 与 `engine-config.json` 本来就不入库。
 - **⚠️ 2026-11-09 做过一次历史重写**（剔除 51 张示例 PNG，仓库 47.6 MB → 约 1 MB）：**所有旧 commit hash 全部失效**，本文不再写死 hash，以远程当前值为准；桌面 bundle / patch 也已按新历史重导。
 - `origin` 使用 **SSH**：`git@github.com:kevinzgai/ShortPlay-Studio.git`。本机 `~/.ssh/config` 的 `Host github.com` 段指向专用密钥 `~/.ssh/id_ed25519_github`（`IdentitiesOnly yes`）。
 - **坑**：本机原有的 `~/.ssh/id_rsa` 是绑定 `wd-hub` 仓库的 Deploy Key，`ssh -T git@github.com` 会显示 `Hi kevinzgai/wd-hub!` 看似认证成功，但推这个仓库报 `Permission ... denied to deploy key`。GitHub 不允许同一把 deploy key 复用到别的仓库，别再拿旧密钥试。
@@ -346,5 +390,9 @@ git remote set-url origin git@github.com:kevinzgai/ShortPlay-Studio.git
 - D2 的「重跑覆盖手工修改」尚未解决，靠二次确认缓解；真正合并要等按场增量（键已埋好）。
 - S6 不做的话，第 3 步看到的提示词可能缺资产描述，需在 README「已知限制」写明。
 - 本地规范化依赖空行补场号；PDF 导入不支持。
+- **S5 起 engine.js 允许新增资产来源层函数**：`verify_plan_contract.mjs` 不再用「git status 干净」判断（那是假绿），
+  改为检查 `git diff HEAD` 删除行必须为 0 + 三个已锁函数仍在。若将来要删改既有规则，这条会先红。
+- **道具分组的新建项目默认仍为空**：`buildAssets` 的 props 只从 prev 继承，S5 的验收脚本通过界面 `#add-prop`
+  加一条道具来代表「资产分解后」的状态；若要求「走完阶段 4 就自动有道具」，需要在 S6/S7 补一条道具推断规则。
 - `verify_parse_progress.mjs` / `verify_parse_resume.mjs` 不在 SUITES 内，S2 后是死脚本；S4 未动它们（不碰流水线），留到 S7 收尾时按新流程重写或删除。
 - **万相 Key 只判「有没有填」不判真伪**：`qwen_image_status()` / `engine_probe("qwen")` 让无效 Key 也显示「可用」，实际出图 401。2026-11-10 实测发现，尚未修；修时建议用不计费的 `/compatible-mode/v1/models` 做真实鉴权探测，并同步系统设置契约脚本。
