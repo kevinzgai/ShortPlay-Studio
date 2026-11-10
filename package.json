@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "分镜工场 · 短剧 AI 分集分镜平台（根目录只放命令入口，前端在 frontend/）",
+  "description": "分镜工场 · 短剧 AI 分集分镜平台（前端在兄弟仓 ../shortplay-studio-web，本仓只放命令入口）",
   "scripts": {
-    "install:frontend": "npm install --prefix frontend",
-    "dev": "npm run dev --prefix frontend",
-    "build": "npm run build --prefix frontend",
+    "install:frontend": "npm install --prefix ../shortplay-studio-web",
+    "dev": "npm run dev --prefix ../shortplay-studio-web",
+    "build": "npm run build --prefix ../shortplay-studio-web",
     "example": "node tools/gen_example.js",
     "example:ai": "node tools/gen_ai_example.js"
   }

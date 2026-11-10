@@ -25,9 +25,11 @@
 开发模式（改前端热更新）：
 
 ```bat
-py server.py --no-browser          :: 先起 8177，提供 /api/*
-npm run dev --prefix frontend      :: 再起 5173，Vite 自动代理 /api 到 8177
+py server.py --no-browser                    :: 先起 8177，提供 /api/*
+cd ..\shortplay-studio-web && npm run dev    :: 再起 5173，Vite 自动代理 /api 到 8177
 ```
+
+> 前端已拆独立仓 `shortplay-studio-web`（与本仓同级的兄弟目录，2026-11-11）。本仓不再有 `frontend/`；`WEB_ROOT` 解析顺序：`SHORTPLAY_WEB_ROOT` → 兄弟仓 `dist` → 本仓 `dist`。
 
 ### AI 模式配置
 
@@ -342,9 +344,9 @@ projects/
 
 ```
 shortplay-studio/
-├─ frontend/                       Vue 3 + Vite 工程（唯一前端真源）
+├─ ../shortplay-studio-web/        前端独立仓（Vue 3 + Vite，唯一前端真源，2026-11-11 拆出）
 │  ├─ index.html                   Vite 入口
-│  ├─ vite.config.js              构建到 ../dist，dev 代理 /api → 8177
+│  ├─ vite.config.js              构建到本仓 dist，dev 代理 /api → 8177
 │  ├─ package.json                vue ^3.5 / vite ^5.4 / @vitejs/plugin-vue
 │  └─ src/
 │     ├─ main.js                  挂载 + boot()
@@ -362,7 +364,7 @@ shortplay-studio/
 │                                ShotsTable / PreviewPanel / FeedbackLayer / AgentWorkbench
 ├─ projects/                      项目库（每个项目一个目录 + project.json，已 gitignore）
 │  └─ .trash/                     删除的项目移到这里，不直接抹掉
-├─ dist/                          npm run build 产物，app/main.py 托管它
+├─ dist/                          可选的前端产物（优先用兄弟仓 shortplay-studio-web/dist）
 ├─ docs/archive/ui-versions/      5 版 UI 原型（历史留档，代码里 0 引用，已从根目录移走）
 ├─ reference/                     分镜平台相关资料（不参与运行，见 reference/README.md）
 │  ├─ 00-项目沿革/                 按天记的开发日志：决策理由与踩过的坑，接手先读
@@ -410,7 +412,7 @@ shortplay-studio/
 
 | 验证 | 覆盖 | 结果 |
 | --- | --- | --- |
-| `npm run build --prefix frontend` | Vue SFC 编译 / 产物输出 dist | 47 模块通过 |
+| `npm run build`（shortplay-studio-web 仓） | Vue SFC 编译 / 产物输出该仓 dist | 47 模块通过 |
 | `tools/verify_platform.py` | 离线主流程（`?ai=0`）：导入 → 拆解 → 23 镜 → 编辑 → 删除撤销 → 排序 → 重生成 → 导出 → 体检补全 → 表格；**跑完只删本次创建的项目**，不会往项目库里堆「雨夜便利店」 | 43/43 |
 | `tools/verify_ai.py` | **DEPRECATED**（休眠流水线，已从 SUITES 摘除，勿跑）；历史基线为真模型 32/32 | — |
 | `tools/verify_all.mjs` | **全量串行 26 套**：各套件串行执行（并发跑会互相改变项目数量，让「项目列表条数」类断言假失败），最后打一张通过汇总表；加关键字只跑匹配的，例 `node tools/verify_all.mjs assets` | 26/26 |
@@ -504,13 +506,13 @@ storyboard/起始帧提示词.md|json  每镜首帧提示词（中文给豆包/�
 ## 内置剧本《鬼婚，逃命》
 
 - 第一步新增「载入《鬼婚，逃命》」按钮，一键把第一章放进输入框；原文存档在 `examples/鬼婚逃命-原文.txt`。
-- 原作是**小说体第一人称**，没有场次行和「角色：台词」，直接喂解析器会退化成「1 场 / 0 台词 / 90+ 条动作」。`frontend/src/lib/sampleGuihun.js` 是唯一真源，只做格式转写：加场次头、给原文直接引语加角色名、内心独白标「水雷（旁白）」、叙述句按原顺序合并为动作行，**不新增人物 / 地点 / 情节**。
+- 原作是**小说体第一人称**，没有场次行和「角色：台词」，直接喂解析器会退化成「1 场 / 0 台词 / 90+ 条动作」。前端仓 `src/lib/sampleGuihun.js` 是唯一真源，只做格式转写：加场次头、给原文直接引语加角色名、内心独白标「水雷（旁白）」、叙述句按原顺序合并为动作行，**不新增人物 / 地点 / 情节**。
 - 转写结果：10 场 / 7 角色 / 19 句对白 / 55 条动作 / 3257 字，另存 `examples/鬼婚逃命-分镜剧本.txt` 供「上传 .txt」使用。
 - 重新生成：`node tools/gen_guihun.js`（需 8177 服务在跑），输出 `examples/guihun-storyboard.{json,csv,md,txt}` 与 `guihun-video-prompts.json`。生成参数用 `pacing: cinematic`（单集上限 34 镜）与 `9:16`，`standard` 的 28 镜上限对 10 场长章节不够。
 
 ## 控件系统
 
-`frontend/src/assets/controls.css` 是独立的基础控件皮肤层，在 `main.js` 里最后引入（打包顺序实测 `fx.css → styles.css → controls.css`）。**零第三方依赖、零 DOM 改动**，所有 `id` / `class` / `data-field` 事件委托保持原样。
+前端仓 `src/assets/controls.css` 是独立的基础控件皮肤层，在 `main.js` 里最后引入（打包顺序实测 `fx.css → styles.css → controls.css`）。**零第三方依赖、零 DOM 改动**，所有 `id` / `class` / `data-field` 事件委托保持原样。
 
 - 统一 `input / select / textarea / checkbox / radio / file / button`：34px 高、9px 圆角、1px 边分层、hover 只变边色、3px 品牌聚焦环、150ms 过渡。
 - 自绘细节：下拉 SVG 箭头、复选框勾选与半选态、收敛的 number 步进器、文件选择按钮、按钮顶部内高光与 `:focus-visible` 环。

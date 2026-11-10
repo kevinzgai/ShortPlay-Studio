@@ -6,8 +6,11 @@ import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-# 前端是 Vue 3 + Vite 工程，构建产物在 dist/；没有构建时回退到项目根便于排查
-# 可用 SHORTPLAY_WEB_ROOT 覆盖（拆仓后前端产物在另一个仓库时用）
+# 前端是 Vue 3 + Vite 工程（独立仓库 shortplay-studio-web），构建产物在它的 dist/；
+# 可用 SHORTPLAY_WEB_ROOT 覆盖。解析顺序：环境变量 → 兄弟仓 dist → 本仓 dist（老布局）→ 仓库根。
 WEB_ROOT = Path(os.environ["SHORTPLAY_WEB_ROOT"]).expanduser() if os.environ.get("SHORTPLAY_WEB_ROOT") \
-    else (ROOT / "dist" if (ROOT / "dist" / "index.html").exists() else ROOT)
+    else next((p for p in (
+        ROOT.parent / "shortplay-studio-web" / "dist",
+        ROOT / "dist",
+    ) if (p / "index.html").exists()), ROOT)
 PORT = int(os.environ.get("SHORTPLAY_PORT", "8177"))

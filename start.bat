@@ -8,20 +8,23 @@ if exist "llm-config.bat" call "llm-config.bat"
 set "SHORTPLAY_PORT=8177"
 set "PYTHONUTF8=1"
 
-REM ---- 前端：首次自动装依赖，每次启动重新构建，保证 dist 与源码一致 ----
+REM ---- 前端已拆独立仓 shortplay-studio-web（与本仓同级的兄弟目录）----
+REM ---- 首次自动装依赖，每次启动重新构建，保证 dist 与源码一致 ----
+set "WEB_REPO=%~dp0..\shortplay-studio-web"
+if not exist "%WEB_REPO%\package.json" goto NO_NPM
 where npm >nul 2>nul
 if errorlevel 1 goto NO_NPM
-if not exist "frontend\node_modules\vue" (
+if not exist "%WEB_REPO%\node_modules\vue" (
   echo   首次启动，正在安装前端依赖，请稍候...
-  call npm install --prefix frontend --no-audit --no-fund
+  call npm install --prefix "%WEB_REPO%" --no-audit --no-fund
 )
 echo   正在构建前端 Vue 3 + Vite ...
-call npm run build --prefix frontend --silent
+call npm run build --prefix "%WEB_REPO%" --silent
 if errorlevel 1 echo   [提示] 前端构建失败，将使用已有构建产物
 goto CHECK_PY
 
 :NO_NPM
-echo   [提示] 未检测到 Node.js，直接使用已有的 dist 构建产物
+echo   [提示] 未检测到 Node.js 或前端仓库不存在，使用已有构建产物
 
 :CHECK_PY
 where py >nul 2>nul
