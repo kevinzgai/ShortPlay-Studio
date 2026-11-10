@@ -507,7 +507,7 @@ table.shots .detail-brief{min-width:210px;max-width:280px;font-size:11px;color:v
   .sub,.muted,.cell.notes,.cell-label{color:#555 !important}
   h1,h2,h3,.pv-title,.scene-head .title{color:#111 !important}
   h1{font-size:20px}
-  .episode-filter,.ai-status,.episode-card,#shot-gates{display:none !important}
+  .episode-filter,.ai-status,.episode-card,#shot-gates,#frames-gate{display:none !important}
 }
 
 /* ==========================================================================
@@ -684,3 +684,12 @@ table.shots .detail-brief{min-width:210px;max-width:280px;font-size:11px;color:v
 .ep-gate-running{background:var(--primary)}
 .ep-gate-stale{background:var(--warn)}
 .ep-gate-failed{background:var(--err)}
+
+/* S6 · 首帧提示词闸门（第 4 步末尾） */
+.fg-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.fg-head b{font-size:13px}
+.fg-note{font-size:11.5px;line-height:1.7;color:var(--text-3);margin:0}
+.fg-row{display:flex;align-items:center;gap:12px;margin-top:10px;flex-wrap:wrap}
+.fg-row .fg-note{flex:1;min-width:220px}
+.fg-slots{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.fg-slots .chip{font-size:10.5px}

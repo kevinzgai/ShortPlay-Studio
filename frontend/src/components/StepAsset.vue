@@ -3,7 +3,7 @@
    把角色 / 场景 / 道具的参考图在这一层定死，分镜的画面描述与参考图槽位
    都从这里取。资产实体全片共享，改一次所有引用它的分镜同步生效。 */
 import { computed } from "vue";
-import { S, goStep } from "../stores/studio.js";
+import { S, goStep, framesGate, regenFrames } from "../stores/studio.js";
 import AssetPanel from "./AssetPanel.vue";
 import ExportMenu from "./ExportMenu.vue";
 
@@ -50,6 +50,33 @@ const allReady = computed(() => totalCount.value > 0 && readyCount.value === tot
   </div>
 
   <AssetPanel />
+
+  <!-- S6：首帧提示词必须在资产定妆之后生成，第 3 步只有只读预览。 -->
+  <div id="frames-gate" class="card pad" style="margin-bottom:14px">
+    <div class="fg-head">
+      <b>首帧提示词 · 定妆后生成</b>
+      <span class="chip" :class="S.frames.length ? 'ok' : ''">
+        {{ S.frames.length ? S.frames.length + " 镜已生成" : "尚未生成" }}
+      </span>
+    </div>
+    <p class="fg-note" id="frames-gate-reason">
+      {{ framesGate.ok ? "资产齐了：" + framesGate.dressed + " 条资产已定妆，可生成 " +
+          framesGate.shots + " 镜的首帧提示词" : framesGate.reason }}
+    </p>
+    <div class="fg-row">
+      <button class="btn primary" id="generate-frames" :disabled="!framesGate.ok"
+        @click="regenFrames(false)">
+        {{ S.frames.length ? "重新生成" : "生成" }} {{ framesGate.shots }} 镜首帧提示词 →
+      </button>
+      <span class="fg-note">第 3 步只有只读预览，不会发 frames 请求；这里生成时会把已定妆资产的参考图槽位写进提示词。</span>
+    </div>
+    <div v-if="S.frames.length && S.frames[0].refSlots && S.frames[0].refSlots.length"
+      id="frames-slots" class="fg-slots">
+      <span v-for="(s, i) in S.frames[0].refSlots" :key="i" class="chip" :class="s.ready ? 'ok' : ''">
+        [{{ i + 1 }}] {{ s.code }} {{ s.name }} · {{ s.ready ? "已定妆" : "待定妆" }}
+      </span>
+    </div>
+  </div>
 
   <div class="cta-row">
     <button class="btn" id="back-3" @click="goStep(3)">← 回分镜表</button>

@@ -1968,6 +1968,41 @@ export const assetPackStats = computed(() => {
   };
 });
 
+/* ------------------------------ S6 · 首帧提示词闸门 ------------------------------
+ * 首帧提示词需要 shots + 已定妆资产两者。顺序翻转后第 3 步排分镜时资产还没定妆，
+ * 所以在这一层设硬闸门：第 3 步一律不发 /api/ai/frames，只有第 4 步定妆完整才生成。
+ * 不新建 AI 接口、不改 server.py、后端 7 阶段流水线保持休眠。
+ */
+/** 闸门状态：ok / 一句人话原因 / 已定妆资产数 / 镜头数。 */
+export const framesGate = computed(() => {
+  const all = [].concat(S.assets.characters, S.assets.scenes, S.assets.props);
+  const dressed = all.filter((a) => a && (a.refImage || (a.genImages || []).length)).length;
+  const shots = S.shots.length;
+  if (Number(S.step) !== 4)
+    return { ok: false, reason: "先到第 4 步资产定妆", dressed: dressed, shots: shots };
+  if (!shots)
+    return { ok: false, reason: "先在第 3 步排出镜头", dressed: dressed, shots: shots };
+  if (!S.assetPack)
+    return { ok: false, reason: "先做一次资产分解（AI 分解资产）", dressed: dressed, shots: shots };
+  if (!dressed)
+    return { ok: false, reason: "先给至少一条资产挂参考图或出图，再生成首帧提示词", dressed: dressed, shots: shots };
+  return { ok: true, reason: "", dressed: dressed, shots: shots };
+});
+/** 服务端回包里的 refAssets 是资产编号；关联回已定妆资产，写成参考图槽位并追加到提示词。 */
+function withRefSlots(f) {
+  const all = [].concat(S.assets.characters, S.assets.scenes, S.assets.props);
+  const slots = (f.refAssets || []).map((code) => {
+    const a = all.find((x) => x && x.code === code);
+    return a ? { code: code, name: a.name,
+                 ready: !!(a.refImage || (a.genImages || []).length) } : null;
+  }).filter(Boolean);
+  const line = slots.length
+    ? "\n参考图槽位：" + slots.map((s, i) =>
+        "[" + (i + 1) + "] " + s.code + " " + s.name + (s.ready ? "（已定妆）" : "（待定妆）")).join("；")
+    : "";
+  return Object.assign({}, f, { refSlots: slots, prompt: String(f.prompt || "") + line });
+}
+
 /** 单独跑一次资产分解（不生成分镜），已有手改 / 锁定会被保留。 */
 export function buildAssetPack() {
   if (S.assetBusy) return Promise.resolve();
@@ -1999,8 +2034,20 @@ export function buildAssetPack() {
   });
 }
 
-/** 资产包 + 分镜表 → 每镜起始帧提示词（纯模板，秒回）。 */
+/** 资产包 + 分镜表 → 每镜起始帧提示词（纯模板，秒回）。S6：只在第 4 步定妆后可生成。 */
 export function regenFrames(silent) {
+  // 第 3 步只保留提示词只读预览，任何路径都不在这儿发 /api/ai/frames。
+  if (Number(S.step) !== 4) {
+    if (!silent) toast("首帧提示词在第 4 步资产定妆后生成；第 3 步只有只读预览", "warn");
+    return Promise.resolve();
+  }
+  // 显式按钮走完整闸门；silent（改风格 / 重新分解）只有已经生成过才重算，
+  // 否则「资产刚分解、还没定妆」就会拿空参考图算出一版没用的提示词。
+  if (!silent && !framesGate.value.ok) {
+    toast(framesGate.value.reason, "warn");
+    return Promise.resolve();
+  }
+  if (silent && !S.frames.length && !framesGate.value.ok) return Promise.resolve();
   if (!S.assetPack) {
     if (!silent) toast("先做一次资产分解，才有资产包可以拼起始帧", "warn");
     return Promise.resolve();
@@ -2011,7 +2058,7 @@ export function regenFrames(silent) {
   }
   return AI.frames(S.shots, packWithStyle(), S.config.aspect).then((r) => {
     if (!silent) begin();
-    S.frames = r.frames || [];
+    S.frames = (r.frames || []).map(withRefSlots);
     S.frameStats = r.stats || null;
     save();
     if (!silent) toast("已生成 " + S.frames.length + " 个镜头的起始帧提示词（" + S.config.aspect + "）", "ok", "撤销", undo);
