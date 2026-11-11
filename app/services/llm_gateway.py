@@ -16,6 +16,7 @@
 
 import sys
 import time
+from pathlib import Path
 
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
@@ -28,15 +29,28 @@ _MAX_USER_CHARS = 36000  # 与旧 call_llm 一致：含带编号的剧本行清�
 
 
 def _caller_path():
-    """自动取业务调用方标识（v1 粒度 = 模块名，如 parse_task / assets）。"""
+    """自动取业务调用方标识（v1 粒度 = 模块名，如 parse_task / assets）。
+
+    回溯栈找第一个「不是本模块」的帧，取其模块名或文件名：
+      · 业务模块调用 → "parse_task" / "assets"（排查时能直接定位到哪个阶段）
+      · 脚本 / 手工调试直接调 → 退回脚本文件名，不再是笼统的 "unknown"
+    这条信息只在台账里用，取不到也无害，所以不做任何异常放大。
+    """
     frame = sys._getframe(1)
-    for _ in range(6):
-        mod = frame.f_globals.get("__name__", "")
-        if mod.startswith("app.services") and not mod.endswith("llm_gateway"):
-            return mod.rsplit(".", 1)[-1]
-        frame = frame.f_back
+    for _ in range(8):
         if frame is None:
             break
+        mod = frame.f_globals.get("__name__", "")
+        if mod and not mod.endswith("llm_gateway") and mod != __name__:
+            leaf = mod.rsplit(".", 1)[-1]
+            if leaf and leaf != "__main__":
+                return leaf
+            # __main__：取脚本文件名，如 debug_assets.py
+            fname = frame.f_globals.get("__file__") or ""
+            if fname:
+                return Path(fname).stem or "main"
+            return "main"
+        frame = frame.f_back
     return "unknown"
 
 

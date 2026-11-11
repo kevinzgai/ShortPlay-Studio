@@ -478,8 +478,15 @@ git remote set-url origin git@github.com:kevinzgai/ShortPlay-Studio.git
 - 本地规范化依赖空行补场号；PDF 导入不支持。
 - **S5 起 engine.js 允许新增资产来源层函数**：`verify_plan_contract.mjs` 不再用「git status 干净」判断（那是假绿），
   改为检查 `git diff HEAD` 删除行必须为 0 + 三个已锁函数仍在。若将来要删改既有规则，这条会先红。
-- **道具分组的新建项目默认仍为空**：`buildAssets` 的 props 只从 prev 继承，S5 的验收脚本通过界面 `#add-prop`
-  加一条道具来代表「资产分解后」的状态；若要「走完阶段 4 就自动有道具」，需另开阶段补一条道具推断规则。
+- ~~**道具分组的新建项目默认仍为空**：`buildAssets` 的 props 只从 prev 继承，S5 的验收脚本通过界面 `#add-prop`
+  加一条道具来代表「资产分解后」的状态；若要「走完阶段 4 就自动有道具」，需另开阶段补一条道具推断规则。~~
+  **→ 2026-11-11 核查后结案（不是缺陷，无需改代码）**：
+  ① **AI 分解路径道具完整**——实测《鬼婚逃命》真实调用产出 3 个道具（红绳玉佩 / 黄纸铜钱 / 黄铜罗盘），
+  `agents/prompts/assets.md` 的 props schema 与 `assets.py:140` 的解析完全对得上；
+  ② **只有离线规则引擎**（`engine.js:1069`）的 props 是 `((prev && prev.props) || []).slice()`——只继承不推断，
+  这是**有意设计**：道具名没有像人名那样的动词模式可依据，正则硬猜只会产出噪声道具污染面板；
+  ③ **绑定链路本身正常**——`p_fixture_stage_split` 实测 44 镜中 8 镜正确绑定（「热咖啡」绑到 8 个出现它的镜头）。
+  结论：走 AI 分解自然就有道具，离线模式保持「不猜」，此条不再跟进。
 - **死脚本已销账（S7）**：`verify_parse_progress.mjs` / `verify_parse_resume.mjs` / `verify_ai.py` 标 **DEPRECATED**，
   不在 SUITES；不重写也不删除（被测对象无 UI 入口，逐集链路由 S4/S5/S6 覆盖），保留供旧项目恢复排查。
 - ~~**万相 Key 只判「有没有填」不判真伪**：`qwen_image_status()` / `engine_probe("qwen")` 让无效 Key 也显示「可用」，实际出图 401。2026-11-10 实测发现，尚未修；修时建议用不计费的 `/compatible-mode/v1/models` 做真实鉴权探测，并同步系统设置契约脚本。~~
