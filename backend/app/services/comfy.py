@@ -71,14 +71,23 @@ FACE_CLOSE_VARIANTS = ("portrait", "faceSheet")
 IDENTITY_ANCHOR_ORDER = ("portrait", "faceSheet", "turnaround")
 
 
-# 参考图在提示词里的身份声明。H3 的 image_1 是「被编辑的图」，它会倾向沿用
-# 参考图的构图与背景 —— 而我们要的是「同一张脸、换一个构图」，所以必须明确
-# 把「只抄脸、不抄画面」写死，否则出三视图时会得到一张放大版的半身像。
+# 参考图在提示词里的身份声明。
+# 【<Picture 1> 的尖括号不是装饰，是身份传递的开关】2026-11-12 真机对照实验：
+# 裸写 "Picture 1" 出来的三视图是黑发年轻人（身份完全丢失）——H3 的文本编码器
+# 有专门的 <Picture n> 绑定 token，裸词不会被关联到参考图槽位，模型等于
+# 「收到一张图但提示词从没提过它」，只能凭人设文字自由发挥。
+# 加上尖括号后同一 seed 立刻出花白老人、同一张脸。编辑指令式措辞
+# （"keep the person, change composition"）试过：身份保住了但三视图连版
+# 直接不出了，所以保持「声明式 + 只抄人」的写法。
+# 服装要抄：三视图的意义就是「同一人同一套衣服的三个角度」，旧版把
+# clothing layout 也列进「别抄」清单，结果立领被画成翻领。改成服装显式照抄。
 IDENTITY_REF_PREFIX = (
-    "Picture 1 is an identity reference of the same person. "
-    "Reproduce that face exactly: same bone structure, same eyes, nose, lips and "
-    "jawline, same hairstyle and hairline. Do not copy Picture 1's framing, pose, "
-    "camera angle, background or clothing layout — only the identity carries over.\n"
+    "<Picture 1> is an identity reference of the same person. "
+    "Reproduce that person exactly: same face (same bone structure, same eyes, nose, "
+    "lips and jawline), same hairstyle and hairline, same age and body type, and the "
+    "same outfit (same garment types, colors, collar style and fabric). Do not copy "
+    "<Picture 1>'s framing, pose, camera angle or background — the person and the "
+    "outfit carry over, the composition does not.\n"
 )
 
 
@@ -477,13 +486,22 @@ def h3_ref_slots():
     """问 ComfyUI「MiniMaxH3ImageConditioning 到底有几个参考图槽、叫什么」。
 
     【为什么不把 image_1..image_16 写死】
-    官方节点是可选输入 image_1 / image_2 …，但具体到某个 ComfyUI 版本，
-    槽位名和上限都可能不同（H3-Image 的 ComfyUI 原生支持是 2026-11-10 才合的）。
-    写死一个猜来的名字，出错时表征是 /prompt 校验失败、报一坨 node_errors，
-    排查起来像工作流坏了。直接读 object_info 拿真实定义，缺通道时能给出
-    「你的 ComfyUI 太旧」这种能动手的结论。
+    参考图通道的 object_info 声明至少有三种形态（本机 v0.45.0 实测走 a）：
+     a) COMFY_AUTOGROW_V3 动态槽：optional.images 带 {"template": {"prefix": "image_"}}。
+        提交时键名是 `images`，值是编号字典 {"1": [LoadImage节点, 0], ...} ——
+        实测顶层写 image_1 会被 execute() 拒收（unexpected keyword argument），
+        单连线 tensor 会在节点内 sorted(images or {}) 处炸
+        （Boolean value of Tensor with more than one value is ambiguous）。
+        编号字典的键序即提示词里 Picture 1/2/… 的顺序。
+     b) 静态展开多槽：image_1 / image_2 …（每槽一图）。
+     c) 单批量槽 images（类型 IMAGE）：多图需 ImageBatch 拼接。
+    写死一个猜来的名字，出错时表征是 /prompt 校验失败或节点执行炸、
+    报一坨 node_errors / tensor 异常，排查起来像工作流坏了。直接读
+    object_info 拿真实定义，缺通道时能给出「你的 ComfyUI 太旧」这种结论。
 
-    返回槽位名列表（按 1..N 排序）；节点不存在或没有 IMAGE 输入时返回 []。
+    返回形态标记列表；节点不存在或没有任何图片输入时返回 []。
+    形态 a 返回 ["autogrow"]；形态 b 返回 ["image_1", "image_2", ...]；
+    形态 c 返回 ["images"]。
     """
     now = time.time()
     if H3_REF_SLOTS_CACHE["names"] is not None and now - H3_REF_SLOTS_CACHE["at"] < H3_REF_SLOTS_TTL:
@@ -497,16 +515,32 @@ def h3_ref_slots():
         return []
     node = (info or {}).get("MiniMaxH3ImageConditioning") or {}
     spec = node.get("input") or {}
+
+    # 三种槽位形态都认（object_info 实测于本机 v0.45.0）：
+    #  a) COMFY_AUTOGROW_V3 动态槽：optional.images 的类型是 "COMFY_AUTOGROW_V3"，
+    #     带 {"template": {"prefix": "image_", "min": 0, "max": 100}} —— 提交工作流时
+    #     直接写 image_1 / image_2 …（每槽一图），与官方文档一致。tooltip 写明
+    #     「<Picture n> in the prompt; image_1 is the picture to edit」。
+    #  b) 展开后的静态多槽：image_1 / image_2 …（每槽一图，某些版本直接展开）。
+    #  c) 单批量槽 images：类型 "IMAGE"（若存在，多图需 ImageBatch 拼接）。
     names = []
+    autogrow = False
     for group in ("required", "optional"):
         for key, decl in (spec.get(group) or {}).items():
+            kind = decl[0] if isinstance(decl, (list, tuple)) and decl else decl
+            if kind == "COMFY_AUTOGROW_V3" or (isinstance(decl, dict) and decl.get("template")):
+                autogrow = True
+                continue
+            if str(key) == "images" and kind == "IMAGE":
+                names.append(key)
+                continue
             if not re.fullmatch(r"image_\d+", str(key)):
                 continue
-            # decl 形如 ["IMAGE", {...}]，只认 IMAGE 型
-            kind = decl[0] if isinstance(decl, (list, tuple)) and decl else decl
             if kind == "IMAGE":
                 names.append(key)
-    names.sort(key=lambda k: int(k.split("_")[1]))
+    if autogrow:
+        names = ["autogrow"]
+    names.sort(key=lambda k: 0 if k == "images" else (1 if k == "autogrow" else int(k.split("_")[1])))
     H3_REF_SLOTS_CACHE["names"] = names
     H3_REF_SLOTS_CACHE["at"] = now
     return names
@@ -559,7 +593,12 @@ def comfy_ref_name(local_name):
         hit = _UPLOADED.get(key)
     if hit:
         return hit
-    # 只认 examples/assets/ 里的单層文件名，`../` 一律挡掉
+    # 只认 examples/assets/ 里的单層文件名，`../` 一律挡掉。
+    # 容错：调用方常把完整相对路径（file 字段就是 "examples/assets/x.png" 格式）
+    # 直接塞进来，前端是 split("/").pop() 剥过的，后端也剥一次 —— 拒绝报错
+    # 不如直接收下，反正最终只落到这一个目录，路径穿越照样被白名单挡死。
+    if key.startswith("examples/assets/"):
+        key = key[len("examples/assets/"):]
     if not ASSET_IMG_NAME.match(key) or "/" in key or "\\" in key:
         raise ValueError("参考图名不合法：%s" % key[:60])
     path = ASSET_IMG_DIR / key
@@ -672,14 +711,37 @@ def _workflow_h3_image(prompt, w, h, seed, steps, refs=()):
         if not slots:
             raise ValueError("当前 ComfyUI 的 MiniMaxH3ImageConditioning 没有参考图输入，"
                              "接不了身份参考（需要 ComfyUI v0.45.0+ 的 H3-Image 原生支持）")
-        if len(refs) > len(slots):
-            raise ValueError("参考图最多 %d 张，这次给了 %d 张" % (len(slots), len(refs)))
-        wired = {}
-        for i, rname in enumerate(refs):
-            nid = str(20 + i)
-            nodes[nid] = {"class_type": "LoadImage", "inputs": {"image": rname}}
-            wired[slots[i]] = [nid, 0]
-        nodes["5"]["inputs"].update(wired)
+        if slots[0] == "autogrow":
+            # 动态槽（本机 v0.45.0 实测）：提交键名是 images，值是编号字典
+            # {"1": [LoadImage, 0], "2": ...}。键序即提示词里 Picture 1/2/… 的顺序。
+            # 顶层写 image_1 会被 execute() 拒收，单连线 tensor 会在节点内炸。
+            for i, rname in enumerate(refs):
+                nid = str(20 + i)
+                nodes[nid] = {"class_type": "LoadImage", "inputs": {"image": rname}}
+                nodes["5"]["inputs"].setdefault("images", {})[str(i + 1)] = [nid, 0]
+        elif slots[0] == "images":
+            # 单批量槽形态：一个槽收一个 IMAGE batch，一个输入不能挂两条线 ——
+            # 多张参考图必须先 ImageBatch 逐级拼接。
+            prev = ""
+            for i, rname in enumerate(refs):
+                nid = str(20 + i)
+                nodes[nid] = {"class_type": "LoadImage", "inputs": {"image": rname}}
+                if prev:
+                    bid = str(30 + i)
+                    nodes[bid] = {"class_type": "ImageBatch",
+                                  "inputs": {"image1": [prev, 0], "image2": [nid, 0]}}
+                    prev = bid
+                else:
+                    prev = nid
+            nodes["5"]["inputs"]["images"] = [prev, 0]
+        else:
+            # 静态多槽形态（image_1..N）：一槽一线，按序对应 Picture N
+            if len(refs) > len(slots):
+                raise ValueError("参考图最多 %d 张，这次给了 %d 张" % (len(slots), len(refs)))
+            for i, rname in enumerate(refs):
+                nid = str(20 + i)
+                nodes[nid] = {"class_type": "LoadImage", "inputs": {"image": rname}}
+                nodes["5"]["inputs"][slots[i]] = [nid, 0]
     return nodes
 
 
