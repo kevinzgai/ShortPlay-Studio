@@ -1,8 +1,14 @@
 # dev 分支 · 续作任务计划（换机接手用）
 
-> 生成：2026-11-09 · 基线分支 `main` · 适用分支 `dev` · **已推送 GitHub（main + dev）** · 历史已剔除示例 PNG
-> 本文自包含：**S0~S7 全部阶段已完成；本文档转维护手册，读完即可接手，不需要翻聊天记录。**
-> 完整设计依据见 `docs/分步开发路线-移除一键生成.md`（同一分支，已提交）。
+> 生成：2026-11-09 · 最后更新：**2026-11-11** · 基线分支 `main` · 适用分支 `dev` · **已推送 GitHub（main + dev）** · 历史已剔除示例 PNG
+> 本文自包含：**S0~S7 + A/B/C 全部完成；本文档转维护手册，读完即可接手，不需要翻聊天记录。**
+> 完整设计依据见 `docs/分步开发路线-移除一键生成.md`、`docs/前后端拆分方案.md`、`docs/LangChain接入-技术方案.md`。
+>
+> **2026-11-11 重大变更（换机必读，旧文档口径已全部作废）**：
+> ① 后端已从「Python 标准库单文件」换成 **FastAPI + uvicorn**，零依赖部署特性**已放弃**，改用 venv；
+> ② 前后端**已拆成两个仓库**，前端在兄弟目录 `shortplay-studio-web`，本仓 `frontend/` 与根 `dist/` 已删除；
+> ③ LLM 调用改走 `app/services/llm_gateway.py`（LangChain），**每次调用落库** `data/llm_calls.db`；
+> ④ 回归从 25 套变成 **26 套**，启动命令改为 `./.venv/bin/python server.py`。
 
 ---
 
@@ -22,17 +28,23 @@ docs/dev-续作任务计划.md 和 docs/分步开发路线-移除一键生成.md
   S5 定妆消费分镜（assetsFromShots / reparse 来源可配置 / 资产卡引用数 / 零引用兜底说明）、
   S6 出片归位（framesGate 硬闸门 / withRefSlots 参考图槽位 / 第 3 步只读预览不发 frames）。
 - S7「收尾与文档」已完成：休眠流水线标注、README 工作区章节 +「为什么不做一键」、套件登记复核、
-  两个死脚本标 DEPRECATED 销账。**S0~S7 全部阶段收尾完毕。**
-- 实测：`verify_all.mjs` 25 套全绿（5m15s）；各阶段细项见 §3。
-  注意其中 `ComfyUI 出图 UI` 因本机 8188 离线是「0 通过/0 失败 · 环境跳过」，不是完整 26/26。
+  两个死脚本标 DEPRECATED 销账。
+- **【2026-11-11 新增，三项大改造已全部落地】**
+  A 阶段拆包（`app/` 五层）、B 阶段拆仓（前端独立成 `shortplay-studio-web` 兄弟仓，
+  本仓 `frontend/` 与根 `dist/` 已删，`studio.js` 2881 行拆成 5 个域文件 + barrel）、
+  C 阶段换 FastAPI（`app/asgi.py`，`SHORTPLAY_LEGACY_SERVER=1` 可回退标准库实现）。
+  另加 LangChain 接入步骤一：LLM 调用走 `app/services/llm_gateway.py`，每次调用落库 `data/llm_calls.db`。
+- 实测：`verify_all.mjs` **26 套**（原 25 + Step C 的 SSE 不阻塞），本机实测 **26/26**（约 5 分钟）。
 
 【全部阶段已完成，本提示词转为维护模式】
-- S0~S7 已全部落地并验收，不要重做任何阶段。要改功能就按新需求开新阶段，先报计划再动手。
-- 四条红线仍然有效（见下）；改动前先跑一次基线：node tools/verify_all.mjs（25 套串行，实测 5m15s）。
+- S0~S7 + A/B/C 已全部落地并验收，不要重做任何阶段。要改功能就按新需求开新阶段，先报计划再动手。
+- 四条红线仍然有效（见下）；改动前先跑一次基线：node tools/verify_all.mjs（26 套串行，实测约 5 分钟）。
 - 休眠的 /api/parse/start 流水线：代码保留、无 UI 入口、已标「勿删（旧项目恢复用）」，
   不要新建入口，也不要删；两个 DEPRECATED 回归脚本不跑。
 - README 的「四个工作区 · 每步人工确认」与「为什么不做一键」是产品口径，改实现必须同步改它，
   verify_final_docs.mjs 会拦。
+- LangGraph（技术方案步骤二）**挂触发器待命、未排期**，触发条件是「评审回环的打回+收敛条件定义清楚」
+  或「第二个需要工具循环的 skill 立项」。触发前不要主动引入 langgraph 依赖。
 
 【硬约束，违反即返工】
 - 四项已锁决策：D1 分集/分镜各为独立 AI 步 + 人工闸门；D2 整步作废 + 显式重跑（不做按场增量）；
@@ -42,21 +54,28 @@ docs/dev-续作任务计划.md 和 docs/分步开发路线-移除一键生成.md
   （S5 起允许新增资产来源层纯函数，但既有规则一行不许删改，见 verify_plan_contract.mjs）；
   不新建 AI 接口，复用 /api/ai/plan、/api/ai/storyboard、/api/ai/assets、/api/ai/frames；
   后端 7 阶段流水线保持休眠不删。
+- **LangChain 三条铁律（2026-11-11 锁定）**：`extract_json` / `repair_json` 逐字保留不许重写；
+  `with_structured_output` 不作依赖（只做旁路告警）；每步一提交、26 回归放行，挂了单 commit 回滚。
 - 本阶段新增脚本必须全绿才进下一阶段；旧脚本若因步骤号变化而红，必须在同阶段内修完，不许挂账。
 - 已知缺陷允许保留：重跑会覆盖手工修改，靠二次确认缓解。
 
 【环境与容易踩的坑】
-- 服务是 Python 标准库后端 8177：py server.py --no-browser；改 frontend/src 必须 npm run build，
-  改 server.py 必须重启 8177。回归：node tools/verify_all.mjs（25 套串行，实测 5m15s）。
+- **后端已是 FastAPI + uvicorn，必须用 venv**：`./.venv/bin/python server.py --no-browser`；
+  venv 不存在时 `python3 -m venv .venv && ./.venv/bin/python -m pip install -r requirements.txt`。
+  回退旧标准库实现：`SHORTPLAY_LEGACY_SERVER=1 ./.venv/bin/python server.py`。
+- **前端在兄弟仓**：`../shortplay-studio-web`。改前端必须去那个仓 `npm run build`，
+  本仓没有 `frontend/`，也没有 `dist/`。`server.py` 用 WEB_ROOT 四级解析自动找兄弟仓产物。
+- 回归：`node tools/verify_all.mjs`（**26 套**串行，实测约 5 分钟）。
 - .gitignore 排除 tools/verify_*：这些回归脚本不随仓库走，若新机没有，先从旧机拷 tools/ 整目录，
   并把脚本头部的 playwright-core file:/// 路径与 Chromium executablePath 换成新机实际路径。
   本机（Mac）还额外改了 py→python3、verify_all.mjs 的 py→python3、stage_split 的 fixture 项目 ID，
   且 8177 要带 NO_PROXY=127.0.0.1,localhost 启动（详见 §1 的 Mac 适配清单）。
-- 旧机 engine.js / studio.js / .vue 是 CRLF，本机（Mac）当前工作区已统一 LF；改前先统计 `\r\n`
-  确认行尾，再用 Python io.open(..., newline='') + assert count==1 精确替换；
-  engine.js:918 早有同名 sceneKey(intExt,time,name)，新函数只能叫 sceneStableKey。
+- engine.js / studio.js / .vue 改前先统计 `\r\n` 确认行尾，再用 Python io.open(..., newline='')
+  + assert count==1 精确替换；engine.js:918 早有同名 sceneKey(intExt,time,name)，新函数只能叫 sceneStableKey。
 - Playwright 用 JS API（allTextContents/innerText），默认有窗口模式 headless:false。
 - verify_ai.py 与 verify_parse_progress/resume 已标 PAUSED 并移出 SUITES，别跑旧断言。
+- **LLM 调用排查**：出问题先查 `data/llm_calls.db`（call_path / model / latency / token 用量 / error），
+  比问用户复现快得多。`call_path` 记的是调用方模块名（如 `parse_task` / `assets`）。
 
 【交付要求】
 - 先报 3-5 行计划再动手；验证强度默认从简，只有交互/时序/跨层状态才上浏览器脚本。
@@ -70,38 +89,63 @@ docs/dev-续作任务计划.md 和 docs/分步开发路线-移除一键生成.md
 
 「AI 一键分集 + 分镜」的 7 阶段自动流水线已**休眠**；四个工作区顺序翻转为
 **① 改剧本 → ② 分集 → ③ 分镜 → ④ 定妆**。
-**S0 / S1 / S2 / S3 / S3.5 / S4 / S5 / S6 / S7 全部完成**。`verify_all.mjs` 的 SUITES 为
-**25 套（原 17 + S3 的 2 + S3.5 的 2 + S4 的 1 + S5 的 1 + S6 的 1 + S7 的 1）**，本机实测 **25/25 套全绿**（5m15s）。
+**S0~S7 九个功能阶段 + A/B/C 三个架构阶段全部完成**。后端已是 **FastAPI + uvicorn**、前后端**已拆双仓**、
+LLM 调用走 **LangChain 网关且全量落库**。`verify_all.mjs` 的 SUITES 为 **26 套**，本机实测 **26/26 全绿**（约 5 分钟）。
 第 2 步的临时桥接已在 S4 移除，第 3 步只保留逐集闸门与只读提示词预览；第 4 步资产清单以分镜引用为准，
 首帧提示词在定妆完成后才生成；README 已与实现对齐，休眠流水线已标注「勿删」。逐项结果见 §3。
-**下一步 = 无**（路线收尾）。后续新需求另开阶段，仍须遵守下面四条红线与串行门槛。
-> 口径说明：25/25 里 `ComfyUI 出图 UI` 是 **0 通过/0 失败的环境跳过**（本机 8188 离线），
-> 不是完整 26/26 真实出图断言；启动 8188 后重跑该套即可拿回。其余 24 套全绿。
+**下一步 = 无**（路线收尾）。唯一挂着的是 LangGraph 步骤二，**等触发器**，不是待办任务。
+
+### 架构现状（2026-11-11 之后）
+
+| 维度 | 现状 |
+|---|---|
+| 仓库 | 后端 `ShortPlay-Studio`（本仓）+ 前端 `shortplay-studio-web`（兄弟目录） |
+| HTTP 层 | FastAPI + uvicorn（`app/asgi.py` 做协议翻译）；`SHORTPLAY_LEGACY_SERVER=1` 回退标准库 |
+| 部署 | venv + `requirements.txt`（5 条直接依赖，钉版本）；**「零依赖双击即用」已放弃** |
+| LLM 层 | `app/services/llm_gateway.py`（ChatOpenAI）；`extract_json`/`repair_json` 原样复用 |
+| 可观测 | `data/llm_calls.db`（SQLite WAL）逐次记录：call_path / model / 耗时 / token / error |
+| 回归 | 26 套；`verify_sse_nonblocking.py` 专防事件循环被 SSE 阻塞 |
+| 前端状态 | `src/stores/studio.js` 是 barrel，域文件在 `src/stores/studio/{core,session,steps,shots,assets}.js` |
 
 ---
 
 ## 1. 换机后 5 分钟自检
 
 ```bash
-git clone https://github.com/kevinzgai/ShortPlay-Studio.git   # 公开仓库，clone 免凭证
+# ① 两个仓都要 clone（前端是独立仓，必须在同级目录）
+git clone https://github.com/kevinzgai/ShortPlay-Studio.git       # 后端（本仓）
+git clone https://github.com/kevinzgai/shortplay-studio-web.git   # 前端（兄弟仓）
+
+# ② 后端 venv（必须：FastAPI 之后不再是零依赖）
 cd ShortPlay-Studio
-git checkout dev                 # 远程已有 dev，直接切
-npm install                     # 或双击 start.bat，它会自动装 + 构建
-npm run build
-py server.py --no-browser       # 起 8177（服务只用 Python 标准库）
+git checkout dev
+python3 -m venv .venv
+./.venv/bin/python -m pip install -r requirements.txt
+
+# ③ 前端装依赖 + 构建（产物在 shortplay-studio-web/dist）
+cd ../shortplay-studio-web && npm install && npm run build && cd ../ShortPlay-Studio
+
+# ④ 起服务（macOS/Linux 用这条；Windows 双击 start.bat 会自动做 ②③）
+NO_PROXY=127.0.0.1,localhost ./.venv/bin/python server.py --no-browser
 curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8177/   # 期望 200
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8177/docs  # FastAPI 文档页，期望 200
 ```
 
-- 前端产物在 `dist/`（`server.py` 托管），**改了 `frontend/src` 必须 `npm run build` 才生效**；改 `server.py` 必须重启 8177。
-- 开发态：`py server.py --no-browser` + `npm run dev --prefix frontend`（5173 代理 /api 到 8177）。
+- **前端产物在兄弟仓 `shortplay-studio-web/dist/`**，本仓**没有** `frontend/` 也没有 `dist/`。
+  改前端必须去那个仓 `npm run build`；`app/paths.py` 的 WEB_ROOT 会自动按
+  `SHORTPLAY_WEB_ROOT` → 兄弟仓 dist → 本仓 dist → 仓库根 四级解析。
+- 开发态：后端 `./.venv/bin/python server.py --no-browser` + 前端仓 `npm run dev`（5173 代理 /api 到 8177）。
 - 离线模式 `?ai=0`：强制规则引擎 + 不发任何模型请求，排查 UI 时优先用。
+- **回退到旧标准库实现**（FastAPI 出问题时的应急开关）：
+  `SHORTPLAY_LEGACY_SERVER=1 ./.venv/bin/python server.py --no-browser`，启动横幅会显示 `LEGACY`。
 - **推送凭证**：本机 `origin` 走 SSH（`git@github.com:...`），密钥 `~/.ssh/id_ed25519_github`。只 clone / 读代码不需要配置；要 push 就得在新机配自己的 SSH 公钥，或改用 HTTPS + PAT。
 
 ### 回归（重要：脚本不在 git）
 
 ```bash
-node tools/verify_all.mjs        # 25 套串行（原 17 + S3 的 2 + S3.5 的 2 + S4 的 1 + S5 的 1 + S6 的 1 + S7 的 1），实测 5m15s
+node tools/verify_all.mjs        # 26 套串行，实测约 5 分钟
 node tools/verify_all.mjs assets # 只跑名字含 assets 的
+./.venv/bin/python tools/verify_sse_nonblocking.py  # SSE 不阻塞事件循环（Step C 专项）
 ```
 
 `.gitignore` 有 `tools/verify_*`，**全部回归脚本不随仓库走**。换机后从旧机器拷整个 `tools/` 目录，并替换其中两处本机绝对路径（脚本头部）：
@@ -158,6 +202,16 @@ Python 侧脚本（`verify_platform.py` 等）同样检查一次 playwright 路�
 | S5 定妆消费分镜 | ✅ | `assetsFromShots()` + `assetUsage()` / `reparse(opts)` 来源可配置 / 资产卡「N 镜 · 第 X–Y 集」与零引用兜底说明 / `#asset-source-note`；`verify_asset_from_shots.mjs` 27/27；全量 **23/23** |
 | S6 出片归位 | ✅ | `framesGate` computed + `regenFrames(silent)` 第 4 步硬闸门 / `withRefSlots()` 参考图槽位 / `#frames-gate` / `#pv-frames-note` 只读预览 / 回第 3 步不发 frames；`verify_frames_after_assets.mjs` 24/24；全量 **24/24（5m05s，含 1 套环境跳过）** |
 | S7 收尾与文档 | ✅ | `server.py` 顶部 + 分区注释标「无 UI 入口，勿删」/ README 改「四个工作区 · 每步人工确认」+「为什么不做一键」并修掉 4 处过时口径 / 死脚本标 DEPRECATED 销账 / `verify_final_docs.mjs` 38/38；全量 **25/25（5m15s，含 1 套环境跳过）** |
+
+### 架构阶段（2026-11-11 完成，与 S 系列正交）
+
+| 阶段 | 状态 | 关键产出 |
+|---|---|---|
+| A 拆包 | ✅ | `server.py` 4418 行 → **21 行**薄壳；业务搬 `app/services/`、路由 `app/web/`、配置 `app/config/`、静态与分发 `app/main.py`；`app/paths.py` 用 `parent.parent`（踩过「静默生成空目录」的坑）；全量 26/26 |
+| B 拆仓 | ✅ | 前端独立仓 `shortplay-studio-web`；本仓删 `frontend/`（44 文件）与根 `dist/`；`studio.js` 2881 行拆 `studio/{core,session,steps,shots,assets}.js` + barrel（25 个组件 import 路径不变）；WEB_ROOT 四级解析；全量 26/26 |
+| C 换 FastAPI | ✅ | 先做响应层解耦（`Response` + `Sink`，36 函数 88 调用点**一行未改**），再加 `app/asgi.py`；SSE 阻塞丢 `anyio.to_thread`（挂起时 `/api/config` 最差 **2ms**）；`SHORTPLAY_LEGACY_SERVER=1` 回退；全量 26/26（5m02s，比 stdlib 快 25s） |
+| LangChain 接入（步骤一） | ✅ | `app/services/llm_gateway.py`（ChatOpenAI 替换 urllib）；`app/config/db.py` 落库 `data/llm_calls.db`；三条铁律锁定；26/26 |
+| LangChain 接入（步骤二） | ⏸ **挂触发器** | LangGraph 接管编排。触发条件：评审回环的「打回+收敛条件」定义清楚，或第二个需要工具循环的 skill 立项。**未触发前不引入 langgraph 依赖** |
 
 **依赖严格串行**：S2 定死步骤号 → S3 定死集号 → S4 依赖集号 → S5 依赖镜头 → S6 依赖资产。不许跳步。
 **S3.5 是正交层**：只动 UI 与配置读写，不参与上面这条依赖链，也不改 `engine.js` 与生成逻辑。
@@ -386,6 +440,30 @@ D4 无批量按钮；`npm run build` 通过。
 
 ## 5. 关键代码坐标（别重新找）
 
+> **注意路径前缀**：2026-11-11 拆仓后，前端文件全部在**兄弟仓** `../shortplay-studio-web/` 下，
+> 下表里写 `frontend/src/...` 的历史条目实际路径为 `../shortplay-studio-web/src/...`。
+> `studio.js` 已拆域，历史条目里说「`studio.js` 的某函数」现在在 `src/stores/studio/<域>.js` 里
+> （barrel 仍导出同名符号，`import { xxx } from "./stores/studio.js"` 照旧可用）。
+
+### 架构层（2026-11-11 新增）
+
+| 位置 | 说明 |
+|---|---|
+| `server.py` | **21 行薄壳**，只剩 `from app.main import run`。改启动逻辑别在这改 |
+| `app/main.py` | 装配层：`Handler` / `StudioServer` / `run()` / 横幅。`run()` 里 `SHORTPLAY_LEGACY_SERVER=1` 走旧 stdlib 实现 |
+| `app/asgi.py` | **FastAPI 应用**：只做协议翻译（Sink 收 `Response` → Starlette），含 SSE 线程池防阻塞、静态托管、404 口径 |
+| `app/web/responses.py` | **响应原语**：`Response`（纯数据）+ `Sink`（假 handler，`wfile` 主动抛错）+ `_emit` 双模式投递。**路由层能脱离 socket 测就靠它** |
+| `app/web/routes_get.py` / `routes_post.py` / `agent_routes.py` | 三张路由表。签名仍是 `fn(h)` / `fn(h, payload)`，**没改成 FastAPI 路由函数**（有意为之：换框架零改动） |
+| `app/services/llm_gateway.py` | **LLM 唯一出口**：`call_llm` / `call_llm_json`，同签名替换旧 urllib 版；报错文案逐字兼容 |
+| `app/services/llm_json.py` | `extract_json` / `repair_json` **一字不许改**（铁律），gateway 直接 import 复用 |
+| `app/config/db.py` | `llm_calls` 表（SQLite WAL）。只存字符数与 token，**不存 prompt 原文与 Key**；写失败只打 stderr |
+| `app/paths.py` | `ROOT` 必须 `parent.parent`；`WEB_ROOT` 四级解析（环境变量→兄弟仓 dist→本仓 dist→仓库根） |
+| `requirements.txt` | 5 条直接依赖钉版本：langchain-core / langchain-openai / fastapi / uvicorn（+ 传递依赖） |
+| `../shortplay-studio-web/src/stores/studio.js` | barrel，5 行 `export *`；域文件在 `studio/{core,session,steps,shots,assets}.js` |
+| `tools/verify_sse_nonblocking.py` | Step C 专项：SSE 挂起期间 `/api/config` 必须 < 500ms |
+
+### 业务层（历史条目，路径见上方提示）
+
 | 位置 | 说明 |
 |---|---|
 | `frontend/src/lib/engine.js` | `sceneStableKey` / `keyScenes` / `shotKeyOf` / `keyShots`；`parseScript`→`scenes[].key`，`renumberShots`→`shots[].key` |
@@ -424,12 +502,14 @@ D4 无批量按钮；`npm run build` 通过。
 
 | 路径 | 原因 | 换机怎么办 |
 |---|---|---|
-| `tools/verify_*`（本机 31 个 `verify_*.mjs`，含 PAUSED 死脚本） | `.gitignore` 明确排除「硬编码本机路径」 | 拷 `tools/` 整目录 + 按 §1 的 Mac 适配清单改路径 / 命令 / fixture |
-| `tools/verify_all.mjs`（25 套 SUITES） | 原 17 套已从旧机同步，另登记 S3 的 2 套 / S3.5 的 2 套 / S4 的 1 套 / S5 的 1 套 / S6 的 1 套 / S7 的 1 套 | 见 §3；换机后同样把新增脚本一起拷 |
+| `tools/verify_*`（本机 32 个 `verify_*.mjs` + 若干 `.py`，含 PAUSED 死脚本与新增的 `verify_sse_nonblocking.py`） | `.gitignore` 明确排除「硬编码本机路径」 | 拷 `tools/` 整目录 + 按 §1 的 Mac 适配清单改路径 / 命令 / fixture |
+| `tools/verify_all.mjs`（**26 套** SUITES） | 25 套 + Step C 的 SSE 不阻塞 1 套 | 见 §3；换机后同样把新增脚本一起拷 |
 | `projects/p_fixture_stage_split` | `verify_stage_split.mjs` 需要「含分镜的既有项目」，旧机 fixture 未随仓库迁移 | 用 `engine.js` 造一个 23 镜项目，字段要点见 §1 |
 | `llm-config.bat` / `llm-providers.json` / `.env*` | **含真实 API Key，禁止提交** | 在新机按 README 第 49 行说明重建（只需 LLM 那条；万相 key 可选、2026-11-11 起不用管）。**本机缺这个 → 3 套 AI 资产用例被按钮闸门挡住** |
+| **`.venv/`**（Python 虚拟环境） | 平台相关，不可跨机复制 | **必装**：`python3 -m venv .venv && ./.venv/bin/python -m pip install -r requirements.txt`。FastAPI 之后不再是零依赖 |
+| **`data/llm_calls.db`**（LLM 调用台账） | 本机运行数据，`.gitignore` 排除 | 不用迁移：首次调用自动建表。要带历史排查就拷这个文件 |
 | `projects/`（29 个真实项目） | 本机运行数据 | 不迁移也能开发；要测旧存档迁移就拷几个 `project.json` |
-| `dist/` | 构建产物 | `npm run build` 重新生成 |
+| `shortplay-studio-web/dist/` | 构建产物，在**兄弟仓**里 | 去前端仓 `npm install && npm run build` 重新生成。**本仓已无 `dist/`** |
 | `examples/assets/`（本机 71M 测试图） | 运行时出图产物、体积过大 | 已加入 `.gitignore`；历史里的 51 张示例图也已剔除，新机跑出图时自动生成 |
 | `screenshots/`、`.tts/`、`.workbuddy/` | 运行/个人数据 | 忽略 |
 | `MIGRATION.md` | 含本机绝对路径的运维记录 | 忽略 |
@@ -442,7 +522,12 @@ D4 无批量按钮；`npm run build` 通过。
 - 本地分支 **`dev`**（从基线分支 `main` 新建），含 S0/S1/S2/S3 全部代码改动、`README.md` 同步、`docs/` 两份文档、三份 `tools/baseline-*.txt`。S3 以 Conventional Commits 提交（subject 小写开头），验证脚本按 `.gitignore` 不入库。
 - **✅ 已推送到 `github.com:kevinzgai/ShortPlay-Studio.git`**（2026-11-09）：`dev` 与 `main` 均已推送，`dev` 已设 upstream 跟踪 `origin/dev`。用 `git ls-remote --heads origin` 核对。
 - **✅ 2026-11-10 已推送**：S3.5~S7 的 12 个提交（`feat(settings)` / `style(settings)` / `feat(plan)` / `feat(shots)` / `feat(assets)` / `feat(frames)` 及各阶段 `docs(plan)`）已推到 `origin/dev`，本地与远程同步。换机 clone 后用 `git log --oneline origin/dev..HEAD` 核对，正常应为空。
-- 入库范围提醒：`tools/verify_*` 与 `engine-config.json` 按 `.gitignore` **不入库**，clone 下来没有回归脚本与本机引擎配置，需按 §1 自行同步。
+- **✅ 2026-11-11 已推送（架构三阶段 + LangChain）**：A 拆包 / B 拆仓 / C 换 FastAPI /
+  LangChain 步骤一 全部推到 `origin/dev`。**前端仓 `shortplay-studio-web` 是独立仓库，也在 `dev` 分支，
+  换机要单独 clone**（见 §1）。两个仓的提交互不依赖，先 clone 哪个都行。
+- 入库范围提醒：`tools/verify_*`、`engine-config.json`、`llm-providers.json`、`.venv/`、`data/`
+  按 `.gitignore` **不入库**。clone 下来没有回归脚本、没有本机密钥、没有 venv、没有调用台账，
+  需按 §1 自行同步与安装。
 - **⚠️ 2026-11-09 做过一次历史重写**（剔除 51 张示例 PNG，仓库 47.6 MB → 约 1 MB）：**所有旧 commit hash 全部失效**，本文不再写死 hash，以远程当前值为准；桌面 bundle / patch 也已按新历史重导。
 - `origin` 使用 **SSH**：`git@github.com:kevinzgai/ShortPlay-Studio.git`。本机可用密钥是 **`~/.ssh/id_ed25519`**（`ssh -T git@github.com` 应回 `Hi kevinzgai!`）。
   **2026-11-10 实测补充**：当时 remote 曾被配成 HTTPS，`git push` 会 `Operational timed out` / `could not read Username`（本机没缓存 HTTPS 凭证），改回 SSH 后一次推成功。若再遇到推不上，先 `git remote get-url origin` 确认协议。
@@ -468,14 +553,31 @@ git remote set-url origin git@github.com:kevinzgai/ShortPlay-Studio.git
 
 ## 8. 未决 / 已知限制
 
+### 当前真正待办（2026-11-11）
+
+| # | 项 | 状态 | 说明 |
+|---|---|---|---|
+| 1 | LangGraph 步骤二（接管流水线编排） | ⏸ **等触发器，不是待办** | 触发条件二选一：评审回环的「打回+收敛条件」定义清楚，或第二个需要工具循环的 skill 立项。触发前不引入 langgraph 依赖 |
+| 2 | 「零依赖双击即用」已放弃 | ⚠️ 已接受的代价 | FastAPI 之后必须 venv。`start.bat` / `start-mac.command` 已做自动引导，venv 缺失时回退系统 Python（AI 调用不可用但服务能起） |
+| 3 | D2 重跑覆盖手工修改 | ⚠️ 已知限制 | 靠二次确认缓解；真正合并要等按场增量（键已埋好） |
+| 4 | 本地规范化依赖空行补场号；PDF 导入不支持 | ⚠️ 已知限制 | 未排期 |
+
+### 已注销（核查后确认不用做，别再当遗留任务跟）
+
+| 项 | 结论 |
+|---|---|
+| ~~万相有效 Key / 只判有没有填不判真伪~~ | **2026-11-11 用户明确注销**。它是 ComfyUI 之外的可选备用引擎，默认引擎是 `comfy`；`qwenKey` 为空时诊断只降级为 `warn`，不影响主流程与回归 |
+| ~~新建项目道具分组默认空~~ | **2026-11-11 核查结案，不是缺陷**。① AI 分解路径道具完整（实测产出 3 个）；② 只有离线引擎 `engine.js:1069` 的 props 只继承不推断，属有意设计（道具名无可靠正则特征）；③ 绑定链路正常（fixture 44 镜中 8 镜正确绑定） |
+
+### 历史限制（保留供溯源）
+
 - S2 刻意偏离计划两处：① `planOnly()` **已在 S3 拆成 `planStep()`（显式按钮）**；② `doGenerate()` 降级为离线规则而非彻底禁用（否则 S2→S4 之间排不出镜头、5 个脚本失去可测路径）。
 - S3 起 `localGenerate()` 不再重算分集；**S4 已移除第 2 步的临时桥接**（`#generate` 只导航到第 3 步），`localGenerate()` 仅保留给生成设置的本地重排入口。
 - 本机（Mac）`npm` 镜像源 500、官方源不通，`vue` / `vite` 依赖是从本机其它工程的 pnpm 目录复制补齐的；`npm run build` 已跑通，换机仍按 §1 正常 `npm install`。
-- 本机 macOS 有 `127.0.0.1:7877` 系统代理，8177 不带 `NO_PROXY=127.0.0.1,localhost` 启动时，Python `urllib` 会把 ComfyUI 8188 探测带成 502；带 `NO_PROXY` 重启后 `/api/comfy/status` online=true（ComfyUI 0.34.2），`verify_comfy_ui.mjs` 26/26 全绿。
-- 本机未配 `llm-providers.json`，`/api/config` 的 `llm:false` 使 `#build-assets` / `.ap-fill` 置灰，3 套 AI 资产用例无法跑（环境阻塞，非 S3 代码回归）；补齐模型 Key 后重跑即可，见 §3。
+- 本机 macOS 有 `127.0.0.1:7877` 系统代理，8177 不带 `NO_PROXY=127.0.0.1,localhost` 启动时，Python `urllib` 会把 ComfyUI 8188 探测带成 502；带 `NO_PROXY` 重启后 `/api/comfy/status` online=true。
+- **ComfyUI 8188 会掉线**（2026-11-11 实测：跑回归中途从在线变成 `Connection refused`）。掉线时 `verify_comfy_ui.mjs` 环境跳过、`系统设置三栏` 掉 1 项、并发测试 C 段失败（A/B 段 40/40 仍过）。**这是环境问题不是代码回归**，把 ComfyUI 拉起来重跑即可。
 - D2 的「重跑覆盖手工修改」尚未解决，靠二次确认缓解；真正合并要等按场增量（键已埋好）。
-- S6 已完成：第 3 步是只读预览、不会用空参考图算提示词；首帧提示词统一在第 4 步定妆后生成，README 不必再写这条已知限制。
-- 本地规范化依赖空行补场号；PDF 导入不支持。
+- S6 已完成：第 3 步是只读预览、不会用空参考图算提示词；首帧提示词统一在第 4 步定妆后生成。
 - **S5 起 engine.js 允许新增资产来源层函数**：`verify_plan_contract.mjs` 不再用「git status 干净」判断（那是假绿），
   改为检查 `git diff HEAD` 删除行必须为 0 + 三个已锁函数仍在。若将来要删改既有规则，这条会先红。
 - ~~**道具分组的新建项目默认仍为空**：`buildAssets` 的 props 只从 prev 继承，S5 的验收脚本通过界面 `#add-prop`
