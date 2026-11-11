@@ -17,7 +17,7 @@
 
 > macOS 装了 WideWired / VPN 时，**本机浏览器不要填虚拟 IP**（如 `http://172.30.242.10:8177/`）：`NEPacketTunnelProvider` 会把发往自身虚拟 IP 的包送进 utun 隧道，必然超时，与服务是否启动无关。本机固定用 `127.0.0.1`；虚拟 IP 只留给组网里**其他设备**访问。
 
-运行时不需要 Node；Node 只在构建前端时用一次（`start.bat` 已经替你做了）。服务端只用 Python 标准库，无需 pip 安装。端口可用 `SHORTPLAY_PORT` 改，8177 与 ComfyUI 网关（8000 / 8188）不冲突。
+运行时不需要 Node；Node 只在构建前端时用一次（`start.bat` 已经替你做了）。服务端跑在 venv 里（FastAPI + uvicorn + LangChain 两个包，共 5 个直接依赖，`start.bat` / `start-mac.command` 首次启动自动创建并安装；装不上会回退系统 Python，服务能起但 AI 调用不可用）。端口可用 `SHORTPLAY_PORT` 改，8177 与 ComfyUI 网关（8000 / 8188）不冲突。
 
 > 工程化后不再支持双击 `index.html` 的 `file://` 纯离线路径：Vue SFC 需要构建产物，请统一走 `start.bat` / `start-mac.command`。
 > 想对比规则引擎与 AI 的结果，访问 `http://127.0.0.1:8177/?ai=0`：强制离线规则引擎 + 不分集，且**不发任何模型请求**。
@@ -25,11 +25,11 @@
 开发模式（改前端热更新）：
 
 ```bat
-py server.py --no-browser                    :: 先起 8177，提供 /api/*
-cd ..\shortplay-studio-web && npm run dev    :: 再起 5173，Vite 自动代理 /api 到 8177
+py server.py --no-browser              :: 先起 8177，提供 /api/*
+cd frontend && npm run dev             :: 再起 5173，Vite 自动代理 /api 到 8177
 ```
 
-> 前端已拆独立仓 `shortplay-studio-web`（与本仓同级的兄弟目录，2026-11-11）。本仓不再有 `frontend/`；`WEB_ROOT` 解析顺序：`SHORTPLAY_WEB_ROOT` → 兄弟仓 `dist` → 本仓 `dist`。
+> 前端源码在本仓 `frontend/`（2026-11-11 单仓合并），构建产物落到仓库根 `dist/`。`WEB_ROOT` 解析顺序：`SHORTPLAY_WEB_ROOT` → 本仓 `dist` → 仓库根。
 
 ### AI 模式配置
 
@@ -344,10 +344,10 @@ projects/
 
 ```
 shortplay-studio/
-├─ ../shortplay-studio-web/        前端独立仓（Vue 3 + Vite，唯一前端真源，2026-11-11 拆出）
+├─ frontend/                       前端（Vue 3 + Vite，唯一前端真源）
 │  ├─ index.html                   Vite 入口
-│  ├─ vite.config.js              构建到本仓 dist，dev 代理 /api → 8177
-│  ├─ package.json                vue ^3.5 / vite ^5.4 / @vitejs/plugin-vue
+│  ├─ vite.config.js               构建到仓库根 dist/，dev 代理 /api → 8177
+│  ├─ package.json                 vue ^3.5 / vite ^5.4 / @vitejs/plugin-vue
 │  └─ src/
 │     ├─ main.js                  挂载 + boot()
 │     ├─ App.vue                  三栏骨架 + 全局键盘/拖拽/编辑事件委托
@@ -364,7 +364,7 @@ shortplay-studio/
 │                                ShotsTable / PreviewPanel / FeedbackLayer / AgentWorkbench
 ├─ projects/                      项目库（每个项目一个目录 + project.json，已 gitignore）
 │  └─ .trash/                     删除的项目移到这里，不直接抹掉
-├─ dist/                          可选的前端产物（优先用兄弟仓 shortplay-studio-web/dist）
+├─ dist/                          前端构建产物（由 frontend/ 构建生成，已 gitignore）
 ├─ docs/archive/ui-versions/      5 版 UI 原型（历史留档，代码里 0 引用，已从根目录移走）
 ├─ reference/                     分镜平台相关资料（不参与运行，见 reference/README.md）
 │  ├─ 00-项目沿革/                 按天记的开发日志：决策理由与踩过的坑，接手先读
@@ -412,7 +412,7 @@ shortplay-studio/
 
 | 验证 | 覆盖 | 结果 |
 | --- | --- | --- |
-| `npm run build`（shortplay-studio-web 仓） | Vue SFC 编译 / 产物输出该仓 dist | 47 模块通过 |
+| `npm run build`（根目录转发到 frontend/） | Vue SFC 编译 / 产物输出根 dist | 52 模块通过 |
 | `tools/verify_platform.py` | 离线主流程（`?ai=0`）：导入 → 拆解 → 23 镜 → 编辑 → 删除撤销 → 排序 → 重生成 → 导出 → 体检补全 → 表格；**跑完只删本次创建的项目**，不会往项目库里堆「雨夜便利店」 | 43/43 |
 | `tools/verify_ai.py` | **DEPRECATED**（休眠流水线，已从 SUITES 摘除，勿跑）；历史基线为真模型 32/32 | — |
 | `tools/verify_all.mjs` | **全量串行 26 套**：各套件串行执行（并发跑会互相改变项目数量，让「项目列表条数」类断言假失败），最后打一张通过汇总表；加关键字只跑匹配的，例 `node tools/verify_all.mjs assets` | 26/26 |

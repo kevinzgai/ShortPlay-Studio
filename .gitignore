@@ -18,6 +18,7 @@ id_ed25519*
 screenshots/
 __pycache__/
 dist/
+frontend/node_modules/
 projects/
 .tts/
 .workbuddy/

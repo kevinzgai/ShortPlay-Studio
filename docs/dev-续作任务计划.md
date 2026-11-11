@@ -6,7 +6,8 @@
 >
 > **2026-11-11 重大变更（换机必读，旧文档口径已全部作废）**：
 > ① 后端已从「Python 标准库单文件」换成 **FastAPI + uvicorn**，零依赖部署特性**已放弃**，改用 venv；
-> ② 前后端**已拆成两个仓库**，前端在兄弟目录 `shortplay-studio-web`，本仓 `frontend/` 与根 `dist/` 已删除；
+> ② 前后端**保持单仓**：前端源码在 `frontend/`，构建产物在仓库根 `dist/`。
+> （2026-11-11 曾拆成 `shortplay-studio-web` 兄弟仓，当晚已合回单仓；拆域改进保留，见 `docs/前后端拆分方案.md` 文首标注）
 > ③ LLM 调用改走 `app/services/llm_gateway.py`（LangChain），**每次调用落库** `data/llm_calls.db`；
 > ④ 回归从 25 套变成 **26 套**，启动命令改为 `./.venv/bin/python server.py`。
 
@@ -30,8 +31,8 @@ docs/dev-续作任务计划.md 和 docs/分步开发路线-移除一键生成.md
 - S7「收尾与文档」已完成：休眠流水线标注、README 工作区章节 +「为什么不做一键」、套件登记复核、
   两个死脚本标 DEPRECATED 销账。
 - **【2026-11-11 新增，三项大改造已全部落地】**
-  A 阶段拆包（`app/` 五层）、B 阶段拆仓（前端独立成 `shortplay-studio-web` 兄弟仓，
-  本仓 `frontend/` 与根 `dist/` 已删，`studio.js` 2881 行拆成 5 个域文件 + barrel）、
+  A 阶段拆包（`app/` 五层）、B 阶段拆仓**已于当晚回退为单仓**（`studio.js` 2881 行拆成 5 个域文件 + barrel
+  这个改进完整保留，前端源码回到本仓 `frontend/`）、
   C 阶段换 FastAPI（`app/asgi.py`，`SHORTPLAY_LEGACY_SERVER=1` 可回退标准库实现）。
   另加 LangChain 接入步骤一：LLM 调用走 `app/services/llm_gateway.py`，每次调用落库 `data/llm_calls.db`。
 - 实测：`verify_all.mjs` **26 套**（原 25 + Step C 的 SSE 不阻塞），本机实测 **26/26**（约 5 分钟）。
@@ -63,8 +64,9 @@ docs/dev-续作任务计划.md 和 docs/分步开发路线-移除一键生成.md
 - **后端已是 FastAPI + uvicorn，必须用 venv**：`./.venv/bin/python server.py --no-browser`；
   venv 不存在时 `python3 -m venv .venv && ./.venv/bin/python -m pip install -r requirements.txt`。
   回退旧标准库实现：`SHORTPLAY_LEGACY_SERVER=1 ./.venv/bin/python server.py`。
-- **前端在兄弟仓**：`../shortplay-studio-web`。改前端必须去那个仓 `npm run build`，
-  本仓没有 `frontend/`，也没有 `dist/`。`server.py` 用 WEB_ROOT 四级解析自动找兄弟仓产物。
+- **前端在本仓 `frontend/`**（单仓，2026-11-11 合回）。改前端后必须 `npm run build`
+  （根目录转发到 `frontend/`），产物落到仓库根 `dist/`。`server.py` 的 WEB_ROOT
+  解析顺序：`SHORTPLAY_WEB_ROOT` → 本仓 `dist` → 仓库根。
 - 回归：`node tools/verify_all.mjs`（**26 套**串行，实测约 5 分钟）。
 - .gitignore 排除 tools/verify_*：这些回归脚本不随仓库走，若新机没有，先从旧机拷 tools/ 整目录，
   并把脚本头部的 playwright-core file:/// 路径与 Chromium executablePath 换成新机实际路径。
@@ -99,31 +101,30 @@ LLM 调用走 **LangChain 网关且全量落库**。`verify_all.mjs` 的 SUITES 
 
 | 维度 | 现状 |
 |---|---|
-| 仓库 | 后端 `ShortPlay-Studio`（本仓）+ 前端 `shortplay-studio-web`（兄弟目录） |
+| 仓库 | **单仓** `ShortPlay-Studio`：后端在根目录，前端在 `frontend/`（B 阶段拆仓已回退） |
 | HTTP 层 | FastAPI + uvicorn（`app/asgi.py` 做协议翻译）；`SHORTPLAY_LEGACY_SERVER=1` 回退标准库 |
 | 部署 | venv + `requirements.txt`（5 条直接依赖，钉版本）；**「零依赖双击即用」已放弃** |
 | LLM 层 | `app/services/llm_gateway.py`（ChatOpenAI）；`extract_json`/`repair_json` 原样复用 |
 | 可观测 | `data/llm_calls.db`（SQLite WAL）逐次记录：call_path / model / 耗时 / token / error |
 | 回归 | 26 套；`verify_sse_nonblocking.py` 专防事件循环被 SSE 阻塞 |
-| 前端状态 | `src/stores/studio.js` 是 barrel，域文件在 `src/stores/studio/{core,session,steps,shots,assets}.js` |
+| 前端状态 | `frontend/src/stores/studio.js` 是 barrel，域文件在 `frontend/src/stores/studio/{core,session,steps,shots,assets}.js` |
 
 ---
 
 ## 1. 换机后 5 分钟自检
 
 ```bash
-# ① 两个仓都要 clone（前端是独立仓，必须在同级目录）
-git clone https://github.com/kevinzgai/ShortPlay-Studio.git       # 后端（本仓）
-git clone https://github.com/kevinzgai/shortplay-studio-web.git   # 前端（兄弟仓）
-
-# ② 后端 venv（必须：FastAPI 之后不再是零依赖）
+# ① clone（单仓，前端已在 frontend/ 里，只有一个仓库要拉）
+git clone https://github.com/kevinzgai/ShortPlay-Studio.git
 cd ShortPlay-Studio
 git checkout dev
+
+# ② 后端 venv（必须：FastAPI 之后不再是零依赖）
 python3 -m venv .venv
 ./.venv/bin/python -m pip install -r requirements.txt
 
-# ③ 前端装依赖 + 构建（产物在 shortplay-studio-web/dist）
-cd ../shortplay-studio-web && npm install && npm run build && cd ../ShortPlay-Studio
+# ③ 前端装依赖 + 构建（产物落到仓库根 dist/）
+npm install --prefix frontend && npm run build
 
 # ④ 起服务（macOS/Linux 用这条；Windows 双击 start.bat 会自动做 ②③）
 NO_PROXY=127.0.0.1,localhost ./.venv/bin/python server.py --no-browser
@@ -131,10 +132,10 @@ curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8177/   # 期望 200
 curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8177/docs  # FastAPI 文档页，期望 200
 ```
 
-- **前端产物在兄弟仓 `shortplay-studio-web/dist/`**，本仓**没有** `frontend/` 也没有 `dist/`。
-  改前端必须去那个仓 `npm run build`；`app/paths.py` 的 WEB_ROOT 会自动按
-  `SHORTPLAY_WEB_ROOT` → 兄弟仓 dist → 本仓 dist → 仓库根 四级解析。
-- 开发态：后端 `./.venv/bin/python server.py --no-browser` + 前端仓 `npm run dev`（5173 代理 /api 到 8177）。
+- **前端源码在 `frontend/`，产物在仓库根 `dist/`**（都在这一个仓里）。
+  改前端必须 `npm run build`（根目录转发到 `frontend/`）；`app/paths.py` 的 WEB_ROOT 按
+  `SHORTPLAY_WEB_ROOT` → 本仓 `dist` → 仓库根 三级解析。
+- 开发态：后端 `./.venv/bin/python server.py --no-browser` + `cd frontend && npm run dev`（5173 代理 /api 到 8177）。
 - 离线模式 `?ai=0`：强制规则引擎 + 不发任何模型请求，排查 UI 时优先用。
 - **回退到旧标准库实现**（FastAPI 出问题时的应急开关）：
   `SHORTPLAY_LEGACY_SERVER=1 ./.venv/bin/python server.py --no-browser`，启动横幅会显示 `LEGACY`。
@@ -208,7 +209,7 @@ Python 侧脚本（`verify_platform.py` 等）同样检查一次 playwright 路�
 | 阶段 | 状态 | 关键产出 |
 |---|---|---|
 | A 拆包 | ✅ | `server.py` 4418 行 → **21 行**薄壳；业务搬 `app/services/`、路由 `app/web/`、配置 `app/config/`、静态与分发 `app/main.py`；`app/paths.py` 用 `parent.parent`（踩过「静默生成空目录」的坑）；全量 26/26 |
-| B 拆仓 | ✅ | 前端独立仓 `shortplay-studio-web`；本仓删 `frontend/`（44 文件）与根 `dist/`；`studio.js` 2881 行拆 `studio/{core,session,steps,shots,assets}.js` + barrel（25 个组件 import 路径不变）；WEB_ROOT 四级解析；全量 26/26 |
+| B 拆仓 | ⚠️ **已回退** | 当时：前端独立仓 `shortplay-studio-web`；本仓删 `frontend/`（44 文件）与根 `dist/`；`studio.js` 2881 行拆 `studio/{core,session,steps,shots,assets}.js` + barrel（25 个组件 import 路径不变）；全量 26/26。**当晚合回单仓**：源码回 `frontend/`（拆域保留）、产物回根 `dist/`、WEB_ROOT 降为三级 |
 | C 换 FastAPI | ✅ | 先做响应层解耦（`Response` + `Sink`，36 函数 88 调用点**一行未改**），再加 `app/asgi.py`；SSE 阻塞丢 `anyio.to_thread`（挂起时 `/api/config` 最差 **2ms**）；`SHORTPLAY_LEGACY_SERVER=1` 回退；全量 26/26（5m02s，比 stdlib 快 25s） |
 | LangChain 接入（步骤一） | ✅ | `app/services/llm_gateway.py`（ChatOpenAI 替换 urllib）；`app/config/db.py` 落库 `data/llm_calls.db`；三条铁律锁定；26/26 |
 | LangChain 接入（步骤二） | ⏸ **挂触发器** | LangGraph 接管编排。触发条件：评审回环的「打回+收敛条件」定义清楚，或第二个需要工具循环的 skill 立项。**未触发前不引入 langgraph 依赖** |
@@ -440,8 +441,7 @@ D4 无批量按钮；`npm run build` 通过。
 
 ## 5. 关键代码坐标（别重新找）
 
-> **注意路径前缀**：2026-11-11 拆仓后，前端文件全部在**兄弟仓** `../shortplay-studio-web/` 下，
-> 下表里写 `frontend/src/...` 的历史条目实际路径为 `../shortplay-studio-web/src/...`。
+> **路径口径**：2026-11-11 合回单仓后，前端文件在 `frontend/src/...`，下表路径可直接用。
 > `studio.js` 已拆域，历史条目里说「`studio.js` 的某函数」现在在 `src/stores/studio/<域>.js` 里
 > （barrel 仍导出同名符号，`import { xxx } from "./stores/studio.js"` 照旧可用）。
 
@@ -457,9 +457,9 @@ D4 无批量按钮；`npm run build` 通过。
 | `app/services/llm_gateway.py` | **LLM 唯一出口**：`call_llm` / `call_llm_json`，同签名替换旧 urllib 版；报错文案逐字兼容 |
 | `app/services/llm_json.py` | `extract_json` / `repair_json` **一字不许改**（铁律），gateway 直接 import 复用 |
 | `app/config/db.py` | `llm_calls` 表（SQLite WAL）。只存字符数与 token，**不存 prompt 原文与 Key**；写失败只打 stderr |
-| `app/paths.py` | `ROOT` 必须 `parent.parent`；`WEB_ROOT` 四级解析（环境变量→兄弟仓 dist→本仓 dist→仓库根） |
+| `app/paths.py` | `ROOT` 必须 `parent.parent`；`WEB_ROOT` 三级解析（环境变量→本仓 dist→仓库根） |
 | `requirements.txt` | 5 条直接依赖钉版本：langchain-core / langchain-openai / fastapi / uvicorn（+ 传递依赖） |
-| `../shortplay-studio-web/src/stores/studio.js` | barrel，5 行 `export *`；域文件在 `studio/{core,session,steps,shots,assets}.js` |
+| `frontend/src/stores/studio.js` | barrel，5 行 `export *`；域文件在 `studio/{core,session,steps,shots,assets}.js` |
 | `tools/verify_sse_nonblocking.py` | Step C 专项：SSE 挂起期间 `/api/config` 必须 < 500ms |
 
 ### 业务层（历史条目，路径见上方提示）
@@ -509,7 +509,7 @@ D4 无批量按钮；`npm run build` 通过。
 | **`.venv/`**（Python 虚拟环境） | 平台相关，不可跨机复制 | **必装**：`python3 -m venv .venv && ./.venv/bin/python -m pip install -r requirements.txt`。FastAPI 之后不再是零依赖 |
 | **`data/llm_calls.db`**（LLM 调用台账） | 本机运行数据，`.gitignore` 排除 | 不用迁移：首次调用自动建表。要带历史排查就拷这个文件 |
 | `projects/`（29 个真实项目） | 本机运行数据 | 不迁移也能开发；要测旧存档迁移就拷几个 `project.json` |
-| `shortplay-studio-web/dist/` | 构建产物，在**兄弟仓**里 | 去前端仓 `npm install && npm run build` 重新生成。**本仓已无 `dist/`** |
+| `dist/`（仓库根） | 前端构建产物 | `npm run build` 重新生成（源码在 `frontend/`）。已 gitignore |
 | `examples/assets/`（本机 71M 测试图） | 运行时出图产物、体积过大 | 已加入 `.gitignore`；历史里的 51 张示例图也已剔除，新机跑出图时自动生成 |
 | `screenshots/`、`.tts/`、`.workbuddy/` | 运行/个人数据 | 忽略 |
 | `MIGRATION.md` | 含本机绝对路径的运维记录 | 忽略 |
@@ -522,9 +522,9 @@ D4 无批量按钮；`npm run build` 通过。
 - 本地分支 **`dev`**（从基线分支 `main` 新建），含 S0/S1/S2/S3 全部代码改动、`README.md` 同步、`docs/` 两份文档、三份 `tools/baseline-*.txt`。S3 以 Conventional Commits 提交（subject 小写开头），验证脚本按 `.gitignore` 不入库。
 - **✅ 已推送到 `github.com:kevinzgai/ShortPlay-Studio.git`**（2026-11-09）：`dev` 与 `main` 均已推送，`dev` 已设 upstream 跟踪 `origin/dev`。用 `git ls-remote --heads origin` 核对。
 - **✅ 2026-11-10 已推送**：S3.5~S7 的 12 个提交（`feat(settings)` / `style(settings)` / `feat(plan)` / `feat(shots)` / `feat(assets)` / `feat(frames)` 及各阶段 `docs(plan)`）已推到 `origin/dev`，本地与远程同步。换机 clone 后用 `git log --oneline origin/dev..HEAD` 核对，正常应为空。
-- **✅ 2026-11-11 已推送（架构三阶段 + LangChain）**：A 拆包 / B 拆仓 / C 换 FastAPI /
-  LangChain 步骤一 全部推到 `origin/dev`。**前端仓 `shortplay-studio-web` 是独立仓库，也在 `dev` 分支，
-  换机要单独 clone**（见 §1）。两个仓的提交互不依赖，先 clone 哪个都行。
+- **✅ 2026-11-11 已推送（架构三阶段 + LangChain）**：A 拆包 / C 换 FastAPI /
+  LangChain 步骤一 全部推到 `origin/dev`。B 拆仓当晚回退为单仓（前端源码合回 `frontend/`），
+  所以**只需要 clone 这一个仓**，前端跟着一起来。
 - 入库范围提醒：`tools/verify_*`、`engine-config.json`、`llm-providers.json`、`.venv/`、`data/`
   按 `.gitignore` **不入库**。clone 下来没有回归脚本、没有本机密钥、没有 venv、没有调用台账，
   需按 §1 自行同步与安装。

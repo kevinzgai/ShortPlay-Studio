@@ -8,9 +8,9 @@ if exist "llm-config.bat" call "llm-config.bat"
 set "SHORTPLAY_PORT=8177"
 set "PYTHONUTF8=1"
 
-REM ---- 前端已拆独立仓 shortplay-studio-web（与本仓同级的兄弟目录）----
+REM ---- 前端源码在本仓 frontend/（2026-11-11 合仓），产物落到本仓 dist/ ----
 REM ---- 首次自动装依赖，每次启动重新构建，保证 dist 与源码一致 ----
-set "WEB_REPO=%~dp0..\shortplay-studio-web"
+set "WEB_REPO=%~dp0frontend"
 if not exist "%WEB_REPO%\package.json" goto NO_NPM
 where npm >nul 2>nul
 if errorlevel 1 goto NO_NPM

@@ -11,10 +11,10 @@
 #   SHORTPLAY_PORT=8187   换端口
 #   SHORTPLAY_NO_OPEN=1   不自动打开浏览器（远程终端 / 自动化用）
 #
-# 前端（2026-11-11 拆仓）：Vue 源码在兄弟仓 ../shortplay-studio-web，
-# 本脚本不构建前端，直接用服务端 WEB_ROOT 解析到的已有 dist 产物
-# （顺序：SHORTPLAY_WEB_ROOT > 兄弟仓 dist > 本仓 dist）。要重新构建：
-#   cd ../shortplay-studio-web && npm run build
+# 前端（2026-11-11 合仓）：Vue 源码在本仓 frontend/，构建产物落到仓库根 dist/，
+# 服务端 WEB_ROOT 默认就指向它（可用 SHORTPLAY_WEB_ROOT 覆盖）。
+# 本脚本不构建前端，直接用已有的 dist 产物。要重新构建：
+#   npm run build        # 等价 cd frontend && npm run build
 
 set -u
 cd "$(dirname "$0")" || exit 1
