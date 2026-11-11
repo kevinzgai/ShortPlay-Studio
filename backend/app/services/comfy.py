@@ -212,8 +212,12 @@ def comfy_prompt_rows(assets, variants, style_en=""):
     return {"rows": rows, "styleEn": _as(style_en, "", 240) or STYLE_ANCHOR_EN_DEFAULT}
 
 
-def comfy_workflow(prompt, w, h, seed):
-    """与 tools/gen_first_frame.py 完全一致：Flux.1-schnell fp8 / 4 步 / euler。"""
+def comfy_workflow(prompt, w, h, seed, steps=4):
+    """与 tools/gen_first_frame.py 完全一致：Flux.1-schnell fp8 / 4 步 / euler。
+
+    steps 只给同步接口 /v1/images 用；资产批量的异步链路仍走默认 4 步，
+    两边共用同一张工作流，不会出现「同步能出、异步出不来」的分叉。
+    """
     return {
         "1": {"class_type": "UNETLoader",
               "inputs": {"unet_name": comfy_model(), "weight_dtype": "default"}},
@@ -226,7 +230,7 @@ def comfy_workflow(prompt, w, h, seed):
         "5": {"class_type": "EmptySD3LatentImage",
               "inputs": {"width": w, "height": h, "batch_size": 1}},
         "6": {"class_type": "BasicScheduler",
-              "inputs": {"model": ["1", 0], "scheduler": "simple", "steps": 4, "denoise": 1}},
+              "inputs": {"model": ["1", 0], "scheduler": "simple", "steps": steps, "denoise": 1}},
         "7": {"class_type": "KSamplerSelect", "inputs": {"sampler_name": "euler"}},
         "8": {"class_type": "RandomNoise", "inputs": {"noise_seed": seed}},
         "9": {"class_type": "BasicGuider", "inputs": {"model": ["1", 0], "conditioning": ["4", 0]}},
@@ -240,8 +244,8 @@ def comfy_workflow(prompt, w, h, seed):
     }
 
 
-def comfy_submit(prompt, w, h, seed):
-    body = json.dumps({"prompt": comfy_workflow(prompt, w, h, seed),
+def comfy_submit(prompt, w, h, seed, steps=4):
+    body = json.dumps({"prompt": comfy_workflow(prompt, w, h, seed, steps),
                        "client_id": "shortplay-assets"}).encode("utf-8")
     req = urllib.request.Request(comfy_host() + "/prompt", data=body,
                                  headers={"Content-Type": "application/json"})
@@ -441,3 +445,65 @@ def comfy_worker(jid, plan, engine="comfy"):
         job["status"] = "done" if job.get("status") != "cancelled" else "cancelled"
         job["current"] = ""
         job["finishedAt"] = time.time()
+
+
+# --------------------------------------------------------------------------
+# /v1/images 同步出图：一次请求 → 直接返回可打开的 PNG URL
+# --------------------------------------------------------------------------
+V1_IMAGE_URL_PREFIX = "/v1/images/file/"
+
+
+def _v1_int(v, default, lo, hi, label):
+    """只收整数；bool 是 int 的子类，必须单独挡掉，否则 True 会被当成 1。"""
+    if v is None:
+        return default
+    if isinstance(v, bool) or not isinstance(v, int):
+        raise ValueError("%s 必须是整数" % label)
+    if not lo <= v <= hi:
+        raise ValueError("%s 要在 %d–%d 之间" % (label, lo, hi))
+    return v
+
+
+def sync_image(body):
+    """阻塞式文生图：提交 → 等 ComfyUI → 下载原图 → 落盘 → 回 URL。
+
+    与 comfy_job_start() 的异步 job 并存，两条路共用 comfy_workflow()，
+    所以「系统设置 · 出图引擎」里换的 comfyHost / comfyModel 对两边同时生效。
+    界面批量出资产仍走异步 job（jobId + 轮询 + 缩略图 dataURI），互不影响。
+
+    返回字段对齐本机 8000 的 H3 + SeedVR2 Gateway：
+        prompt_id / seed / status / elapsed / filename / url
+    差异：本接口恒同步（Gateway 的 wait=false + job 轮询不在这里实现），
+    图片由本项目自己托管在 V1_IMAGE_URL_PREFIX 下，不依赖 8000 是否常驻。
+    """
+    if not isinstance(body, dict):
+        raise ValueError("请求体要是 JSON 对象")
+    prompt = str(body.get("prompt") or "").strip()[:4000]
+    if not prompt:
+        raise ValueError("prompt 不能为空")
+    w = _v1_int(body.get("width"), 1024, 256, 2048, "width")
+    h = _v1_int(body.get("height"), 1024, 256, 2048, "height")
+    steps = _v1_int(body.get("steps"), 4, 1, 50, "steps")
+    timeout = _v1_int(body.get("timeout"), 600, 30, 1800, "timeout")
+    seed = body.get("seed")
+    if seed is None:
+        seed = random.randint(1, 2 ** 31 - 1)
+    elif isinstance(seed, bool) or not isinstance(seed, int):
+        raise ValueError("seed 必须是整数")
+
+    t0 = time.time()
+    pid = comfy_submit(prompt, w, h, seed, steps)
+    imgs = comfy_wait(pid, timeout=timeout)
+    if not imgs:
+        raise RuntimeError("ComfyUI 没有返回图片")
+    png = comfy_download(imgs[0])
+    ASSET_IMG_DIR.mkdir(parents=True, exist_ok=True)
+    # 12 位十六进制 + _00001_.png，与 Gateway 返回的文件名同款，天然满足
+    # ASSET_IMG_NAME 白名单；不用 ComfyUI 的原始文件名，杜绝路径穿越。
+    filename = "%012x_00001_.png" % random.getrandbits(48)
+    (ASSET_IMG_DIR / filename).write_bytes(png)
+    return {
+        "prompt_id": pid, "seed": seed, "status": "succeeded",
+        "elapsed": round(time.time() - t0, 2),
+        "filename": filename, "url": V1_IMAGE_URL_PREFIX + filename,
+    }

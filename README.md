@@ -198,6 +198,8 @@ py tools/gen_first_frame.py --indices 0,40    :: 本地 ComfyUI Flux 出起始�
 | `POST /api/comfy/generate` | 提交批量任务（可带 `styleEn` 剧本风格英文锚），秒回 `jobId` |
 | `GET /api/comfy/job?id=…[&full=1]` | 轮询进度 / 取回缩略图 |
 | `GET /api/comfy/image?f=…` | 查看落盘原图 |
+| `POST /v1/images` | **同步出图**：一次请求等到出完，直接回 `url`（给脚本 / 其它模块调） |
+| `GET /v1/images/file/{filename}` | 同步接口回的 `url` 由这里供图（`inline`，浏览器直显） |
 | `GET /api/projects` | 项目列表（只回摘要：名称 / 更新时间 / 集数镜数资产数 / 生成图数） |
 | `GET /api/projects/get?id=…` | 取整份项目（含剧本、分镜、资产与图片 dataURI） |
 | `POST /api/projects/save` | 写回整份项目，原子替换 `projects/<id>/project.json` |
@@ -213,6 +215,18 @@ py tools/gen_first_frame.py --indices 0,40    :: 本地 ComfyUI Flux 出起始�
 > 坑五：改了 `server.py` 要重启 8177 才生效；`Stop-Process` 只按端口杀容易留下旧进程继续抢请求（本机 Windows 允许同端口复用），按命令行匹配 `*shortplay-studio*server.py*` 全杀再起。
 
 > 坑六：**道具图里出现人手 / 人像**，是三个条件叠出来的：通用风格锚带 `natural skin texture`、道具没有英文主体（中文名被 T5 忽略）、道具模板漏写 `no people`。修法是分层风格锚 + `propEn` + 静物模板（`still life of a single … no people, no human figure, no hands, no face`），四者缺一都还会复发。同 seed 只换提示词的对照图见 `screenshots/prop_ab_cur.png`（坏）/ `prop_fix_coins_771.png`（好）。
+
+**同步出图 `POST /v1/images`**（与上面 `jobId` 轮询并存，两条路共用 `comfy_workflow()`，设置里换的 `comfyHost` / `comfyModel` 对两边同时生效）：
+
+```bash
+curl -X POST http://127.0.0.1:8177/v1/images \
+  -H "Content-Type: application/json" \
+  -d '{"prompt":"a robot barista in a Shanghai cafe","width":2048,"height":2048,"seed":42}'
+# {"prompt_id":"d01ba641-…","seed":42,"status":"succeeded","elapsed":22.8,
+#  "filename":"4b234b0336c1_00001_.png","url":"/v1/images/file/4b234b0336c1_00001_.png"}
+```
+
+字段口径对齐本机 8000 的 H3 + SeedVR2 Gateway，但图片由本服务自己托管，不依赖那个 Gateway 是否常驻。可选 `steps`（默认 4，Flux-schnell 用 4 就够）、`timeout`（默认 600s）；`width` / `height` 限 256–2048，`seed` 不传就随机。
 
 ### 剧本怎么写（混用也行）
 

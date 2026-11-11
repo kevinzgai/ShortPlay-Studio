@@ -19,7 +19,8 @@ from app.config.engine_store import (comfy_host, engine_config_save,
                                      h3_image_status, qwen_image_status)
 from app.services.agents import AgentDisabledError, agent_system
 from app.services.assets import build_asset_pack, build_frame_prompts, fill_asset_with_ai
-from app.services.comfy import (comfy_job_start, comfy_prompt_rows, comfy_status)
+from app.services.comfy import (comfy_job_start, comfy_prompt_rows, comfy_status,
+                                sync_image)
 from app.services.diagnostics import engine_probe, llm_test
 from app.services.export_zip import build_export_zip
 from app.services.llm_json import call_llm_json
@@ -306,9 +307,27 @@ def _ai(h, path, payload):
 
 
 # --------------------------------------------------------------------------
+# /v1/images：同步文生图，一次请求直接拿回图片 URL
+# --------------------------------------------------------------------------
+def _v1_images(h, payload):
+    """与 /api/comfy/generate 的异步 job 并存，给外部脚本 / 其它模块直接调。
+
+    契约对齐本机 8000 的 H3 + SeedVR2 Gateway，但这里走项目自己的 ComfyUI
+    配置（comfyHost / comfyModel），不依赖那个 Gateway 是否在线。
+    """
+    try:
+        return json_response(h, sync_image(payload))
+    except ValueError as exc:
+        return json_response(h, {"status": "failed", "detail": str(exc)[:300]}, 400)
+    except Exception as exc:
+        return json_response(h, {"status": "failed", "detail": str(exc)[:300]}, 502)
+
+
+# --------------------------------------------------------------------------
 # 路由表：path → 处理函数（签名统一 fn(h, payload)）
 # --------------------------------------------------------------------------
 POST_ROUTES = {
+    "/v1/images": _v1_images,
     "/api/import/docx": _import_docx,
     "/api/parse/start": _parse_start,
     "/api/parse/cancel": _parse_cancel,

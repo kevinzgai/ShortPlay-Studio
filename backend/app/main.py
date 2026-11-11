@@ -64,7 +64,7 @@ from app.paths import PORT, WEB_ROOT
 from app.web.agent_routes import (AGENT_GET_PATHS, AGENT_POST_PATHS, agent_get,
                                   agent_post)
 from app.web.responses import json_response, read_body
-from app.web.routes_get import GET_ROUTES
+from app.web.routes_get import GET_ROUTES, v1_image_file
 from app.web.routes_post import UNMATCHED, dispatch as post_dispatch
 from app.web.routes_post import known_paths as known_post_paths
 from app.web.sse import parse_stream
@@ -107,6 +107,9 @@ class Handler(SimpleHTTPRequestHandler):
             return agent_get(self, path)
         if path == "/api/parse/events":
             return parse_stream(self)
+        if path.startswith("/v1/images/file/"):
+            # /v1/images 同步接口回的 URL：动态路径不进静态字典，单独按前缀分派
+            return v1_image_file(self, path[len("/v1/images/file/"):])
         return super().do_GET()
 
     def do_POST(self):

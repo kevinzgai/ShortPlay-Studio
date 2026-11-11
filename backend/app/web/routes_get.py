@@ -76,6 +76,20 @@ def _comfy_image(h):
     return bytes_response(h, f.read_bytes(), name, "image/png")
 
 
+def v1_image_file(h, name):
+    """GET /v1/images/file/{filename}：同步接口回的 URL 由这里供图。
+
+    与 /api/comfy/image 共用同一目录与同一文件名白名单（内容寻址、无子目录），
+    但用 inline 让浏览器直接显示，而不是当附件下载成 export.zip。
+    """
+    if not ASSET_IMG_NAME.match(name or ""):
+        return json_response(h, {"detail": "非法文件名"}, 400)
+    f = ASSET_IMG_DIR / name
+    if not f.is_file():
+        return json_response(h, {"detail": "图片不存在"}, 404)
+    return bytes_response(h, f.read_bytes(), name, "image/png", inline=True)
+
+
 def _parse_state(h):
     task = PARSE_TASKS.get(query_dict(h).get("id", ""))
     if not task:

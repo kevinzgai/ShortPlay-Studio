@@ -38,7 +38,7 @@ from app.paths import WEB_ROOT
 from app.web.agent_routes import (AGENT_GET_PATHS, AGENT_POST_PATHS, agent_get,
                                   agent_post)
 from app.web.responses import Response, Sink, read_body
-from app.web.routes_get import GET_ROUTES
+from app.web.routes_get import GET_ROUTES, v1_image_file
 from app.web.routes_post import UNMATCHED
 from app.web.routes_post import dispatch as post_dispatch
 from app.web.routes_post import known_paths as known_post_paths
@@ -81,6 +81,30 @@ async def _read_json_body(request: Request):
     raw = await request.body()
     length = int(request.headers.get("content-length", len(raw)) or len(raw))
     return json.loads(raw[:length].decode("utf-8"))
+
+
+# --------------------------------------------------------------------------
+# /v1/images：同步文生图（协议翻译层）
+# --------------------------------------------------------------------------
+@app.post("/v1/images")
+async def v1_images(request: Request):
+    """出图会阻塞几十秒，必须丢线程池；直接放 async 里会卡死整个事件循环。"""
+    import anyio
+
+    try:
+        payload = await _read_json_body(request)
+    except (ValueError, KeyError, UnicodeDecodeError) as exc:
+        return JSONResponse({"detail": "请求格式不对：" + str(exc)}, status_code=400)
+    sink = _sink_for(request)
+    out = await anyio.to_thread.run_sync(
+        lambda: post_dispatch(sink, "/v1/images", payload))
+    return to_starlette(out)
+
+
+@app.get("/v1/images/file/{filename}")
+def v1_image(filename: str, request: Request):
+    """sync handler：FastAPI 自动丢 threadpool，读盘不占事件循环。"""
+    return to_starlette(v1_image_file(_sink_for(request), filename))
 
 
 # --------------------------------------------------------------------------

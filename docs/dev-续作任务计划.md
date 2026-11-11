@@ -461,6 +461,9 @@ D4 无批量按钮；`npm run build` 通过。
 | `requirements.txt` | 5 条直接依赖钉版本：langchain-core / langchain-openai / fastapi / uvicorn（+ 传递依赖） |
 | `frontend/src/stores/studio.js` | barrel，5 行 `export *`；域文件在 `studio/{core,session,steps,shots,assets}.js` |
 | `tools/verify_sse_nonblocking.py` | Step C 专项：SSE 挂起期间 `/api/config` 必须 < 500ms |
+| `backend/app/services/comfy.py` `sync_image()` | **同步出图**：`POST /v1/images` 提交→等→下载→落盘→回 `url`，与 `comfy_job_start()` 的异步 job 并存，两条路共用 `comfy_workflow()`。别在这里另写一张工作流，否则「设置里换模型只对一边生效」 |
+| `backend/app/asgi.py` `v1_images` / `v1_image` | `/v1/images` 与 `/v1/images/file/{filename}` 的 FastAPI 挂载点。**出图阻塞几十秒，必须 `anyio.to_thread.run_sync`**，直接写在 async 里会卡死整个事件循环（与 SSE 同一个坑） |
+| `backend/app/web/routes_get.py` `v1_image_file()` | 供图：与 `/api/comfy/image` 共用 `ASSET_IMG_DIR` + `ASSET_IMG_NAME` 白名单，但走 `inline=True`（浏览器直显，不当附件下载） |
 
 ### 业务层（历史条目，路径见上方提示）
 
@@ -561,6 +564,7 @@ git remote set-url origin git@github.com:kevinzgai/ShortPlay-Studio.git
 | 2 | 「零依赖双击即用」已放弃 | ⚠️ 已接受的代价 | FastAPI 之后必须 venv。`start.bat` / `start-mac.command` 已做自动引导，venv 缺失时回退系统 Python（AI 调用不可用但服务能起） |
 | 3 | D2 重跑覆盖手工修改 | ⚠️ 已知限制 | 靠二次确认缓解；真正合并要等按场增量（键已埋好） |
 | 4 | 本地规范化依赖空行补场号；PDF 导入不支持 | ⚠️ 已知限制 | 未排期 |
+| 5 | `/v1/images` 同步出图产物不自动清理 | ⚠️ 已知限制 | 原图落 `backend/examples/assets/`（已被 `.gitignore` 排除），与批量出图共用同一目录。**没做保留策略**：2048×2048 一张约 3.8MB，高频调用会占盘，需要时手动清该目录下的 `[0-9a-f]{12}_00001_.png`（同步产物专属命名，批量产物是 `CODE_variant_SEED.png`，两者不会混淆） |
 
 ### 已注销（核查后确认不用做，别再当遗留任务跟）
 
