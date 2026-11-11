@@ -2,3 +2,8 @@
 # 步骤二（langgraph）挂触发器待命，触发条件见 docs/LangChain接入-技术方案.md §5。
 langchain-core==1.7.6
 langchain-openai==1.7.4
+
+# Step C：HTTP 层换成 FastAPI + uvicorn（旧 stdlib 实现保留为回滚开关）。
+# 回滚：SHORTPLAY_LEGACY_SERVER=1
+fastapi==0.162.2
+uvicorn==0.38.0

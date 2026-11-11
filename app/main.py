@@ -164,14 +164,8 @@ def _lan_ip():
         sock.close()
 
 
-def run():
-    """启动服务：解析参数 → 绑定端口 → 打印横幅 → 阻塞 serve_forever。"""
-    no_browser = "--no-browser" in sys.argv
-    # 默认监听所有网卡 → 同一局域网的其他设备可直接访问。
-    # 只想本机用时：SHORTPLAY_HOST=127.0.0.1 python3 server.py
-    host = os.environ.get("SHORTPLAY_HOST", "0.0.0.0")
-    server = StudioServer((host, PORT), Handler)
-    base, key, model = llm_settings()
+def _banner(host, model, base, key, engine):
+    """启动横幅。uvicorn 与 stdlib 两条路共用，保证输出逐字一致。"""
     print("=" * 62)
     print("  分镜工场 ShortPlay Studio 已启动")
     print("  监听： %s:%d" % (host, PORT))
@@ -181,13 +175,49 @@ def run():
         print("  局域网： " + ("http://%s:%d/  ← 同一 WiFi 下其他设备用这个" % (lan, PORT)
                               if lan else "已监听所有网卡，请用本机 IP + 端口访问"))
     print("  AI 模式： " + ("已接入 %s（AI 分集 + AI 分镜）" % model if base and key else "离线规则引擎（无需联网）"))
+    print("  HTTP 引擎： " + engine)
     print("  停止服务：按 Ctrl+C，或直接关掉这个窗口")
     print("=" * 62, flush=True)
+
+
+def run():
+    """启动服务：解析参数 → 绑定端口 → 打印横幅 → 阻塞运行。
+
+    【2026-11-11 · Step C：默认走 FastAPI + uvicorn】
+    回滚开关：SHORTPLAY_LEGACY_SERVER=1 走旧的 stdlib 实现（ThreadingHTTPServer），
+    两条路的路由表、业务函数完全共享，只有 HTTP 外壳不同。
+    这样任何一步出问题，改一个环境变量就能退回「一键启动」的老路。
+    """
+    no_browser = "--no-browser" in sys.argv
+    # 默认监听所有网卡 → 同一局域网的其他设备可直接访问。
+    # 只想本机用时：SHORTPLAY_HOST=127.0.0.1 python3 server.py
+    host = os.environ.get("SHORTPLAY_HOST", "0.0.0.0")
+    base, key, model = llm_settings()
+    legacy = os.environ.get("SHORTPLAY_LEGACY_SERVER", "").strip() in ("1", "true", "yes")
+
+    if legacy:
+        server = StudioServer((host, PORT), Handler)
+        _banner(host, model, base, key, "标准库 ThreadingHTTPServer（LEGACY）")
+        if not no_browser:
+            threading.Timer(0.8, lambda: webbrowser.open("http://127.0.0.1:%d/" % PORT)).start()
+        try:
+            server.serve_forever()
+        except KeyboardInterrupt:
+            print("\n已停止。", flush=True)
+        finally:
+            server.server_close()
+        return
+
+    import uvicorn
+
+    from app.asgi import app as asgi_app
+
+    _banner(host, model, base, key, "FastAPI + uvicorn")
     if not no_browser:
         threading.Timer(0.8, lambda: webbrowser.open("http://127.0.0.1:%d/" % PORT)).start()
-    try:
-        server.serve_forever()
-    except KeyboardInterrupt:
-        print("\n已停止。", flush=True)
-    finally:
-        server.server_close()
+    # backlog=128 与旧 StudioServer.request_queue_size 对齐：
+    # 浏览器一次页面并发几十个静态资源，backlog 太小会被内核 RST（见 StudioServer 注释）。
+    # workers=1 是硬要求：任务状态（PARSE_TASKS / COMFY_JOBS）全在进程内存里，
+    # 多 worker 会让 SSE 续传与任务查询打到不同进程。
+    uvicorn.run(asgi_app, host=host, port=PORT, backlog=128, workers=1,
+                log_level="warning", access_log=False)
