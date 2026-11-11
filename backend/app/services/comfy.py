@@ -375,7 +375,7 @@ def build_comfy_prompt(asset, variant_key, style_en="", with_ref=False):
     if not v:
         raise ValueError("未知出图类型：" + str(variant_key)[:40])
     if kind == "character":
-        kw = _as(asset.get("keywordEn"), "", 300).strip()
+        kw = _as(asset.get("keywordEn"), "", 400).strip()
         fallback = not kw
         if fallback:
             kw = _as(asset.get("keyword"), "", 200).strip() or \

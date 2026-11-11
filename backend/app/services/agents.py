@@ -88,7 +88,7 @@ SYSTEM_ASSETS = """你是短剧美术设定总监。只输出严格 JSON，不�
    "age":"18岁","role":"主角","face":"脸型与五官，15字内","flaw":"一处可辨识瑕疵，12字内",
    "wardrobeHook":"一个服装或配饰记忆点，12字内","wardrobe":"服装一句话，20字内",
    "keyword":"固定关键词串：把 age、face、flaw、wardrobeHook、wardrobe 用中文逗号连成一句，40字内，例：18岁，圆脸细眉，右眉尾浅疤，颈挂红绳青玉牌，浅灰旧T恤",
-   "keywordEn":"同一串的英文版，给本地 Flux 用，一句，40词内",
+   "keywordEn":"同一串的英文版，给本地 Flux 用，一句，55词内。构成顺序：年龄用区间（如 in his late sixties，不给精确年龄）；体态一句（build & posture，如 lean but sturdy, straight back）；脸与瑕疵；主服装必须带颜色+版型+材质（如 navy stand-collar jacket, stiff cotton-linen）；贴身携带物写呈现方式而不是清单（如 talisman corner visible in coat pocket）；每项英文逗号分隔",
    "source":"script|inferred","evidence":["S1"],"sceneNos":[1,2]}],
  "scenes":[{"name":"爷爷家堂屋","priority":"P0","intExt":"内景","time":"黄昏",
    "props":["八仙桌","钟馗像"],"light":"主光与色温，20字内","lens":"镜头焦段，如 24mm广角",

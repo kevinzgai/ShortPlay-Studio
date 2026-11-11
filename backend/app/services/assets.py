@@ -82,7 +82,7 @@ def build_asset_pack(data, scenes):
             "age": age, "role": role, "wardrobe": wardrobe, "appearance": face,
             "anchors": {"face": face, "flaw": flaw, "wardrobeHook": hook},
             "keyword": keyword,
-            "keywordEn": _as(raw.get("keywordEn"), "", 300),
+            "keywordEn": _as(raw.get("keywordEn"), "", 400),
             "source": src, "evidence": ev, "sceneNos": nos,
             "weight": 5 if _priority(raw.get("priority")) == "P0" else 3,
             "refImage": "", "refName": "", "locked": False, "touched": {},
