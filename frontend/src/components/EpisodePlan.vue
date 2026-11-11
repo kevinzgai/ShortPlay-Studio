@@ -5,6 +5,7 @@ import {
   S, E, planStep, manualEpisodeCount,
   editEpisode, splitEpisode, mergeEpisode, deleteEpisode
 } from "../stores/studio.js";
+/* planBusy / plan.status 由 store 维护；这里只负责把状态画出来 */
 
 function episodeShots(no) { return S.shots.filter((s) => s.episode === no); }
 function onTitle(e, no) { editEpisode(no, { title: e.target.value }); }
@@ -17,11 +18,19 @@ function onTo(e, no) { editEpisode(no, { sceneTo: e.target.value }); }
     <div class="row" style="margin-bottom:12px">
       <h2>分集方案</h2>
       <span class="chip indigo" id="episode-count">{{ S.episodes.length }} 集</span>
+      <span id="plan-status" class="chip" :class="S.steps.plan.status === 'ready' ? 'ok' : ''">
+        {{ S.steps.plan.status === 'ready' ? '方案已就绪' : (S.steps.plan.status === 'stale' ? '基于旧稿' : '尚未分集') }}
+      </span>
       <span v-if="S.steps.plan.engine === 'ai'" class="chip ok">大模型生成{{ S.steps.plan.model ? " · " + S.steps.plan.model : "" }}</span>
       <span v-else-if="manualEpisodeCount()" class="chip warn" id="manual-count">含 {{ manualEpisodeCount() }} 集手调</span>
       <span v-else class="chip">本地规则分集</span>
       <div class="spacer"></div>
-      <button class="btn sm" id="replan" @click="planStep()">重算分集</button>
+      <button class="btn sm primary" id="replan" :disabled="S.planBusy"
+        title="AI 优先，失败自动降级本地规则。重算会覆盖手调结果；已有镜头不会删，只标「需重算」。"
+        @click="planStep()">
+        <span v-if="S.planBusy" class="spinner"></span>
+        {{ S.planBusy ? "重算中…" : "重算分集" }}
+      </button>
     </div>
 
     <div class="episode-grid">
@@ -59,5 +68,6 @@ function onTo(e, no) { editEpisode(no, { sceneTo: e.target.value }); }
     <div class="inline-note" style="margin-top:10px">
       改过的集会标「手调」；重算会覆盖它们（先二次确认）。已有镜头不会删除，只标第 3 步「需重算」，逐集重排后归位。
     </div>
+
   </div>
 </template>

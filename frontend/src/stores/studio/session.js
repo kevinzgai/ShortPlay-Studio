@@ -184,10 +184,13 @@ export function saveEngine(draft) {
   const body = {
     comfyHost: draft.comfyHost || "", comfyModel: draft.comfyModel || "",
     qwenUrl: draft.qwenUrl || "", qwenModel: draft.qwenModel || "",
-    qwenSize: draft.qwenSize || ""
+    qwenSize: draft.qwenSize || "",
+    h3Url: draft.h3Url || "", h3Model: draft.h3Model || "", h3Size: draft.h3Size || ""
   };
   if (draft.clearQwenKey) body.clearQwenKey = true;
   else if (draft.qwenKey) body.qwenKey = draft.qwenKey;
+  if (draft.clearH3Key) body.clearH3Key = true;
+  else if (draft.h3Key) body.h3Key = draft.h3Key;
   ui.engine.busy = "save";
   return AI.engineSave(body)
     .then((j) => {

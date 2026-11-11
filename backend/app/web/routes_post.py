@@ -15,7 +15,8 @@
 import base64
 import json
 
-from app.config.engine_store import (comfy_host, engine_config_save, qwen_image_status)
+from app.config.engine_store import (comfy_host, engine_config_save,
+                                     h3_image_status, qwen_image_status)
 from app.services.agents import AgentDisabledError, agent_system
 from app.services.assets import build_asset_pack, build_frame_prompts, fill_asset_with_ai
 from app.services.comfy import (comfy_job_start, comfy_prompt_rows, comfy_status)
@@ -167,7 +168,7 @@ def _comfy_prompt(h, payload):
 
 def _comfy_generate(h, payload):
     engine = payload.get("engine")
-    if engine not in ("comfy", "qwen"):
+    if engine not in ("comfy", "qwen", "h3"):
         engine = "comfy"
     seq_n = payload.get("n") if isinstance(payload.get("n"), int) else 1
     seq_n = max(1, min(seq_n, 4))
@@ -175,6 +176,10 @@ def _comfy_generate(h, payload):
         qs = qwen_image_status()
         if not qs.get("online"):
             return json_response(h, {"detail": "通义万相没配置好：" + qs.get("detail", "缺 API Key")}, 503)
+    elif engine == "h3":
+        hs = h3_image_status()
+        if not hs.get("online"):
+            return json_response(h, {"detail": "MiniMax 没配置好：" + hs.get("detail", "缺 API Key")}, 503)
     else:
         st = comfy_status()
         if not st.get("online"):

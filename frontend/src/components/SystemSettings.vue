@@ -22,13 +22,14 @@ function go(k) {
 const llmOn = computed(() => !!S.llmAvailable);
 const comfyOn = computed(() => !!ui.comfy.online);
 const qwenOn = computed(() => !!ui.comfy.qwen.online);
-const engineOn = computed(() => comfyOn.value || qwenOn.value);
+const h3On = computed(() => !!(ui.comfy.h3 && ui.comfy.h3.online));
+const engineOn = computed(() => comfyOn.value || qwenOn.value || h3On.value);
 const checked = computed(() => !!ui.comfy.checked);
 /* 口径必须与诊断页一致，否则 tab 说「正常」、点进去说「1 项不可用」：
-   通义万相是可选引擎，没配 Key 只算「未启用」，不算不可用。 */
+   云端引擎都是可选能力，没配 Key 只算「未启用」，不算不可用。 */
 const badCount = computed(() =>
   (PROJECT.server ? 0 : 1) + (llmOn.value ? 0 : 1) + (comfyOn.value ? 0 : 1));
-const warnCount = computed(() => (qwenOn.value ? 0 : 1));
+const warnCount = computed(() => ((qwenOn.value && h3On.value) ? 0 : 1));
 const diagBadge = computed(() => {
   if (badCount.value) return badCount.value + " 项不可用";
   if (warnCount.value) return warnCount.value + " 项可选未启用";
@@ -40,7 +41,9 @@ const tabs = computed(() => [
     badge: llmOn.value ? (S.llmModel || "已接入") : "未接入" },
   { k: "engine", label: "出图引擎", on: engineOn.value,
     badge: !checked.value ? "检测中…"
-      : comfyOn.value ? "ComfyUI" : (qwenOn.value ? "通义万相" : "都不可用") },
+      : comfyOn.value ? "ComfyUI"
+      : qwenOn.value ? "通义万相"
+      : h3On.value ? "MiniMax" : "都不可用" },
   { k: "diag", label: "连接与诊断", on: badCount.value === 0, badge: diagBadge.value }
 ]);
 

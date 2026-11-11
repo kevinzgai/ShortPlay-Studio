@@ -85,8 +85,15 @@ def llm_test(payload):
 
 
 def engine_probe(kind):
-    """连通性探测。ComfyUI 真连一次；万相只校验 Key 是否配好，不空跑计费请求。"""
+    """连通性探测。ComfyUI 真连一次；云端引擎只校验 Key 是否配好，不空跑计费请求。"""
     kind = str(kind or "comfy").strip()
+    if kind == "h3":
+        from app.config.engine_store import _mask_key, h3_image_key, h3_image_model
+        key = h3_image_key()
+        return {"ok": bool(key), "kind": "h3", "model": h3_image_model(),
+                "mask": _mask_key(key),
+                "detail": ("Key 已保存（%s），实际出图才会产生调用与计费" % _mask_key(key))
+                          if key else "没配置 API Key"}
     if kind == "qwen":
         key = qwen_image_key()
         return {"ok": bool(key), "kind": "qwen", "model": qwen_image_model(),

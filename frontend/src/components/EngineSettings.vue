@@ -1,14 +1,19 @@
 <script setup>
-import { reactive, computed, onMounted } from "vue";
+import { reactive, computed, ref, onMounted } from "vue";
 import {
   ui, saveEngine, testEngine, loadEngine, loadComfyModels, comfyCheck
 } from "../stores/studio.js";
 
 /* 出图引擎是「全局单例」，与语言模型的多条列表不同：
-   每类只有一份配置，没有 active 的概念。 */
+   每类只有一份配置，没有 active 的概念。
+   三个引擎用标签切换（不再平铺），标签上直接看在线 / Key 状态。 */
+const engTab = ref("comfy");
+
 const form = reactive({
   comfyHost: "", comfyModel: "", qwenUrl: "", qwenModel: "", qwenSize: "2K",
-  qwenKey: "", clearQwenKey: false
+  qwenKey: "", clearQwenKey: false,
+  h3Url: "", h3Model: "", h3Size: "2720x1536",
+  h3Key: "", clearH3Key: false
 });
 
 const SRC_LABEL = { file: "界面配置", env: "环境变量", default: "内置默认" };
@@ -23,6 +28,11 @@ function fill() {
   form.qwenSize = v("qwenSize", "2K");
   form.qwenKey = "";
   form.clearQwenKey = false;
+  form.h3Url = v("h3Url");
+  form.h3Model = v("h3Model", "MiniMax-H3-Image");
+  form.h3Size = v("h3Size", "2720x1536");
+  form.h3Key = "";
+  form.clearH3Key = false;
 }
 
 onMounted(() => {
@@ -35,34 +45,58 @@ const src = (k) => (((ui.engine.config || {})[k] || {}).source || "");
 const srcText = (k) => SRC_LABEL[src(k)] || "";
 const keySet = computed(() => !!(((ui.engine.config || {}).qwenKey || {}).set));
 const keyMask = computed(() => (((ui.engine.config || {}).qwenKey || {}).mask || ""));
+const h3KeySet = computed(() => !!(((ui.engine.config || {}).h3Key || {}).set));
+const h3KeyMask = computed(() => (((ui.engine.config || {}).h3Key || {}).mask || ""));
 const res = computed(() => ui.engine.result);
 const saving = computed(() => ui.engine.busy === "save");
 const comfyModels = computed(() => ui.engine.models || []);
+
+const engTabs = computed(() => [
+  { k: "comfy", label: "本地 ComfyUI", on: !!ui.comfy.online,
+    badge: ui.comfy.online ? "在线" : "离线" },
+  { k: "qwen", label: "通义万相", on: keySet.value,
+    badge: keySet.value ? (keyMask.value || "已配置") : "未配置" },
+  { k: "h3", label: "MiniMax H3", on: h3KeySet.value,
+    badge: h3KeySet.value ? (h3KeyMask.value || "已配置") : "未配置" }
+]);
 
 function save() {
   saveEngine({
     comfyHost: form.comfyHost, comfyModel: form.comfyModel,
     qwenUrl: form.qwenUrl, qwenModel: form.qwenModel, qwenSize: form.qwenSize,
-    qwenKey: form.qwenKey, clearQwenKey: form.clearQwenKey
+    qwenKey: form.qwenKey, clearQwenKey: form.clearQwenKey,
+    h3Url: form.h3Url, h3Model: form.h3Model, h3Size: form.h3Size,
+    h3Key: form.h3Key, clearH3Key: form.clearH3Key
   }).then((j) => { if (j) fill(); });
 }
 function testComfy() { testEngine("comfy"); }
 function testQwen() { testEngine("qwen"); }
+function testH3() { testEngine("h3"); }
 </script>
 
 <template>
   <div class="es">
+    <!-- 引擎切换：一次只显示一个引擎的配置，状态直接标在标签上 -->
+    <div class="sys-tabs" role="tablist" aria-label="出图引擎">
+      <button
+        v-for="t in engTabs" :key="t.k"
+        class="sys-tab" :class="{ on: engTab === t.k }"
+        role="tab" :aria-selected="engTab === t.k"
+        :data-eng-tab="t.k" @click="engTab = t.k"
+      >
+        <span class="sys-dot" :class="t.on ? 'ok' : 'warn'"></span>
+        <b>{{ t.label }}</b>
+        <em>{{ t.badge }}</em>
+      </button>
+    </div>
+
     <!-- 本地 ComfyUI -->
-    <section class="es-block">
-      <div class="es-h">
-        <b>本地 ComfyUI</b>
-        <span class="es-badge" :class="ui.comfy.online ? 'ok' : 'off'" data-eng-state="comfy">
-          {{ ui.comfy.online ? "在线 · v" + (ui.comfy.version || "?") : "离线" }}
-        </span>
-        <span v-if="ui.comfy.online" class="es-sub">{{ ui.comfy.vramFreeMB }}MB 可用显存</span>
-      </div>
+    <section v-if="engTab === 'comfy'" class="es-block" data-eng-panel="comfy">
       <p class="es-note">
         本机跑 Flux，图不出门、不产生调用费。三视图、概念图、组图都走它。
+        <span v-if="ui.comfy.online" class="es-sub">
+          v{{ ui.comfy.version || "?" }} · {{ ui.comfy.vramFreeMB }}MB 可用显存
+        </span>
       </p>
 
       <div class="es-f">
@@ -96,14 +130,7 @@ function testQwen() { testEngine("qwen"); }
     </section>
 
     <!-- 通义万相 -->
-    <section class="es-block">
-      <div class="es-h">
-        <b>通义万相</b>
-        <span class="es-badge" :class="ui.comfy.qwen.online ? 'ok' : 'off'" data-eng-state="qwen">
-          {{ ui.comfy.qwen.online ? "Key 已配置" : "未配置" }}
-        </span>
-        <span v-if="keySet" class="es-sub">{{ keyMask }}</span>
-      </div>
+    <section v-else-if="engTab === 'qwen'" class="es-block" data-eng-panel="qwen">
       <p class="es-note">
         云端组图引擎，一次可出一组风格一致的图。按次计费，只有真正出图才会产生调用。
       </p>
@@ -144,9 +171,51 @@ function testQwen() { testEngine("qwen"); }
       </div>
     </section>
 
+    <!-- MiniMax H3-Image -->
+    <section v-else class="es-block" data-eng-panel="h3">
+      <p class="es-note">
+        云端生图引擎（api.minimax.cn，一次可出多张）。按次计费，只有真正出图才会产生调用。
+      </p>
+
+      <div class="es-f">
+        <label>
+          API Key
+          <span v-if="srcText('h3Key')" class="es-src">{{ srcText("h3Key") }}</span>
+        </label>
+        <div class="es-row">
+          <input v-model="form.h3Key" data-eng="h3-key" type="password" autocomplete="off"
+            :placeholder="h3KeySet ? '已保存 ' + h3KeyMask + '，留空 = 不修改' : 'sk-cp-…'">
+          <button v-if="h3KeySet" class="btn sm quiet" data-eng="clear-h3-key"
+            @click="form.clearH3Key = !form.clearH3Key">
+            {{ form.clearH3Key ? "已标记清除" : "清除 Key" }}
+          </button>
+        </div>
+        <span v-if="form.clearH3Key" class="es-hint warn">保存后会删掉已存的 Key</span>
+      </div>
+
+      <div class="es-f">
+        <label>模型<span v-if="srcText('h3Model')" class="es-src">{{ srcText("h3Model") }}</span></label>
+        <input v-model="form.h3Model" data-eng="h3-model" placeholder="MiniMax-H3-Image">
+      </div>
+      <div class="es-f">
+        <label>接口地址<span v-if="srcText('h3Url')" class="es-src">{{ srcText("h3Url") }}</span></label>
+        <input v-model="form.h3Url" data-eng="h3-url" placeholder="https://api.minimax.cn/v1/images/generations">
+      </div>
+      <div class="es-f">
+        <label>出图尺寸（宽x高）</label>
+        <input v-model="form.h3Size" data-eng="h3-size" placeholder="2720x1536">
+      </div>
+
+      <div class="es-acts">
+        <button class="btn sm" data-eng="test-h3" :disabled="ui.engine.testing === 'h3'" @click="testH3">
+          {{ ui.engine.testing === "h3" ? "检查中…" : "检查 Key" }}
+        </button>
+      </div>
+    </section>
+
     <div v-if="res" class="ms-result" :class="res.ok ? 'ok' : 'err'" data-eng-result>
       <b>{{ res.ok ? "✓ 通过" : "✗ 不通" }}</b>
-      <span>{{ res.kind === "qwen" ? "通义万相" : "本地 ComfyUI" }}</span>
+      <span>{{ { comfy: "本地 ComfyUI", qwen: "通义万相", h3: "MiniMax H3" }[res.kind] || res.kind }}</span>
       <span>{{ res.detail || (res.host || "") }}</span>
     </div>
 

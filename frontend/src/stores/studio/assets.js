@@ -521,6 +521,12 @@ export function comfyCheck() {
       ui.comfy.qwen.size = s.qwen.size || "";
       ui.comfy.qwen.detail = s.qwen.detail || "";
     }
+    if (s.h3) {
+      ui.comfy.h3.online = !!s.h3.online;
+      ui.comfy.h3.model = s.h3.model || "";
+      ui.comfy.h3.size = s.h3.size || "";
+      ui.comfy.h3.detail = s.h3.detail || "";
+    }
     ui.comfy.online = !!s.online;
     ui.comfy.checked = true;
     ui.comfy.version = s.version || "";
@@ -606,7 +612,7 @@ export function comfyToggleVariant(kind, key) {
 }
 export function comfySetScope(v) { ui.comfy.scope = v; }
 export function comfySetEngine(v) {
-  ui.comfy.engine = v === "qwen" ? "qwen" : "comfy";
+  ui.comfy.engine = v === "qwen" ? "qwen" : v === "h3" ? "h3" : "comfy";
   ui.comfy.preview = null;
 }
 export function comfySetSeqN(n) { ui.comfy.seqN = Math.max(1, Math.min(4, Number(n) || 1)); }
@@ -628,7 +634,17 @@ function comfyApplyResults(full) {
     const k = a.genImages.findIndex((x) => x.variant === it.variant);
     if (k >= 0) a.genImages.splice(k, 1, row); else a.genImages.push(row);
     if (a.genImages.length > 6) a.genImages = a.genImages.slice(-6);
-    if (!a.refImage) {
+    /* 主参考图约定：资产只有一张生成图时，第一张就是默认图——
+       包括「重新生成把多张变成一张」「旧主图已被替换」的情况，
+       refImage 必须跟唯一那张对齐，不能指向已经不存在的旧图。
+       多张时才留给用户手选；用户手动上传的参考图（非生成图）不在这条路径里，不会被动。 */
+    if (a.genImages.length === 1) {
+      const only = a.genImages[0];
+      if (a.refImage !== only.dataUri) {
+        a.refImage = only.dataUri;
+        a.refName = only.label + " · 本地生成";
+      }
+    } else if (!a.refImage) {
       a.refImage = it.dataUri;
       a.refName = (it.file || "").split("/").pop() || (it.variantLabel + ".png");
     }
@@ -715,11 +731,17 @@ export function clearComfyPreview() { ui.comfy.preview = null; }
 export function comfyGenerateImages(currentId, shotIds) {
   if (ui.comfy.busy) return;
   const engine = ui.comfy.engine;
-  const seqN = engine === "qwen" ? (ui.comfy.seqN || 1) : 1;
-  if (engine === "qwen" ? !ui.comfy.qwen.online : !ui.comfy.online) {
-    toast(engine === "qwen"
-      ? "通义万相没配好：" + (ui.comfy.qwen.detail || "缺 API Key")
-      : "本地 ComfyUI 没连上，先启动 8188 或切到「通义万相」", "warn");
+  const cloud = engine === "qwen" || engine === "h3";
+  const seqN = cloud ? (ui.comfy.seqN || 1) : 1;
+  const online = cloud
+    ? (engine === "qwen" ? ui.comfy.qwen.online : ui.comfy.h3.online)
+    : ui.comfy.online;
+  if (!online) {
+    toast(cloud
+      ? (engine === "qwen"
+          ? "通义万相没配好：" + (ui.comfy.qwen.detail || "缺 API Key")
+          : "MiniMax 没配好：" + (ui.comfy.h3.detail || "缺 API Key"))
+      : "本地 ComfyUI 没连上，先启动 8188 或切到云端引擎", "warn");
     return;
   }
   const key = { character: "characters", scene: "scenes", prop: "props" }[S.assetTab] || "characters";

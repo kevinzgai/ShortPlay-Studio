@@ -102,7 +102,8 @@ export const ui = reactive({
     errors: [], results: [], filling: "",
     preview: null, previewBusy: false,
     engine: "comfy", seqN: 1,
-    qwen: { online: false, model: "", size: "", detail: "" }
+    qwen: { online: false, model: "", size: "", detail: "" },
+    h3: { online: false, model: "", size: "", detail: "" }
   },
   // 语言模型接入（列表 / 当前生效 / 测试结果）：纯界面态，不进撤销、不落盘
   models: {

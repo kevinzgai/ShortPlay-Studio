@@ -25,17 +25,17 @@
 开发模式（改前端热更新）：
 
 ```bat
-py server.py --no-browser              :: 先起 8177，提供 /api/*
+py backend/server.py --no-browser       :: 先起 8177，提供 /api/*
 cd frontend && npm run dev             :: 再起 5173，Vite 自动代理 /api 到 8177
 ```
 
-> 前端源码在本仓 `frontend/`（2026-11-11 单仓合并），构建产物落到仓库根 `dist/`。`WEB_ROOT` 解析顺序：`SHORTPLAY_WEB_ROOT` → 本仓 `dist` → 仓库根。
+> 前端源码在本仓 `frontend/`，构建产物落到 `backend/dist/`（由 `backend/server.py` 托管）。`WEB_ROOT` 解析顺序：`SHORTPLAY_WEB_ROOT` → `backend/dist` → 仓库根。
 
 ### AI 模式配置
 
-`start.bat` 会自动加载同目录的 `llm-config.bat`。首次使用请把 `llm-config.example.bat` 复制为 `llm-config.bat` 并填入你自己的 Key；不配置也能用，会自动回退内置离线规则引擎。
+`start.bat` 会自动加载 `backend/llm-config.bat`。首次使用请把 `backend/llm-config.example.bat` 复制为 `backend/llm-config.bat` 并填入你自己的 Key；不配置也能用，会自动回退内置离线规则引擎。
 
-换模型 / 换服务商：编辑 `llm-config.bat`（格式参见 `llm-config.example.bat`），任何兼容 OpenAI `/chat/completions` 的端点都行：
+换模型 / 换服务商：编辑 `backend/llm-config.bat`（格式参见 `backend/llm-config.example.bat`），任何兼容 OpenAI `/chat/completions` 的端点都行：
 
 ```bat
 set "SHORTPLAY_LLM_BASE_URL=https://api.deepseek.com"
@@ -344,9 +344,9 @@ projects/
 
 ```
 shortplay-studio/
-├─ frontend/                       前端（Vue 3 + Vite，唯一前端真源）
+├─ frontend/                       前端根节点（Vue 3 + Vite，唯一前端真源）
 │  ├─ index.html                   Vite 入口
-│  ├─ vite.config.js               构建到仓库根 dist/，dev 代理 /api → 8177
+│  ├─ vite.config.js               构建到 backend/dist/，dev 代理 /api → 8177
 │  ├─ package.json                 vue ^3.5 / vite ^5.4 / @vitejs/plugin-vue
 │  └─ src/
 │     ├─ main.js                  挂载 + boot()
@@ -362,9 +362,16 @@ shortplay-studio/
 │     └─ components/              TopBar(项目胶囊 + 面包屑) / StepOne / SettingsFields / StepTwo /
 │                                EpisodePlan / AssetPanel / StepAsset / StepShots / ShotCard /
 │                                ShotsTable / PreviewPanel / FeedbackLayer / AgentWorkbench
-├─ projects/                      项目库（每个项目一个目录 + project.json，已 gitignore）
-│  └─ .trash/                     删除的项目移到这里，不直接抹掉
-├─ dist/                          前端构建产物（由 frontend/ 构建生成，已 gitignore）
+├─ backend/                        后端根节点（Python 服务 + Agent 数据 + 运行数据全在这里）
+│  ├─ server.py                   启动入口（薄壳，只有 from app.main import run）
+│  ├─ app/                        后端实现：main.py 装配 / web 路由 / services 业务 / config 配置
+│  ├─ agents/                     Agent 注册表 + prompts/ + skills/（可在线编辑，保存即生效）
+│  ├─ requirements.txt            Python 依赖清单
+│  ├─ llm-config.bat              本机模型配置（含密钥，已 gitignore）
+│  ├─ projects/                   项目库（每个项目一个目录 + project.json，已 gitignore）
+│  │  └─ .trash/                  删除的项目移到这里，不直接抹掉
+│  ├─ dist/                       前端构建产物（由 frontend/ 构建生成，已 gitignore）
+│  └─ examples/                   示例剧本 + 两套批量分镜结果
 ├─ docs/archive/ui-versions/      5 版 UI 原型（历史留档，代码里 0 引用，已从根目录移走）
 ├─ reference/                     分镜平台相关资料（不参与运行，见 reference/README.md）
 │  ├─ 00-项目沿革/                 按天记的开发日志：决策理由与踩过的坑，接手先读
@@ -375,19 +382,17 @@ shortplay-studio/
 │  ├─ 05-外部工具链/               Toonflow 源码（已剔除 data/ 与依赖）
 │  └─ 06-设计原型/                 指向 docs/archive/ui-versions/（唯一真源）
 ├─ MIGRATION.md                   迁移记录：路径处理、合并策略、验证结果
-├─ server.py                      启动入口（薄壳，只有 from app.main import run）
-├─ app/                           后端实现：main.py 装配 / web 路由 / services 业务 / config 配置
 ├─ start.bat                      一键启动（GBK，自动装依赖 + 构建 + 起服务）
-├─ llm-config.bat                 本机模型配置（含密钥，已 gitignore）
 ├─ tools/gen_example.js           刷新离线示例（直接 import src/lib/engine.js）
 ├─ tools/gen_ai_example.js        真模型刷新 AI 示例（import src/lib/ai.js）
 ├─ tools/verify_platform.py       离线主流程回归 43 项
 ├─ tools/verify_ai.py             AI 主流程回归（DEPRECATED · 休眠流水线，已从 SUITES 摘除）
 ├─ tools/verify_all.mjs           全量串行跑 26 套回归，输出汇总表（node tools/verify_all.mjs [关键字]）
 ├─ tools/verify_assets.mjs        资产层 + 提示词编译 + 出片端契约 + H3 提示词纯逻辑回归 69 项（node，无浏览器）
-├─ tools/verify_asset_ui.py       资产层 + 导出契约 + H3 UI 回归 45 项（Playwright 有窗口）
-└─ examples/                      示例剧本 + 两套批量分镜结果
+└─ tools/verify_asset_ui.py       资产层 + 导出契约 + H3 UI 回归 45 项（Playwright 有窗口）
 ```
+
+> 2026-11-11 目录重构：后端代码与运行数据统一收进 `backend/`（`app/paths.py` 的 `ROOT` 指向它），前端独立在 `frontend/`，`tools/` 与 `docs/` 是跨前后端的开发工具与文档，留在仓库根。
 
 **分层**：`lib/` 是浏览器与 Node 共用的纯逻辑（零 DOM），`stores/` 只管数据与流程（零 innerHTML），`components/` 只负责声明式渲染。改编排规则只动 `lib/engine.js`，改 AI 链路只动 `lib/ai.js` + `app/web/routes_post.py`，改界面只动对应 `.vue`，彼此不耦合。
 
@@ -651,10 +656,10 @@ queued ──▶ running ──▶ done
 
 ## Agent 工作台 · 角色与技能注册表
 
-参考 `huobao-drama` 的做法（Agent 注册表 + 文件化 `SKILL.md` + 界面在线编辑），把原先写死在 `server.py` 里的 6 个 `SYSTEM_*` 提示词抽成了**可插拔角色**。仍然是零第三方依赖的 Python 服务（入口 `server.py` 薄壳 + `app/` 包），没有引入 LangChain / Mastra。
+参考 `huobao-drama` 的做法（Agent 注册表 + 文件化 `SKILL.md` + 界面在线编辑），把原先写死在 `server.py` 里的 6 个 `SYSTEM_*` 提示词抽成了**可插拔角色**。仍然是零第三方依赖的 Python 服务（入口 `backend/server.py` 薄壳 + `backend/app/` 包），没有引入 LangChain / Mastra。
 
 ```
-agents/
+backend/agents/
   registry.json              角色注册表：id / stage / outputKey / endpoint / skills / enabled / 流水线顺序
   prompts/<id>.md            frontmatter(name, stage, model, output) + 系统提示词正文
   skills/<skill>/SKILL.md    该角色的技能规范全文，调用时拼进 system prompt

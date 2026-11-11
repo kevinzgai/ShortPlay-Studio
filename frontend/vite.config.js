@@ -6,9 +6,9 @@ const resolve = (p) => fileURLToPath(new URL(p, import.meta.url));
 
 export default defineConfig({
   plugins: [vue()],
-  // 与后端同源部署：构建产物直接落到项目根 dist/，server.py 托管它（单端口 8177）
+  // 与后端同源部署：构建产物落到 backend/dist/，backend/server.py 托管它（单端口 8177）
   build: {
-    outDir: resolve("../dist"),
+    outDir: resolve("../backend/dist"),
     emptyOutDir: true,
   },
   // 开发时把 /api 转发给本机 Python 服务，前端热更新与 AI 接口两不误

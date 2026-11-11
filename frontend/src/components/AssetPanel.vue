@@ -330,9 +330,12 @@ const scopeList = computed(() => {
   if (ui.comfy.scope === "p0") return all.filter((a) => (a.priority || "P1") === "P0");
   return all;
 });
+const cloudEngine = computed(() => ui.comfy.engine === "qwen" || ui.comfy.engine === "h3");
 const genCount = computed(() => scopeList.value.length * (ui.comfy.picked[S.assetTab] || []).length
-  * (ui.comfy.engine === "qwen" ? (ui.comfy.seqN || 1) : 1));
-const engineOnline = computed(() => ui.comfy.engine === "qwen" ? ui.comfy.qwen.online : ui.comfy.online);
+  * (cloudEngine.value ? (ui.comfy.seqN || 1) : 1));
+const engineOnline = computed(() => cloudEngine.value
+  ? (ui.comfy.engine === "qwen" ? ui.comfy.qwen.online : ui.comfy.h3.online)
+  : ui.comfy.online);
 /* 这一行不是按钮、是「出图参数」：点完只会改这里的一行说明，真正出图在右边那个按钮 */
 const genSummary = computed(() => {
   const n = scopeList.value.length;
@@ -341,8 +344,8 @@ const genSummary = computed(() => {
   if (!k) return "至少选一种画幅";
   if (!n) return ui.comfy.scope === "p0" ? "本栏没有 P0 " + tab
     : ui.comfy.scope === "shot" ? "本镜没有" + tab + "资产" : "先在左侧选一个" + tab;
-  const seq = ui.comfy.engine === "qwen" ? " × " + (ui.comfy.seqN || 1) + " 张/组" : "";
-  const total = n * k * (ui.comfy.engine === "qwen" ? (ui.comfy.seqN || 1) : 1);
+  const seq = cloudEngine.value ? " × " + (ui.comfy.seqN || 1) + " 张/组" : "";
+  const total = n * k * (cloudEngine.value ? (ui.comfy.seqN || 1) : 1);
   return n + " 个" + tab + " × " + k + " 种画幅" + seq + " = " + total + " 张";
 });
 const genPct = computed(() => ui.comfy.total ? Math.round(ui.comfy.done / ui.comfy.total * 100) : 0);
@@ -482,9 +485,13 @@ watch(() => sel.value && sel.value.id, () => { closePreview(); ui.comfy.preview 
         <div class="ap-gen-seg" title="切换出图引擎">
           <button :class="{ on: ui.comfy.engine === 'comfy' }" @click="comfySetEngine('comfy')">本地 ComfyUI</button>
           <button :class="{ on: ui.comfy.engine === 'qwen' }" @click="comfySetEngine('qwen')">通义万相</button>
+          <button :class="{ on: ui.comfy.engine === 'h3' }" @click="comfySetEngine('h3')">MiniMax H3</button>
         </div>
         <span v-if="ui.comfy.engine === 'qwen'" class="ap-gen-info" :class="{ off: !ui.comfy.qwen.online }">
           {{ ui.comfy.qwen.online ? (ui.comfy.qwen.model + ' · ' + ui.comfy.qwen.size + ' · 云端组图') : ui.comfy.qwen.detail }}
+        </span>
+        <span v-else-if="ui.comfy.engine === 'h3'" class="ap-gen-info" :class="{ off: !ui.comfy.h3.online }">
+          {{ ui.comfy.h3.online ? (ui.comfy.h3.model + ' · ' + ui.comfy.h3.size + ' · 云端生图') : ui.comfy.h3.detail }}
         </span>
         <span v-else-if="ui.comfy.online" class="ap-gen-info">
           ComfyUI {{ ui.comfy.version }} · {{ ui.comfy.model }} · 显存空闲 {{ vramText(ui.comfy.vramFreeMB) }}
@@ -510,7 +517,7 @@ watch(() => sel.value && sel.value.id, () => { closePreview(); ui.comfy.preview 
               @click="comfyToggleVariant(S.assetTab, v.key)">{{ v.label }}</button>
           </div>
         </div>
-        <div v-if="ui.comfy.engine === 'qwen'" class="ap-gen-grp">
+        <div v-if="cloudEngine" class="ap-gen-grp">
           <span class="ap-gen-cap" title="一次生成几张前后一致的组图">组图张数</span>
           <div class="ap-gen-seg">
             <button v-for="k in [1, 2, 3, 4]" :key="k" :class="{ on: ui.comfy.seqN === k }"
@@ -532,7 +539,7 @@ watch(() => sel.value && sel.value.id, () => { closePreview(); ui.comfy.preview 
         <div class="ap-gen-bar"><i :style="{ width: genPct + '%' }"></i></div>
         <span>已出 {{ ui.comfy.done }} / {{ ui.comfy.total }} 张</span>
         <span class="ap-gen-cur">{{ ui.comfy.current || "排队中…" }}</span>
-        <span class="ap-gen-hint">{{ ui.comfy.engine === 'qwen' ? '云端组图单批约 20–60 秒，别关页面' : 'Flux 单张约 6–12 秒，别关页面' }}</span>
+        <span class="ap-gen-hint">{{ cloudEngine ? '云端生图单批约 20–60 秒，别关页面' : 'Flux 单张约 6–12 秒，别关页面' }}</span>
       </template>
       <template v-else>
         <span class="ok">✓ 完成 {{ ui.comfy.results.length }} 张，已挂到对应资产</span>

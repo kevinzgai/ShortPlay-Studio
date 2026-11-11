@@ -370,7 +370,11 @@ table.shots .detail-brief{min-width:210px;max-width:280px;font-size:11px;color:v
 .busy-card{display:flex;align-items:center;gap:12px;background:var(--surface-3);border:1px solid var(--line-2);
   padding:15px 20px;border-radius:var(--radius-lg);box-shadow:var(--shadow-pop);font-size:13px;color:var(--text-2)}
 .spinner{width:15px;height:15px;border:2px solid rgba(255,255,255,.12);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite}
+/* 按钮内联 spinner：生成中按钮自己转圈，不再多占一行说明文字 */
+.btn .spinner{width:12px;height:12px;border-width:2px;flex:none}
+.btn.primary .spinner{border-top-color:#fff}
 @keyframes spin{to{transform:rotate(360deg)}}
+.plan-empty{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .modal-veil{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:80;display:grid;place-items:center;padding:24px}
 .modal{background:var(--surface);border:1px solid var(--line-2);border-radius:var(--radius-lg);
   box-shadow:var(--shadow-pop);width:min(640px,100%);max-height:82vh;overflow:auto}
@@ -411,8 +415,6 @@ table.shots .detail-brief{min-width:210px;max-width:280px;font-size:11px;color:v
 .ep-hook{margin:0 0 6px;font-size:11.5px;color:var(--warn);background:var(--warn-soft);
   border:1px solid var(--warn-line);border-radius:5px;padding:5px 8px}
 .ep-meta{font-size:11px;color:var(--text-4)}
-.ai-planning{margin-bottom:16px;color:var(--primary-deep);background:var(--primary-soft);
-  border-left:2px solid var(--primary);font-size:13px}
 
 .ai-status{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px;padding:8px 12px;
   border-radius:8px;background:rgba(255,255,255,.02);border:1px solid var(--line);
@@ -480,7 +482,6 @@ table.shots .detail-brief{min-width:210px;max-width:280px;font-size:11px;color:v
 /* ---- S3 · 第 2 步分集独立成步 ---- */
 .plan-stale-bar{display:flex;align-items:center;gap:10px;background:var(--warn-soft);
   border-color:var(--warn-line);margin-bottom:14px;font-size:13px;color:var(--warn)}
-.plan-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
 .ep-title{flex:1;min-width:90px;max-width:190px;background:transparent;border:0;
   border-bottom:1px solid var(--line);color:var(--text);font-size:13.5px;font-weight:590;
   padding:2px 0;outline:none}

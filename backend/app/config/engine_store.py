@@ -27,6 +27,9 @@ ENGINE_DEFAULTS = {
                 "services/aigc/multimodal-generation/generation"),
     "qwenModel": "wan2.7-image-pro",
     "qwenSize": "2K",
+    "h3Url": "https://api.minimax.cn/v1/images/generations",
+    "h3Model": "MiniMax-H3-Image",
+    "h3Size": "2720x1536",
 }
 
 
@@ -37,6 +40,10 @@ ENGINE_ENV = {
     "qwenModel": "SHORTPLAY_QWEN_IMAGE_MODEL",
     "qwenSize": "SHORTPLAY_QWEN_IMAGE_SIZE",
     "qwenKey": "SHORTPLAY_DASHSCOPE_API_KEY",
+    "h3Url": "SHORTPLAY_MINIMAX_IMAGE_URL",
+    "h3Model": "SHORTPLAY_MINIMAX_IMAGE_MODEL",
+    "h3Size": "SHORTPLAY_MINIMAX_IMAGE_SIZE",
+    "h3Key": "SHORTPLAY_MINIMAX_API_KEY",
 }
 
 
@@ -55,7 +62,8 @@ def _engine_doc():
     raw = raw if isinstance(raw, dict) else {}
     doc = {}
     for k, limit in (("comfyHost", 300), ("comfyModel", 160), ("qwenUrl", 300),
-                     ("qwenModel", 120), ("qwenSize", 20), ("qwenKey", 200)):
+                     ("qwenModel", 120), ("qwenSize", 20), ("qwenKey", 200),
+                     ("h3Url", 300), ("h3Model", 120), ("h3Size", 24), ("h3Key", 200)):
         doc[k] = str(raw.get(k) or "").strip()[:limit]
     _ENGINE_CACHE["mtime"], _ENGINE_CACHE["doc"] = mtime, doc
     return doc
@@ -99,14 +107,34 @@ def qwen_image_size():
     return _engine_get("qwenSize")[0]
 
 
+def h3_image_url():
+    return _engine_get("h3Url")[0]
+
+
+def h3_image_model():
+    return _engine_get("h3Model")[0]
+
+
+def h3_image_size():
+    return _engine_get("h3Size")[0]
+
+
+def h3_image_key():
+    """文件优先 → 环境变量：界面上填的 Key 立即生效，不改 bat、不用重启。"""
+    return _engine_get("h3Key")[0]
+
+
 def engine_config_public():
     """给前端看：只回打码后的 Key 与每项来源，绝不回传明文。"""
     out = {}
-    for k in ("comfyHost", "comfyModel", "qwenUrl", "qwenModel", "qwenSize"):
+    for k in ("comfyHost", "comfyModel", "qwenUrl", "qwenModel", "qwenSize",
+              "h3Url", "h3Model", "h3Size"):
         v, src = _engine_get(k)
         out[k] = {"value": v, "source": src}
     key, key_src = _engine_get("qwenKey")
     out["qwenKey"] = {"mask": _mask_key(key), "source": key_src, "set": bool(key)}
+    h3key, h3key_src = _engine_get("h3Key")
+    out["h3Key"] = {"mask": _mask_key(h3key), "source": h3key_src, "set": bool(h3key)}
     return out
 
 
@@ -131,6 +159,18 @@ def qwen_image_status():
         "size": qwen_image_size(),
         "host": qwen_image_url().split("/api/")[0],
         "detail": "" if key else "没配置通义万相 API Key：到「系统设置 · 出图引擎」填一条即可",
+    }
+
+
+def h3_image_status():
+    """MiniMax H3-Image 探测结果，口径与 qwen_image_status 一致。"""
+    key = h3_image_key()
+    return {
+        "online": bool(key),
+        "model": h3_image_model(),
+        "size": h3_image_size(),
+        "host": h3_image_url().split("/v1/")[0],
+        "detail": "" if key else "没配置 MiniMax API Key：到「系统设置 · 出图引擎」填一条即可",
     }
 
 
@@ -162,7 +202,8 @@ def engine_config_save(payload):
     with ENGINE_LOCK:
         doc = dict(_engine_doc())
         for k, limit in (("comfyHost", 300), ("comfyModel", 160), ("qwenUrl", 300),
-                         ("qwenModel", 120), ("qwenSize", 20)):
+                         ("qwenModel", 120), ("qwenSize", 20),
+                         ("h3Url", 300), ("h3Model", 120), ("h3Size", 24)):
             if k in payload:
                 doc[k] = str(payload.get(k) or "").strip()[:limit]
         # Key 留空 = 不改已存的（与 llm-providers 的编辑约定一致）
@@ -170,5 +211,9 @@ def engine_config_save(payload):
             doc["qwenKey"] = ""
         elif str(payload.get("qwenKey") or "").strip():
             doc["qwenKey"] = str(payload.get("qwenKey")).strip()[:200]
+        if payload.get("clearH3Key"):
+            doc["h3Key"] = ""
+        elif str(payload.get("h3Key") or "").strip():
+            doc["h3Key"] = str(payload.get("h3Key")).strip()[:200]
         _engine_doc_write(doc)
     return engine_config_public()

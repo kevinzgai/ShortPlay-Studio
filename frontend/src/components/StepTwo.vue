@@ -30,28 +30,22 @@ function gotoScript() {
     <div class="stat"><div class="v">{{ stats.actions }}</div><div class="k">动作 / 画面描述</div></div>
   </div>
 
-  <!-- S3：剧本改过但没点重算 → 明确告诉用户当前方案基于旧稿 -->
+  <!-- S3：剧本改过但没点重算 → 明确告诉用户当前方案基于旧稿（重算入口在分集方案卡片头部，不重复放按钮） -->
   <div v-if="S.steps.plan.status === 'stale' && S.episodes.length" id="plan-stale-bar"
     class="card pad plan-stale-bar">
     <span>⚠️ 剧本改过，现有分集基于旧稿（共 {{ S.episodes.length }} 集）。不重算就沿用旧方案。</span>
-    <div class="spacer"></div>
-    <button class="btn sm primary" id="replan-from-stale" @click="planStep()">重算分集</button>
   </div>
 
-  <!-- S3：分集只由按钮产出，进第 2 步不再自动附带 -->
-  <div class="card pad plan-actions" id="plan-actions">
-    <button class="btn primary" id="plan-step-btn" :disabled="S.planBusy" @click="planStep()">
-      {{ S.planBusy ? "正在重算分集…" : (S.episodes.length ? "重算分集" : "生成分集") }}
-    </button>
-    <span id="plan-status" class="chip" :class="S.steps.plan.status === 'ready' ? 'ok' : ''">
-      {{ S.steps.plan.status === 'ready' ? '方案已就绪' : (S.steps.plan.status === 'stale' ? '基于旧稿' : '尚未分集') }}
-    </span>
-    <span class="muted" style="font-size:12px">AI 优先，模型不可用或失败时降级本地规则；分集只在这里产出</span>
-  </div>
-
+  <!-- S3：分集只由按钮产出；有方案时入口在「分集方案」卡片头部，这里只兜空状态 -->
   <EpisodePlan v-if="S.episodes.length" />
-  <div v-else-if="S.planBusy" class="card pad ai-planning">✨ 正在通读剧情、规划分集…</div>
-  <div v-else id="plan-empty" class="card pad">还没有分集方案。点上面「生成分集」先出切法，确认后第 3 步按集排镜头。</div>
+  <div v-else id="plan-empty" class="card pad plan-empty">
+    <span>还没有分集方案。</span>
+    <button class="btn sm primary" id="plan-step-btn" :disabled="S.planBusy" @click="planStep()">
+      <span v-if="S.planBusy" class="spinner"></span>
+      {{ S.planBusy ? "生成中…" : "生成分集" }}
+    </button>
+    <span class="muted" style="font-size:12px">AI 优先，模型不可用或失败时降级本地规则；确认后第 3 步按集排镜头</span>
+  </div>
 
   <div class="card pad" style="margin-bottom:18px">
     <div class="row" style="margin-bottom:14px">

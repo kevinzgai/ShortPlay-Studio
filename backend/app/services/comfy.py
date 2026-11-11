@@ -21,10 +21,12 @@ import urllib.parse
 import urllib.request
 
 from app.config.engine_store import (comfy_host, comfy_model,
+                                     h3_image_model, h3_image_status,
                                      qwen_image_model, qwen_image_status)
 from app.constants import STYLE_ANCHOR_EN_DEFAULT
 from app.infra.coerce import _as, s
 from app.paths import ROOT
+from app.services.minimax_image import h3_image_generate
 from app.services.qwen_image import qwen_image_generate
 
 # ComfyUI 一定在本机（127.0.0.1:8188），必须绕过代理。
@@ -104,12 +106,13 @@ def comfy_status():
             "vramFreeMB": int(dev.get("vram_free", 0) / (1024 * 1024)),
             "model": comfy_model(),
             "qwen": qwen_image_status(),
+            "h3": h3_image_status(),
             "variants": {k: [{"key": v["key"], "label": v["label"], "w": v["w"], "h": v["h"]}
                              for v in vs] for k, vs in COMFY_VARIANTS.items()},
         }
     except Exception as exc:
         return {"online": False, "host": comfy_host(), "detail": str(exc)[:160],
-                "qwen": qwen_image_status()}
+                "qwen": qwen_image_status(), "h3": h3_image_status()}
 
 
 def _en_subject(text):
@@ -343,10 +346,11 @@ COMFY_SEQ = [0]
 def comfy_job_start(assets, variants, style_en="", fixed_seed=0, engine="comfy", seq_n=1):
     """把「资产 × 变体」展开成串行任务，立即返回 jobId。
 
-    engine=comfy 走本机 Flux；engine=qwen 走通义万相，seq_n>1 时一次出一组连续一致的图。
+    engine=comfy 走本机 Flux；engine=qwen 走通义万相、engine=h3 走 MiniMax H3-Image，
+    云端引擎 seq_n>1 时一次出一组图。
     """
-    engine = engine if engine in ("comfy", "qwen") else "comfy"
-    seq_n = max(1, min(int(seq_n or 1), 4)) if engine == "qwen" else 1
+    engine = engine if engine in ("comfy", "qwen", "h3") else "comfy"
+    seq_n = max(1, min(int(seq_n or 1), 4)) if engine in ("qwen", "h3") else 1
     plan = []
     for a in assets[:24]:
         kind = _as(a.get("kind"), "character", 16)
@@ -375,7 +379,8 @@ def comfy_job_start(assets, variants, style_en="", fixed_seed=0, engine="comfy",
         job = {"id": jid, "status": "running", "total": total_images, "done": 0,
                "current": "", "items": [], "errors": [], "startedAt": time.time(),
                "finishedAt": 0, "engine": engine,
-               "model": comfy_model() if engine == "comfy" else qwen_image_model()}
+               "model": (comfy_model() if engine == "comfy"
+                         else qwen_image_model() if engine == "qwen" else h3_image_model())}
         COMFY_JOBS[jid] = job
         # 只保留最近 10 个任务，避免长时间运行内存堆积
         if len(COMFY_JOBS) > 10:
@@ -397,6 +402,8 @@ def comfy_worker(jid, plan, engine="comfy"):
         try:
             if engine == "qwen":
                 pngs = qwen_image_generate(t["prompt"], n)
+            elif engine == "h3":
+                pngs = h3_image_generate(t["prompt"], n)
             else:
                 pid = comfy_submit(t["prompt"], t["w"], t["h"], t["seed"])
                 imgs = comfy_wait(pid)

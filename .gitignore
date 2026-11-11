@@ -46,6 +46,6 @@ reference/**/build/
 reference/**/.next/
 
 # ---- 运行时出图产物（体积大，禁止入库）----
-examples/assets/*.png
-examples/first-frames/*.png
+backend/examples/assets/*.png
+backend/examples/first-frames/*.png
 

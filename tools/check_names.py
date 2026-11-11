@@ -17,8 +17,14 @@ import builtins
 import sys
 from pathlib import Path
 
+# Windows GBK 控制台打不出 ✓ / ✗，先切 UTF-8（start.bat 本来就设了 PYTHONUTF8=1，这里双保险）
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 ROOT = Path(__file__).resolve().parent.parent
-FILES = sorted([ROOT / "server.py"]) + sorted((ROOT / "app").rglob("*.py"))
+# 2026-11-11 目录重构：后端代码收进 backend/（server.py 薄壳 + app/ 包）
+BACKEND = ROOT / "backend"
+FILES = sorted([BACKEND / "server.py"]) + sorted((BACKEND / "app").rglob("*.py"))
 
 BUILTINS = set(dir(builtins)) | {"__file__", "__name__", "__doc__", "__package__"}
 

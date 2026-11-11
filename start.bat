@@ -1,30 +1,30 @@
 @echo off
 chcp 936 >nul
-title ·Ö¾µ¹¤³¡ ShortPlay Studio
+title åˆ†é•œå·¥åœº ShortPlay Studio
 cd /d "%~dp0"
 
-if exist "llm-config.bat" call "llm-config.bat"
+if exist "backend\llm-config.bat" call "backend\llm-config.bat"
 
 set "SHORTPLAY_PORT=8177"
 set "PYTHONUTF8=1"
 
-REM ---- Ç°¶ËÔ´ÂëÔÚ±¾²Ö frontend/£¨2026-11-11 ºÏ²Ö£©£¬²úÎïÂäµ½±¾²Ö dist/ ----
-REM ---- Ê×´Î×Ô¶¯×°ÒÀÀµ£¬Ã¿´ÎÆô¶¯ÖØÐÂ¹¹½¨£¬±£Ö¤ dist ÓëÔ´ÂëÒ»ÖÂ ----
+REM ---- å‰ç«¯æºç åœ¨æœ¬ä»“ frontend/ï¼Œæž„å»ºäº§ç‰©è½åˆ° backend/dist/ï¼ˆserver.py æ‰˜ç®¡ï¼‰ ----
+REM ---- é¦–æ¬¡è‡ªåŠ¨è£…ä¾èµ–ï¼Œæ¯æ¬¡å¯åŠ¨é‡æ–°æž„å»ºï¼Œä¿è¯ dist ä¸Žæºç ä¸€è‡´ ----
 set "WEB_REPO=%~dp0frontend"
 if not exist "%WEB_REPO%\package.json" goto NO_NPM
 where npm >nul 2>nul
 if errorlevel 1 goto NO_NPM
 if not exist "%WEB_REPO%\node_modules\vue" (
-  echo   Ê×´ÎÆô¶¯£¬ÕýÔÚ°²×°Ç°¶ËÒÀÀµ£¬ÇëÉÔºò...
+  echo   é¦–æ¬¡å¯åŠ¨ï¼Œæ­£åœ¨å®‰è£…å‰ç«¯ä¾èµ–ï¼Œè¯·ç¨å€™...
   call npm install --prefix "%WEB_REPO%" --no-audit --no-fund
 )
-echo   ÕýÔÚ¹¹½¨Ç°¶Ë Vue 3 + Vite ...
+echo   æ­£åœ¨æž„å»ºå‰ç«¯ Vue 3 + Vite ...
 call npm run build --prefix "%WEB_REPO%" --silent
-if errorlevel 1 echo   [ÌáÊ¾] Ç°¶Ë¹¹½¨Ê§°Ü£¬½«Ê¹ÓÃÒÑÓÐ¹¹½¨²úÎï
+if errorlevel 1 echo   [æç¤º] å‰ç«¯æž„å»ºå¤±è´¥ï¼Œå°†ä½¿ç”¨å·²æœ‰æž„å»ºäº§ç‰©
 goto CHECK_PY
 
 :NO_NPM
-echo   [ÌáÊ¾] Î´¼ì²âµ½ Node.js »òÇ°¶Ë²Ö¿â²»´æÔÚ£¬Ê¹ÓÃÒÑÓÐ¹¹½¨²úÎï
+echo   [æç¤º] æœªæ£€æµ‹åˆ° Node.js æˆ–å‰ç«¯ä»“åº“ä¸å­˜åœ¨ï¼Œä½¿ç”¨å·²æœ‰æž„å»ºäº§ç‰©
 
 :CHECK_PY
 where py >nul 2>nul
@@ -33,41 +33,41 @@ where python >nul 2>nul
 if not errorlevel 1 goto RUN_PYTHON
 
 echo.
-echo   [ÌáÊ¾] Ã»ÕÒµ½ Python£¬AI ¹¦ÄÜ²»¿ÉÓÃ¡£
-echo   Çë°²×° Python 3 Ö®ºóÔÙÔËÐÐ±¾½Å±¾¡£
+echo   [æç¤º] æ²¡æ‰¾åˆ° Pythonï¼ŒAI åŠŸèƒ½ä¸å¯ç”¨ã€‚
+echo   è¯·å®‰è£… Python 3 ä¹‹åŽå†è¿è¡Œæœ¬è„šæœ¬ã€‚
 echo.
 pause
 exit /b 1
 
 :RUN_PY
-REM LangChain ½ÓÈë£¨2026-11-11£©£ººó¶Ë¸Ä×ß .venv£¬È±Ê§Ê±×Ô¶¯´´½¨
-set "PY_BIN=.venv\Scripts\python.exe"
+REM LangChain æŽ¥å…¥ï¼ˆ2026-11-11ï¼‰ï¼šåŽç«¯æ”¹èµ° .venvï¼Œç¼ºå¤±æ—¶è‡ªåŠ¨åˆ›å»º
+set "PY_BIN=backend\.venv\Scripts\python.exe"
 if not exist "%PY_BIN%" (
-  echo   Ê×´ÎÆô¶¯£ºÕýÔÚ´´½¨ Python ÐéÄâ»·¾³...
-  py -m venv .venv 2>nul
+  echo   é¦–æ¬¡å¯åŠ¨ï¼šæ­£åœ¨åˆ›å»º Python è™šæ‹ŸçŽ¯å¢ƒ...
+  py -m venv backend\.venv 2>nul
 )
 if exist "%PY_BIN%" (
   "%PY_BIN%" -c "import langchain_openai" >nul 2>nul
   if errorlevel 1 (
-    echo   ÕýÔÚ°²×° Python ÒÀÀµ£¨Ô¼ 1-2 ·ÖÖÓ£©...
-    "%PY_BIN%" -m pip install --quiet --disable-pip-version-check -r requirements.txt
+    echo   æ­£åœ¨å®‰è£… Python ä¾èµ–ï¼ˆçº¦ 1-2 åˆ†é’Ÿï¼‰...
+    "%PY_BIN%" -m pip install --quiet --disable-pip-version-check -r backend\requirements.txt
   )
   "%PY_BIN%" -c "import langchain_openai" >nul 2>nul
   if not errorlevel 1 goto RUN_VENV
 )
-echo   [ÌáÊ¾] venv ²»¿ÉÓÃ£¬Ê¹ÓÃÏµÍ³ Python£¨AI µ÷ÓÃ²»¿ÉÓÃ£©
-py server.py
+echo   [æç¤º] venv ä¸å¯ç”¨ï¼Œä½¿ç”¨ç³»ç»Ÿ Pythonï¼ˆAI è°ƒç”¨ä¸å¯ç”¨ï¼‰
+py backend\server.py
 goto END
 
 :RUN_VENV
-"%PY_BIN%" server.py
+"%PY_BIN%" backend\server.py
 goto END
 
 :RUN_PYTHON
-python server.py
+python backend\server.py
 goto END
 
 :END
 echo.
-echo   ·þÎñÒÑÍ£Ö¹£¬°´ÈÎÒâ¼ü¹Ø±Õ´°¿Ú¡£
+echo   æœåŠ¡å·²åœæ­¢ï¼ŒæŒ‰ä»»æ„é”®å…³é—­çª—å£ã€‚
 pause >nul

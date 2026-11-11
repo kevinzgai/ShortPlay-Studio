@@ -21,6 +21,7 @@ const rows = computed(() => {
   const llmOk = !!S.llmAvailable;
   const comfyOk = !!ui.comfy.online;
   const qwenOk = !!(ui.comfy.qwen && ui.comfy.qwen.online);
+  const h3Ok = !!(ui.comfy.h3 && ui.comfy.h3.online);
 
   return [
     {
@@ -57,6 +58,15 @@ const rows = computed(() => {
         : "未启用（可选引擎）",
       why: qwenOk ? "" : "不影响出图：本地 ComfyUI 在线时照常可用",
       fix: qwenOk ? "" : "想用云端组图再填一条 DashScope Key，保存即生效"
+    },
+    {
+      key: "h3", name: "MiniMax H3", level: h3Ok ? "ok" : "warn",
+      go: "engine", goLabel: "去配置",
+      value: h3Ok
+        ? ((ui.comfy.h3.model || "") + " · " + (ui.comfy.h3.size || "") + " · 云端生图")
+        : "未启用（可选引擎）",
+      why: h3Ok ? "" : "不影响出图：本地 ComfyUI 或通义万相可用时照常工作",
+      fix: h3Ok ? "" : "想用 MiniMax 生图再填一条 API Key，保存即生效"
     }
   ];
 });

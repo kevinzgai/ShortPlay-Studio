@@ -16,7 +16,7 @@ from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "backend"))
 # 直接引 app/ 下的实现模块，不要 `import server`：
 # server.py 已是薄壳（只剩 from app.main import run），不再对外 re-export 业务符号。
 # 这里原先靠 server.py 的命名空间顺带拿到这些函数，属于隐式依赖。

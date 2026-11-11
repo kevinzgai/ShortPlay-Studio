@@ -11,7 +11,7 @@
 #   SHORTPLAY_PORT=8187   换端口
 #   SHORTPLAY_NO_OPEN=1   不自动打开浏览器（远程终端 / 自动化用）
 #
-# 前端（2026-11-11 合仓）：Vue 源码在本仓 frontend/，构建产物落到仓库根 dist/，
+# 前端（2026-11-11 合仓）：Vue 源码在本仓 frontend/，构建产物落到 backend/dist/，
 # 服务端 WEB_ROOT 默认就指向它（可用 SHORTPLAY_WEB_ROOT 覆盖）。
 # 本脚本不构建前端，直接用已有的 dist 产物。要重新构建：
 #   npm run build        # 等价 cd frontend && npm run build
@@ -54,12 +54,12 @@ else
   echo "正在启动分镜工场（端口 ${PORT}）..."
   # LangChain 接入（2026-11-11）：后端改走 .venv（requirements.txt 只 2 个依赖）。
   # venv 缺失/损坏时自动引导创建；仍失败则回退系统 python3（AI 调用功能退化但服务能起）。
-  PY_BIN=".venv/bin/python"
+  PY_BIN="backend/.venv/bin/python"
   if ! "$PY_BIN" -c "import langchain_openai" >/dev/null 2>&1; then
     echo "  首次启动：正在创建 Python 虚拟环境并安装依赖（约 1-2 分钟）..."
-    python3 -m venv .venv || echo "  [提示] venv 创建失败，回退系统 Python（AI 调用不可用）"
+    python3 -m venv backend/.venv || echo "  [提示] venv 创建失败，回退系统 Python（AI 调用不可用）"
     if [ -x "$PY_BIN" ]; then
-      "$PY_BIN" -m pip install --quiet --disable-pip-version-check -r requirements.txt \
+      "$PY_BIN" -m pip install --quiet --disable-pip-version-check -r backend/requirements.txt \
         || echo "  [提示] 依赖安装失败，回退系统 Python（AI 调用不可用）"
     fi
   fi
@@ -67,7 +67,7 @@ else
     PY_BIN="python3"
     echo "  [提示] 使用系统 Python 启动（无 LangChain 依赖，AI 调用不可用）"
   fi
-  "$PY_BIN" server.py --no-browser &
+  "$PY_BIN" backend/server.py --no-browser &
   SERVER_PID=$!
 
   ok=0

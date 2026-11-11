@@ -312,6 +312,8 @@ export function planStep(opts) {
   S.steps.plan.at = Date.now();
   const wanted = S.episodeMode === "none" ? 1 : S.episodeMode;
   const useAI = !FORCE_LOCAL && S.llmAvailable && S.aiEnabled;
+  // 全屏 loading 遮罩：生成期间整页锁死，防止并发改动
+  busy(true, useAI ? "正在通读剧情、规划分集…" : "正在按本地规则分集…");
   const apply = (episodes, engine, model) => {
     begin();
     S.episodes = episodes.map((ep, i) => Object.assign({}, ep, { no: i + 1 }));
@@ -322,6 +324,7 @@ export function planStep(opts) {
     invalidateShotsForPlan();
     S.activeEpisode = "all";
     S.planBusy = false;
+    busy(false);
     save();
     toast((engine === "ai" ? "AI 已重新分成 " : "已按本地规则分成 ") + S.episodes.length + " 集；第 3 步需逐集重排镜头",
       engine === "ai" ? "ok" : "warn");
@@ -332,6 +335,7 @@ export function planStep(opts) {
       try { apply(E.localEpisodes(S.parsed, wanted), "local", ""); }
       catch (err) {
         S.planBusy = false;
+        busy(false);
         S.steps.plan.status = S.episodes.length ? "ready" : "idle";
         toast("分集失败：" + err.message, "err");
       }
