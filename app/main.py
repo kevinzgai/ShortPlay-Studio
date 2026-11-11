@@ -94,7 +94,11 @@ class Handler(SimpleHTTPRequestHandler):
             sys.stderr.write("[api] " + (fmt % args) + "\n")
 
     def do_GET(self):
-        """GET 分发：纯函数路由表 + 需要长连接/多分支的专用实现。"""
+        """GET 分发：纯函数路由表 + 需要长连接/多分支的专用实现。
+
+        路由函数可能返回 Response（已由 responses._emit 写回 socket），
+        也可能自己直接写 socket（SSE / 静态文件走父类）。两种都兼容。
+        """
         path = self.path.split("?")[0]
         fn = GET_ROUTES.get(path)
         if fn is not None:
