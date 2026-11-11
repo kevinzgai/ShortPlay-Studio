@@ -427,7 +427,7 @@ D4 无批量按钮；`npm run build` 通过。
 | `tools/verify_*`（本机 31 个 `verify_*.mjs`，含 PAUSED 死脚本） | `.gitignore` 明确排除「硬编码本机路径」 | 拷 `tools/` 整目录 + 按 §1 的 Mac 适配清单改路径 / 命令 / fixture |
 | `tools/verify_all.mjs`（25 套 SUITES） | 原 17 套已从旧机同步，另登记 S3 的 2 套 / S3.5 的 2 套 / S4 的 1 套 / S5 的 1 套 / S6 的 1 套 / S7 的 1 套 | 见 §3；换机后同样把新增脚本一起拷 |
 | `projects/p_fixture_stage_split` | `verify_stage_split.mjs` 需要「含分镜的既有项目」，旧机 fixture 未随仓库迁移 | 用 `engine.js` 造一个 23 镜项目，字段要点见 §1 |
-| `llm-config.bat` / `llm-providers.json` / `.env*` | **含真实 API Key，禁止提交** | 在新机按 README 第 49 行说明重建；万相 key 走这里。**本机缺这个 → 3 套 AI 资产用例被按钮闸门挡住** |
+| `llm-config.bat` / `llm-providers.json` / `.env*` | **含真实 API Key，禁止提交** | 在新机按 README 第 49 行说明重建（只需 LLM 那条；万相 key 可选、2026-11-11 起不用管）。**本机缺这个 → 3 套 AI 资产用例被按钮闸门挡住** |
 | `projects/`（29 个真实项目） | 本机运行数据 | 不迁移也能开发；要测旧存档迁移就拷几个 `project.json` |
 | `dist/` | 构建产物 | `npm run build` 重新生成 |
 | `examples/assets/`（本机 71M 测试图） | 运行时出图产物、体积过大 | 已加入 `.gitignore`；历史里的 51 张示例图也已剔除，新机跑出图时自动生成 |
@@ -482,9 +482,11 @@ git remote set-url origin git@github.com:kevinzgai/ShortPlay-Studio.git
   加一条道具来代表「资产分解后」的状态；若要「走完阶段 4 就自动有道具」，需另开阶段补一条道具推断规则。
 - **死脚本已销账（S7）**：`verify_parse_progress.mjs` / `verify_parse_resume.mjs` / `verify_ai.py` 标 **DEPRECATED**，
   不在 SUITES；不重写也不删除（被测对象无 UI 入口，逐集链路由 S4/S5/S6 覆盖），保留供旧项目恢复排查。
-- **万相 Key 只判「有没有填」不判真伪**：`qwen_image_status()` / `engine_probe("qwen")` 让无效 Key 也显示「可用」，实际出图 401。2026-11-10 实测发现，尚未修；修时建议用不计费的 `/compatible-mode/v1/models` 做真实鉴权探测，并同步系统设置契约脚本。
+- ~~**万相 Key 只判「有没有填」不判真伪**：`qwen_image_status()` / `engine_probe("qwen")` 让无效 Key 也显示「可用」，实际出图 401。2026-11-10 实测发现，尚未修；修时建议用不计费的 `/compatible-mode/v1/models` 做真实鉴权探测，并同步系统设置契约脚本。~~
+  **→ 2026-11-11 用户明确注销：万相不用管**。可选备用引擎，非主链路，此条不再跟进（代码保持现状）。
 - **本机 ComfyUI 8188 当前离线**（2026-11-10 S6 全量时）：`verify_comfy_ui.mjs` 已做环境降级，
   打印 `[环境跳过]` 并以 0 通过/0 失败退出；`系统设置三栏` 因此是 29/30（1 项诊断不可用）。
   启动 8188 后重跑这两套可拿回完整断言，**不需要改代码**。
-- **万相有效 Key 仍未提供**：`engine-config.json` 的 `qwenKey` 为空；用户提供新 Key 后需重新
-  `/api/engine/config` 写入并用 `/api/comfy/generate` 实出一张图验证（`/api/engine/test` 不做鉴权探测）。
+- ~~**万相有效 Key 仍未提供**：`engine-config.json` 的 `qwenKey` 为空；用户提供新 Key 后需重新
+  `/api/engine/config` 写入并用 `/api/comfy/generate` 实出一张图验证（`/api/engine/test` 不做鉴权探测）。~~
+  **→ 2026-11-11 用户明确注销：万相不用管**，不再等待 Key，也不需要做真伪探测。
