@@ -234,6 +234,8 @@ H3-Image 的节点图逐字对齐本机 `8000` 网关的 `/v1/images`（连 6 �
 
 > 坑十：**面部四视图别把「一张大脸 + 三个全身」塞进同一张图**。两个尺度互相打架，模型只能把脸画糊。它的职责只有「把脸定准」，出四张头肩特写（正面 / 四分之三 / 正侧 / 微仰角）即可，体型服装交给三视图。
 
+> 坑十一：**三张图三张脸，靠改提示词永远修不好**。三视图 / 面部四视图 / 定妆半身原来是三次独立文生图，三个种子各自从零「想象」一个人 —— 提示词只能约束「同一类长相」，约束不了同一张脸。真正的解是 H3-Image 的参考图通道：同一个 checkpoint，**接上 `image_1` 就是编辑模式、不接就是文生图**（官方原话），最多 16 张，提示词里按输入顺序称 `Picture 1` / `Picture 2`。两个必须踩准的点：① **锚点选脸最大的那张，不是最先出的那张** —— 拿三视图（每格脸约 100px）当锚去生成 400px 的半身特写，源里没有细节可抄，模型只能再编一张，等于多绕一圈；所以顺序排成「定妆半身 → 面部四视图 → 三视图」。② **`image_1` 是「被编辑的图」，模型会倾向沿用它的构图和背景**，而我们要的是「同一张脸、换构图」，所以 `IDENTITY_REF_PREFIX` 必须写在提示词最前面，明确「只抄脸，别抄 framing / pose / background」。另外：槽位名不要写死，H3-Image 的 ComfyUI 原生支持 2026-11-10 才合（v0.45.0+），靠 `/object_info/MiniMaxH3ImageConditioning` 现读 `image_N` 才靠谱；Flux 没有这条通道，架构不是 H3-Image 时一律退回纯文生图，别往提示词里塞 `Picture 1`。
+
 **同步出图 `POST /v1/images`**（与上面 `jobId` 轮询并存，两条路共用 `comfy_workflow()`，设置里换的 `comfyHost` / `comfyModel` 对两边同时生效）：
 
 ```bash
@@ -419,7 +421,7 @@ shortplay-studio/
 ├─ tools/gen_ai_example.js        真模型刷新 AI 示例（import src/lib/ai.js）
 ├─ tools/verify_platform.py       离线主流程回归 43 项
 ├─ tools/verify_ai.py             AI 主流程回归（DEPRECATED · 休眠流水线，已从 SUITES 摘除）
-├─ tools/verify_all.mjs           全量串行跑 26 套回归，输出汇总表（node tools/verify_all.mjs [关键字]）
+├─ tools/verify_all.mjs           全量串行跑 28 套回归，输出汇总表（node tools/verify_all.mjs [关键字]）
 ├─ tools/verify_assets.mjs        资产层 + 提示词编译 + 出片端契约 + H3 提示词纯逻辑回归 69 项（node，无浏览器）
 └─ tools/verify_asset_ui.py       资产层 + 导出契约 + H3 UI 回归 45 项（Playwright 有窗口）
 ```
@@ -445,14 +447,14 @@ shortplay-studio/
 
 重新生成：离线版 `node tools/gen_example.js`；AI 版先 `py server.py --no-browser`，再 `node tools/gen_ai_example.js`。
 
-> 下表是各套件的**历史点测基线**；当前口径以 `node tools/verify_all.mjs` 的 26 套串行汇总为准（`tools/verify_*` 不在 git，换机同步见 `docs/dev-续作任务计划.md` §1）。
+> 下表是各套件的**历史点测基线**；当前口径以 `node tools/verify_all.mjs` 的 28 套串行汇总为准（`tools/verify_*` 不在 git，换机同步见 `docs/dev-续作任务计划.md` §1）。
 
 | 验证 | 覆盖 | 结果 |
 | --- | --- | --- |
 | `npm run build`（根目录转发到 frontend/） | Vue SFC 编译 / 产物输出根 dist | 52 模块通过 |
 | `tools/verify_platform.py` | 离线主流程（`?ai=0`）：导入 → 拆解 → 23 镜 → 编辑 → 删除撤销 → 排序 → 重生成 → 导出 → 体检补全 → 表格；**跑完只删本次创建的项目**，不会往项目库里堆「雨夜便利店」 | 43/43 |
 | `tools/verify_ai.py` | **DEPRECATED**（休眠流水线，已从 SUITES 摘除，勿跑）；历史基线为真模型 32/32 | — |
-| `tools/verify_all.mjs` | **全量串行 26 套**：各套件串行执行（并发跑会互相改变项目数量，让「项目列表条数」类断言假失败），最后打一张通过汇总表；加关键字只跑匹配的，例 `node tools/verify_all.mjs assets` | 26/26 |
+| `tools/verify_all.mjs` | **全量串行 28 套**：各套件串行执行（并发跑会互相改变项目数量，让「项目列表条数」类断言假失败），最后打一张通过汇总表；加关键字只跑匹配的，例 `node tools/verify_all.mjs assets` | 28/28 |
 | `tools/verify_assets.mjs` | 资产层纯逻辑：括注抽外观 / 手改与锁定不被覆盖 / 说话人优先绑定 / 槽位编号 / 提示词去重 / 过期签名 / 出片端契约 / **H3 提示词（禁名、<d> 块、段分组）** | 69/69 |
 | `tools/verify_asset_layout.mjs` | **资产清单密度**：行高 ≤36px / 左 264 右吃满 / 只渲染 1 个详情 / 点行切换 / 搜索过滤 / 定高不撑破 / 无横向溢出 | 13/13 |
 | `tools/verify_assets_panel.mjs` | **资产包面板 + 整包导出**：空态引导 / 编号与优先级 / 三锚点 / 关键词串注入 / 覆盖率 / 提示词正文 / 参考图挂载 / ZIP 下载 / 无 JS 报错 | 12/12 |

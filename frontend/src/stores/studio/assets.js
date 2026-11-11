@@ -632,7 +632,9 @@ function comfyApplyResults(full) {
       variant: it.variant, label: it.variantLabel, dataUri: it.dataUri,
       file: it.file, seed: it.seed, prompt: it.prompt,
       w: it.w, h: it.h, fallbackEn: it.fallbackEn,
-      seconds: it.seconds, uncompressed: it.uncompressed
+      seconds: it.seconds, uncompressed: it.uncompressed,
+      /* 这一张是照着哪张脸出的。空串 = 它就是本批的锚（纯文生图） */
+      refOf: it.refOf || ""
     };
     const k = a.genImages.findIndex((x) => x.variant === it.variant);
     if (k >= 0) a.genImages.splice(k, 1, row); else a.genImages.push(row);
@@ -699,11 +701,21 @@ function comfyPollStart() {
 
 /** 出图 / 预览共用同一份资产载荷，少一处手抄字段就少一次「界面和实际不一致」 */
 function comfyPayload(list) {
-  return list.map((a) => ({
-    id: a.id, kind: a.kind, name: a.name, code: a.code || "",
-    keywordEn: a.keywordEn || "", keyword: a.keyword || "",
-    sceneEn: a.sceneEn || "", appearance: a.appearance || "", propEn: a.propEn || ""
-  }));
+  return list.map((a) => {
+    /* 身份锚的传给方式：
+       主参考图若指向某张本地生成图，就把它的文件名交给后端 —— 后端在磁盘上
+       读原图、推到 ComfyUI 当 image_1，后续变体都照着这张脸出。
+       纯上传的参考图只有 dataURI，后端没有磁盘路径，这里不传（那一张退回纯文生图）。
+       没有生成图的资产也不传：本批会按「定妆半身 → 四视图 → 三视图」的顺序，
+       让脸最大的先出、再给后面的当锚，见后端 _identity_refs。 */
+    const hit = (a.genImages || []).find((x) => x.dataUri && x.dataUri === a.refImage);
+    return {
+      id: a.id, kind: a.kind, name: a.name, code: a.code || "",
+      keywordEn: a.keywordEn || "", keyword: a.keyword || "",
+      sceneEn: a.sceneEn || "", appearance: a.appearance || "", propEn: a.propEn || "",
+      refFile: (hit && hit.file) ? String(hit.file).split("/").pop() : ""
+    };
+  });
 }
 
 /**

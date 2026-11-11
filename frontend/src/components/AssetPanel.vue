@@ -993,7 +993,7 @@ watch(() => sel.value && sel.value.id, () => { closePreview(); ui.comfy.preview 
               <div v-if="sel.genImages && sel.genImages.length" class="ap-genimgs">
                 <div class="ap-genimgs-h">
                   <span>本地生成素材 · {{ sel.genImages.length }} 张</span>
-                  <span class="ap-genimgs-note">第一张自动设为主参考图，会占用 refs 槽位</span>
+                  <span class="ap-genimgs-note">H3-Image 下先出定妆半身，四视图和三视图照它的脸出</span>
                   <button class="mini" @click="clearGenImages(sel.id)">清空</button>
                 </div>
                 <div class="ap-genimgs-grid">
@@ -1011,7 +1011,8 @@ watch(() => sel.value && sel.value.id, () => { closePreview(); ui.comfy.preview 
                       <a v-if="g.file" :href="'/api/comfy/image?f=' + g.file.split('/').pop()"
                         target="_blank" rel="noopener" title="新标签打开原图">↗</a>
                     </figcaption>
-                    <span class="ap-genimgs-meta">{{ g.w }}×{{ g.h }} · {{ g.seconds }}s</span>
+                    <span class="ap-genimgs-meta">{{ g.w }}×{{ g.h }} · {{ g.seconds }}s<span
+                      v-if="g.refOf"> · 脸部参考：{{ g.refOf }}</span></span>
                     <button v-if="sel.refImage !== g.dataUri" class="mini wide"
                       @click="setPrimaryGenImage(sel.id, g.variant)">设为主参考图</button>
                     <span v-else class="ap-genimgs-primary">✓ 主参考图</span>

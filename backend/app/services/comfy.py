@@ -55,6 +55,33 @@ SKIN_DETAIL_TERMS = ("pore", "pores", "skin texture", "blemish", "wrinkle",
 FACE_CLOSE_VARIANTS = ("portrait", "faceSheet")
 
 
+# --------------------------------------------------------------------------
+# 角色身份一致性：H3-Image 的参考图通道（image_1..N）
+# --------------------------------------------------------------------------
+# 「三视图 / 面部四视图 / 定妆半身」原本是三张互不相干的文生图，三个独立随机种子
+# 各自从零「想象」一个人，人脸必然不统一 —— 提示词写得再细也只能保证「同一类长相」，
+# 保证不了同一张脸。H3-Image 本身是「生成 + 参考编辑」同一个 checkpoint：
+# 接上 image_1..N 并按槽位顺序在提示词里称 Picture 1 / Picture 2，就能把一张脸的
+# 身份钉死，其余变体都往上靠。
+#
+# 【锚点必须是脸最大的那张，不是最先出的那张】
+# 三视图里每格脸只有 ~100px 高，用它当锚去生成 400px 的半身特写，源里根本没有
+# 那么多细节可抄，模型只能自己编 —— 结果还是「三张图三张脸」，只是多绕了一圈。
+# 所以锚的优先级按「脸在画面里的像素占比」排：定妆半身 > 面部四视图 > 三视图。
+IDENTITY_ANCHOR_ORDER = ("portrait", "faceSheet", "turnaround")
+
+
+# 参考图在提示词里的身份声明。H3 的 image_1 是「被编辑的图」，它会倾向沿用
+# 参考图的构图与背景 —— 而我们要的是「同一张脸、换一个构图」，所以必须明确
+# 把「只抄脸、不抄画面」写死，否则出三视图时会得到一张放大版的半身像。
+IDENTITY_REF_PREFIX = (
+    "Picture 1 is an identity reference of the same person. "
+    "Reproduce that face exactly: same bone structure, same eyes, nose, lips and "
+    "jawline, same hairstyle and hairline. Do not copy Picture 1's framing, pose, "
+    "camera angle, background or clothing layout — only the identity carries over.\n"
+)
+
+
 ASSET_IMG_DIR = ROOT / "examples" / "assets"
 
 
@@ -335,8 +362,13 @@ def style_for_kind(style_en, kind, variant=""):
     return _strip_style_terms(src, PERSON_ONLY_TERMS, STYLE_ANCHOR_EN_OBJECT)
 
 
-def build_comfy_prompt(asset, variant_key, style_en=""):
-    """资产字段 → 英文 Flux 提示词。缺英文关键词时明确标记，不让用户以为设定生效了。"""
+def build_comfy_prompt(asset, variant_key, style_en="", with_ref=False):
+    """资产字段 → 英文 Flux 提示词。缺英文关键词时明确标记，不让用户以为设定生效了。
+
+    with_ref=True 表示这一张会接参考图，要在最前面声明「脸照 Picture 1 抄、
+    构图别照抄」。身份声明必须放开头：H3 对长提示词的注意力是前重后轻，
+    把它塞在末尾那一长串技术收尾词后面等于没说。
+    """
     kind = _as(asset.get("kind"), "character", 16)
     vs = COMFY_VARIANTS.get(kind, COMFY_VARIANTS["character"])
     v = next((x for x in vs if x["key"] == variant_key), None)
@@ -371,8 +403,36 @@ def build_comfy_prompt(asset, variant_key, style_en=""):
     style_part = (", " + style) if len(style) < 240 else ""
     suffix = COMFY_SUFFIX_OBJECT if kind == "prop" else COMFY_SUFFIX
     w, h = comfy_variant_size(v)
-    return {"prompt": v["tpl"].format(kw=kw) + style_part + ", " + suffix,
+    text = v["tpl"].format(kw=kw) + style_part + ", " + suffix
+    return {"prompt": (IDENTITY_REF_PREFIX + text) if with_ref else text,
+            # 无前缀版一直留着：万一批次里锚图读不出来，要能退回纯文生图，
+            # 而不是带着「Picture 1」这句话去生成一张根本没有参考图的图。
+            "promptBase": text,
             "w": w, "h": h, "label": v["label"], "fallbackEn": fallback}
+
+
+def _identity_refs(kind, keys):
+    """同一资产这一批里，谁出图、谁给谁当脸部锚。
+
+    返回 (ordered, refs)：
+      ordered —— 变体按「脸在画面里的占比」从大到小排，锚先出、跟跑的后出；
+      refs    —— {变体: 锚变体}，第一个变体没有锚（它就是锚）。
+
+    只有角色需要这条链：场景和道具的「同一性」靠文字描述就够，
+    给道具接参考图反而会让它照抄参考图的构图与光位。
+    """
+    if kind != "character":
+        return list(keys), {}
+    rank = {k: i for i, k in enumerate(IDENTITY_ANCHOR_ORDER)}
+    ordered = sorted(keys, key=lambda k: rank.get(k, len(IDENTITY_ANCHOR_ORDER)))
+    refs = {}
+    anchor = ""
+    for vk in ordered:
+        if anchor:
+            refs[vk] = anchor
+        else:
+            anchor = vk
+    return ordered, refs
 
 
 def comfy_prompt_rows(assets, variants, style_en=""):
@@ -382,12 +442,18 @@ def comfy_prompt_rows(assets, variants, style_en=""):
     同一份设定出现两个版本。统一从这一个函数取，复制走的和真正发出去的才是同一串。
     """
     rows = []
+    # 预览必须和实际出图同口径：架构不是 H3-Image 就没有参考图通道，
+    # 这时候还预览出带「Picture 1」的串，用户会以为参考图生效了。
+    ref_ok = comfy_arch() == COMFY_ARCH_H3_IMAGE
     for a in assets[:24]:
         kind = _as(a.get("kind"), "character", 16)
         keys = [k for k in (variants.get(kind) or []) if isinstance(k, str)]
-        for vk in keys[:4]:
+        has_own = bool(_as(a.get("refFile"), "", 200)) if ref_ok else False
+        ordered, refs = _identity_refs(kind, keys)
+        for vk in ordered[:4]:
+            ref_of = ("own" if has_own else refs.get(vk, "")) if ref_ok else ""
             try:
-                built = build_comfy_prompt(a, vk, style_en)
+                built = build_comfy_prompt(a, vk, style_en, bool(ref_of))
             except ValueError:
                 continue
             rows.append({
@@ -395,15 +461,121 @@ def comfy_prompt_rows(assets, variants, style_en=""):
                 "assetName": _as(a.get("name"), "", 40),
                 "variant": vk, "label": built["label"],
                 "prompt": built["prompt"], "w": built["w"], "h": built["h"],
-                "fallbackEn": built["fallbackEn"],
+                "fallbackEn": built["fallbackEn"], "refOf": ref_of,
             })
     if not rows:
         raise ValueError("没有可预览的提示词：先选资产，再勾选至少一种素材类型")
     return {"rows": rows, "styleEn": _as(style_en, "", 240) or STYLE_ANCHOR_EN_DEFAULT}
 
 
-def comfy_workflow(prompt, w, h, seed, steps=0):
+H3_REF_SLOTS_CACHE = {"at": 0.0, "names": None}
+
+H3_REF_SLOTS_TTL = 120
+
+
+def h3_ref_slots():
+    """问 ComfyUI「MiniMaxH3ImageConditioning 到底有几个参考图槽、叫什么」。
+
+    【为什么不把 image_1..image_16 写死】
+    官方节点是可选输入 image_1 / image_2 …，但具体到某个 ComfyUI 版本，
+    槽位名和上限都可能不同（H3-Image 的 ComfyUI 原生支持是 2026-11-10 才合的）。
+    写死一个猜来的名字，出错时表征是 /prompt 校验失败、报一坨 node_errors，
+    排查起来像工作流坏了。直接读 object_info 拿真实定义，缺通道时能给出
+    「你的 ComfyUI 太旧」这种能动手的结论。
+
+    返回槽位名列表（按 1..N 排序）；节点不存在或没有 IMAGE 输入时返回 []。
+    """
+    now = time.time()
+    if H3_REF_SLOTS_CACHE["names"] is not None and now - H3_REF_SLOTS_CACHE["at"] < H3_REF_SLOTS_TTL:
+        return H3_REF_SLOTS_CACHE["names"]
+    url = comfy_host() + "/object_info/MiniMaxH3ImageConditioning"
+    try:
+        with _LOCAL_OPENER.open(url, timeout=20) as r:
+            info = json.load(r)
+    except Exception:
+        # 拿不到就当没有：调用方会退成纯文生图，不会把出图整个打挂
+        return []
+    node = (info or {}).get("MiniMaxH3ImageConditioning") or {}
+    spec = node.get("input") or {}
+    names = []
+    for group in ("required", "optional"):
+        for key, decl in (spec.get(group) or {}).items():
+            if not re.fullmatch(r"image_\d+", str(key)):
+                continue
+            # decl 形如 ["IMAGE", {...}]，只认 IMAGE 型
+            kind = decl[0] if isinstance(decl, (list, tuple)) and decl else decl
+            if kind == "IMAGE":
+                names.append(key)
+    names.sort(key=lambda k: int(k.split("_")[1]))
+    H3_REF_SLOTS_CACHE["names"] = names
+    H3_REF_SLOTS_CACHE["at"] = now
+    return names
+
+
+def comfy_upload_image(png, filename=""):
+    """把本地 PNG 推进 ComfyUI 的 input/，返回 LoadImage 能直接用的名字。
+
+    LoadImage 只认服务端 input/ 目录，喂不了本地绝对路径，所以必须走 /upload/image。
+    文件名取内容 sha1：同一张锚图在一个批次里会被 N 个变体引用，按内容命名
+    天然只上传一次；重跑同一张也是幂等覆盖，不会在对方 input/ 里攒垃圾。
+    """
+    digest = hashlib.sha1(png).hexdigest()[:16]
+    name = "sp_ref_%s.png" % digest
+    boundary = "----spostudio" + digest
+    lines = []
+    lines.append(("--%s\r\nContent-Disposition: form-data; name=\"image\"; "
+                  "filename=\"%s\"\r\nContent-Type: image/png\r\n\r\n" % (boundary, name)).encode("utf-8"))
+    lines.append(png)
+    for k, v in (("type", "input"), ("overwrite", "true")):
+        lines.append(("\r\n--%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s"
+                      % (boundary, k, v)).encode("utf-8"))
+    lines.append(("\r\n--%s--\r\n" % boundary).encode("utf-8"))
+    body = b"".join(lines)
+    req = urllib.request.Request(
+        comfy_host() + "/upload/image", data=body,
+        headers={"Content-Type": "multipart/form-data; boundary=" + boundary})
+    with _LOCAL_OPENER.open(req, timeout=60) as r:
+        out = json.load(r)
+    got = out.get("name") or name
+    sub = (out.get("subfolder") or "").strip()
+    return (sub + "/" + got) if sub else got
+
+
+_UPLOADED = {}
+
+_UPLOADED_LOCK = threading.Lock()
+
+
+def comfy_ref_name(local_name):
+    """本地资产图 → ComfyUI input/ 里的名字，进程内按文件名缓存。
+
+    同一批里「三视图 + 四视图 + 半身」会反复引用同一张锚图，缓存让上传只发生一次；
+    /v1/images 外部调用也可能指同一张，重跑不重复推 1MB 的 PNG 过去。
+    """
+    key = str(local_name or "")
+    if not key:
+        return ""
+    with _UPLOADED_LOCK:
+        hit = _UPLOADED.get(key)
+    if hit:
+        return hit
+    # 只认 examples/assets/ 里的单層文件名，`../` 一律挡掉
+    if not ASSET_IMG_NAME.match(key) or "/" in key or "\\" in key:
+        raise ValueError("参考图名不合法：%s" % key[:60])
+    path = ASSET_IMG_DIR / key
+    if not path.is_file():
+        raise ValueError("参考图不在本地：%s" % key[:60])
+    got = comfy_upload_image(path.read_bytes(), key)
+    with _UPLOADED_LOCK:
+        _UPLOADED[key] = got
+    return got
+
+
+def comfy_workflow(prompt, w, h, seed, steps=0, refs=()):
     """按 comfyModel 的架构出对应工作流。steps=0 表示「用该架构的默认步数」。
+
+    refs 是已上传到 ComfyUI 的参考图文件名列表，只对 H3-Image 有效
+    （Flux 没有参考图通道，忽略即可，不报错）。
 
     【为什么不再写死 Flux.1-schnell】
     `unet_name` 候选里一直混着三个模型，其中两个是 MiniMax H3 系（图像 / 视频），
@@ -422,7 +594,7 @@ def comfy_workflow(prompt, w, h, seed, steps=0):
     if arch == COMFY_ARCH_H3_VIDEO:
         raise ValueError(comfy_arch_error())
     if arch == COMFY_ARCH_H3_IMAGE:
-        return _workflow_h3_image(prompt, w, h, seed, n)
+        return _workflow_h3_image(prompt, w, h, seed, n, refs)
     return _workflow_flux(prompt, w, h, seed, n)
 
 
@@ -454,15 +626,22 @@ def _workflow_flux(prompt, w, h, seed, steps):
     }
 
 
-def _workflow_h3_image(prompt, w, h, seed, steps):
+def _workflow_h3_image(prompt, w, h, seed, steps, refs=()):
     """MiniMax H3-Image：CLIPLoader(type=minimax) + MiniMaxH3ImageConditioning。
 
     节点图逐字照抄本机 8000 网关（h3+seedvr2-gateway）的 /v1/images 工作流，
     连默认步数 6 和 filename_prefix 的 `apiimg/` 子目录都不改 —— 两边出的图
     要在同一条 ComfyUI 队列里排队、同一套 VAE，出图口径才可比。
     唯一区别：prefix 换成 sp_asset，别把我们的图和网关的产物混在一个目录里。
+
+    【refs 一接上就变编辑模式】
+    同一个 checkpoint，接图 = 参考编辑，不接 = 文生图（官方原话：
+    "A run with images connected is an image edit workflow"）。
+    节点已经接了 vae，官方文档说这时参考图会「既进文本编码器、又被锚成 latent」，
+    所以身份保持是节点内部的事，不用我们手搓 img2img 的 denoise。
+    宽高我们显式传，不跟着参考图走 —— 否则出三视图会被拉成参考图的画幅。
     """
-    return {
+    nodes = {
         "1": {"class_type": "UNETLoader",
               "inputs": {"unet_name": comfy_model(), "weight_dtype": "default"}},
         "2": {"class_type": "CLIPLoader",
@@ -488,11 +667,25 @@ def _workflow_h3_image(prompt, w, h, seed, steps):
         "12": {"class_type": "SaveImage",
                "inputs": {"images": ["11", 0], "filename_prefix": "sp_asset"}},
     }
+    if refs:
+        slots = h3_ref_slots()
+        if not slots:
+            raise ValueError("当前 ComfyUI 的 MiniMaxH3ImageConditioning 没有参考图输入，"
+                             "接不了身份参考（需要 ComfyUI v0.45.0+ 的 H3-Image 原生支持）")
+        if len(refs) > len(slots):
+            raise ValueError("参考图最多 %d 张，这次给了 %d 张" % (len(slots), len(refs)))
+        wired = {}
+        for i, rname in enumerate(refs):
+            nid = str(20 + i)
+            nodes[nid] = {"class_type": "LoadImage", "inputs": {"image": rname}}
+            wired[slots[i]] = [nid, 0]
+        nodes["5"]["inputs"].update(wired)
+    return nodes
 
 
-def comfy_submit(prompt, w, h, seed, steps=0):
+def comfy_submit(prompt, w, h, seed, steps=0, refs=()):
     """steps=0 交给 comfy_workflow 按架构取默认值（Flux 4 / H3-Image 6）。"""
-    body = json.dumps({"prompt": comfy_workflow(prompt, w, h, seed, steps),
+    body = json.dumps({"prompt": comfy_workflow(prompt, w, h, seed, steps, refs),
                        "client_id": "shortplay-assets"}).encode("utf-8")
     req = urllib.request.Request(comfy_host() + "/prompt", data=body,
                                  headers={"Content-Type": "application/json"})
@@ -608,21 +801,33 @@ def comfy_job_start(assets, variants, style_en="", fixed_seed=0, engine="comfy",
         if err:
             raise ValueError(err)
     seq_n = max(1, min(int(seq_n or 1), 4)) if engine in ("qwen", "h3") else 1
+    # 参考图通道只有本地 H3-Image 有：Flux 无此输入，云端两家的接口也没接图。
+    # 不支持时不能往提示词里塞「Picture 1」——那会让模型凭空描述一张不存在的参考图。
+    arch = comfy_arch() if engine == "comfy" else ""
+    ref_ok = arch == COMFY_ARCH_H3_IMAGE
     plan = []
     for a in assets[:24]:
         kind = _as(a.get("kind"), "character", 16)
         keys = [k for k in (variants.get(kind) or []) if isinstance(k, str)]
-        for vk in keys[:4]:
+        # 资产自带的主参考图（用户手选/上传/上一次出的）优先于本批锚变体：
+        # 用户既然指定了「这张就是我认可的脸」，就不该被这一批的顺序覆盖
+        own = _as(a.get("refFile"), "", 200) if ref_ok else ""
+        ordered, refs = _identity_refs(kind, keys)
+        for vk in ordered[:4]:
+            ref_of = "" if own else refs.get(vk, "")
             try:
-                built = build_comfy_prompt(a, vk, style_en)
+                built = build_comfy_prompt(a, vk, style_en, bool(ref_ok and (own or ref_of)))
             except ValueError:
                 continue
             plan.append({
                 "assetId": _as(a.get("id"), "", 80), "assetCode": _as(a.get("code"), "", 24),
                 "assetName": _as(a.get("name"), "", 40), "kind": kind,
                 "variant": vk, "variantLabel": built["label"],
-                "prompt": built["prompt"], "w": built["w"], "h": built["h"],
+                "prompt": built["prompt"], "promptBase": built["promptBase"],
+                "w": built["w"], "h": built["h"],
                 "fallbackEn": built["fallbackEn"], "n": seq_n,
+                # 锚图来源：自有参考图 > 本批先出的变体。空串表示这一张纯文生图。
+                "refFile": own, "refVariant": ref_of,
                 "seed": int(fixed_seed) or random.randint(1, 2 ** 31 - 1),
             })
     if not plan:
@@ -647,22 +852,53 @@ def comfy_job_start(assets, variants, style_en="", fixed_seed=0, engine="comfy",
     return {"jobId": jid, "total": total_images, "status": "running", "engine": engine}
 
 
+def _variant_label(kind, vk):
+    for v in COMFY_VARIANTS.get(kind, []):
+        if v["key"] == vk:
+            return v["label"]
+    return vk
+
+
 def comfy_worker(jid, plan, engine="comfy"):
     ASSET_IMG_DIR.mkdir(parents=True, exist_ok=True)
     job = COMFY_JOBS.get(jid)
+    # 本批已经出好的锚图：(assetId, variant) → 本地文件名。
+    # 锚变体先出、跟跑的变体后出，靠 plan 的顺序保证，不额外调度。
+    anchors = {}
     for t in plan:
         if not job or job.get("status") == "cancelled":
             break
         job["current"] = "%s · %s" % (t["assetName"], t["variantLabel"])
         t0 = time.time()
         n = max(1, int(t.get("n", 1)))
+        prompt = t["promptBase"]
+        refs = []
+        ref_label = ""
         try:
+            if engine == "comfy":
+                src = t.get("refFile") or anchors.get(
+                    (t["assetId"], t.get("refVariant") or ""), "")
+                if src:
+                    try:
+                        refs = [comfy_ref_name(src)]
+                    except Exception as exc:
+                        # 锚图拿不到不能连累这一张：退回纯文生图照样出图，
+                        # 只是这张的脸是重新想的，得在错误列表里说清楚
+                        job["errors"].append({
+                            "assetName": t["assetName"], "variantLabel": t["variantLabel"],
+                            "detail": "参考图不可用，这张按纯文生图出（脸不会被统一）："
+                                      + str(exc)[:150]})
+                    else:
+                        ref_label = "自有参考图" if t.get("refFile") else \
+                            _variant_label(t["kind"], t.get("refVariant") or "")
+            if refs:
+                prompt = t["prompt"]
             if engine == "qwen":
                 pngs = qwen_image_generate(t["prompt"], n)
             elif engine == "h3":
                 pngs = h3_image_generate(t["prompt"], n)
             else:
-                pid = comfy_submit(t["prompt"], t["w"], t["h"], t["seed"])
+                pid = comfy_submit(prompt, t["w"], t["h"], t["seed"], refs=refs)
                 imgs = comfy_wait(pid)
                 if not imgs:
                     raise RuntimeError("ComfyUI 没有返回图片")
@@ -674,16 +910,18 @@ def comfy_worker(jid, plan, engine="comfy"):
                 safe = re.sub(r"[^A-Za-z0-9_\-]", "", t["assetCode"] or t["assetId"] or "asset")[:24]
                 name = "%s_%s_%d.png" % (safe or "asset", variant, t["seed"] + i)
                 (ASSET_IMG_DIR / name).write_bytes(png)
+                if i == 0 and i < len(pngs):
+                    anchors[(t["assetId"], t["variant"])] = name
                 datauri, uncompressed = thumb_datauri(png)
                 job["items"].append({
                     "assetId": t["assetId"], "assetCode": t["assetCode"],
                     "assetName": t["assetName"], "kind": t["kind"],
                     "variant": variant, "variantLabel": label,
-                    "prompt": t["prompt"], "w": t["w"], "h": t["h"], "seed": t["seed"] + i,
+                    "prompt": prompt, "w": t["w"], "h": t["h"], "seed": t["seed"] + i,
                     "fallbackEn": t["fallbackEn"], "uncompressed": uncompressed,
                     "file": "examples/assets/" + name, "dataUri": datauri,
                     "bytes": len(png), "seconds": round(time.time() - t0, 1),
-                    "engine": engine,
+                    "engine": engine, "refOf": ref_label,
                 })
                 job["done"] += 1
             if len(pngs) < n:
@@ -749,8 +987,28 @@ def sync_image(body):
     elif isinstance(seed, bool) or not isinstance(seed, int):
         raise ValueError("seed 必须是整数")
 
+    # ref_images：本地已出图的名字（就是本接口返回的 filename），用来做身份参考。
+    # 有了它就能「先出定妆半身 → 再拿它出三视图」，不必一次把三张都排进批次。
+    raw_refs = body.get("ref_images")
+    if raw_refs is None:
+        raw_refs = body.get("refs") or []
+    if not isinstance(raw_refs, list):
+        raise ValueError("ref_images 要是数组")
+    if len(raw_refs) > 8:
+        raise ValueError("ref_images 最多 8 张")
+    info = comfy_arch_info()
+    refs = []
+    if raw_refs:
+        if info["arch"] != COMFY_ARCH_H3_IMAGE:
+            raise ValueError("参考图只在 H3-Image 架构下可用（当前是 %s）" % info["arch"])
+        slots = h3_ref_slots()
+        if not slots:
+            raise ValueError("当前 ComfyUI 的 H3 节点没有参考图输入，需要 v0.45.0+")
+        for x in raw_refs:
+            refs.append(comfy_ref_name(str(x or "").strip()))
+
     t0 = time.time()
-    pid = comfy_submit(prompt, w, h, seed, steps)
+    pid = comfy_submit(prompt, w, h, seed, steps, refs)
     imgs = comfy_wait(pid, timeout=timeout)
     if not imgs:
         raise RuntimeError("ComfyUI 没有返回图片")
@@ -760,12 +1018,12 @@ def sync_image(body):
     # ASSET_IMG_NAME 白名单；不用 ComfyUI 的原始文件名，杜绝路径穿越。
     filename = "%012x_00001_.png" % random.getrandbits(48)
     (ASSET_IMG_DIR / filename).write_bytes(png)
-    info = comfy_arch_info()
     return {
         "prompt_id": pid, "seed": seed, "status": "succeeded",
         "elapsed": round(time.time() - t0, 2),
         # 实际用的步数与模型都回传：换过架构后排查「为什么 6 步还是糊」不用猜
         "steps": int(steps) if steps else COMFY_DEFAULT_STEPS.get(info["arch"], 4),
         "width": w, "height": h, "model": info["model"], "arch": info["arch"],
+        "refs": len(refs),
         "filename": filename, "url": V1_IMAGE_URL_PREFIX + filename,
     }
