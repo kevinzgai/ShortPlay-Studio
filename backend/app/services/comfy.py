@@ -381,7 +381,7 @@ def build_comfy_prompt(asset, variant_key, style_en="", with_ref=False):
             kw = _as(asset.get("keyword"), "", 200).strip() or \
                  ("a Chinese film character named " + _as(asset.get("name"), "unknown", 40))
     elif kind == "scene":
-        kw = _as(asset.get("sceneEn"), "", 300).strip()
+        kw = _as(asset.get("sceneEn"), "", 400).strip()
         fallback = not kw
         if fallback:
             kw = _as(asset.get("appearance"), "", 200).strip() or \

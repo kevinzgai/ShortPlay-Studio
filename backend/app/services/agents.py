@@ -91,8 +91,8 @@ SYSTEM_ASSETS = """你是短剧美术设定总监。只输出严格 JSON，不�
    "keywordEn":"同一串的英文版，给本地 Flux 用，一句，55词内。构成顺序：年龄用区间（如 in his late sixties，不给精确年龄）；体态一句（build & posture，如 lean but sturdy, straight back）；脸与瑕疵；主服装必须带颜色+版型+材质（如 navy stand-collar jacket, stiff cotton-linen）；贴身携带物写呈现方式而不是清单（如 talisman corner visible in coat pocket）；每项英文逗号分隔",
    "source":"script|inferred","evidence":["S1"],"sceneNos":[1,2]}],
  "scenes":[{"name":"爷爷家堂屋","priority":"P0","intExt":"内景","time":"黄昏",
-   "props":["八仙桌","钟馗像"],"light":"主光与色温，20字内","lens":"镜头焦段，如 24mm广角",
-   "sceneEn":"一句英文场景描述，给本地 Flux 用，30词内",
+   "props":["八仙桌（半旧，桌面有茶渍）","钟馗像（挂在正墙）"],"light":"用时间与天气写光质，如「晴日午后斜阳，暖黄从门口切入」，20字内","lens":"镜头焦段，如 24mm广角",
+   "sceneEn":"一句英文场景描述，给本地 Flux 用，55词内。空间分层：主体环境与材质 → 中近景陈设（物件+状态，如 a half-open wooden gate）→ 远景虚化轮廓；声明无人（no people）；光线由时间天气推出（bright summer afternoon light）",
    "source":"script|inferred","evidence":["S1"],"sceneNos":[1]}],
  "props":[{"name":"黄纸铜钱","boundTo":["水雷"],"source":"script","evidence":["S2"]}]}
 

@@ -122,7 +122,7 @@ def build_asset_pack(data, scenes):
             "code": "S%02d" % (len(scenes_out) + 1), "name": name,
             "priority": _priority(raw.get("priority")), "intExt": int_ext, "time": tm,
             "appearance": "；".join(props), "anchors": {"props": props, "light": light, "lens": lens},
-            "sceneEn": _as(raw.get("sceneEn"), "", 300),
+            "sceneEn": _as(raw.get("sceneEn"), "", 400),
             "source": src, "evidence": ev, "sceneNos": nos,
             "refImage": "", "refName": "", "locked": False, "starred": False,
         }
