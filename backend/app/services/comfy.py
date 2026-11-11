@@ -46,6 +46,15 @@ PERSON_ONLY_TERMS = ("skin", "face", "portrait", "beauty", "hair", "eye",
                      "makeup", "hand", "finger", "body", "lip")
 
 
+# 微距皮肤词只对「脸占画面大头」的变体有用。三视图是三个全身塞一张图，
+# 每张脸几十像素，这时候 "visible pores / natural skin texture" 不是加分项
+# 而是灾难：模型只能在指甲盖大的区域硬堆纹理，结果就是磨皮糊或者五官挤在一起。
+SKIN_DETAIL_TERMS = ("pore", "pores", "skin texture", "blemish", "wrinkle",
+                     "sweat", "micro detail", "subsurface")
+
+FACE_CLOSE_VARIANTS = ("portrait", "faceSheet")
+
+
 ASSET_IMG_DIR = ROOT / "examples" / "assets"
 
 
@@ -54,14 +63,34 @@ ASSET_IMG_NAME = re.compile(r"^[A-Za-z0-9_.\-]+\.png$")
 
 COMFY_VARIANTS = {
     "character": [
-        {"key": "turnaround", "label": "三视图", "w": 1024, "h": 672,
-         "tpl": "character turnaround reference sheet, front view, side view, back view, "
-                "full body, same person in all three, neutral gray studio background, "
-                "flat even lighting, character design sheet, {kw}"},
-        {"key": "faceSheet", "label": "面部四视图", "w": 1024, "h": 672,
-         "tpl": "character face reference sheet, front view and three-quarter view close-ups, "
-                "same person, consistent facial features, soft studio light, "
-                "character design sheet, {kw}"},
+        # 【画幅 3:2 → 1:1 是脸崩的主因，不是措辞】
+        # 1024×672 横版塞三个全身时，每格只有 341px 宽，头高约 40–50px。
+        # 那个尺度上「眼尾微垂 / 唇薄 / 左颊一颗小痣」根本没有落脚像素，
+        # 模型只有两条路：要么偷偷画成半身（实测确实如此，构图直接错），
+        # 要么强制全身但把脸糊成一团。1152² 方形把每格做到 384×1152、
+        # 头高约 100px，同 seed 下痣能画出来、正面与侧脸能认出是同一人。
+        {"key": "turnaround", "label": "三视图", "w": 1152, "h": 1152,
+         "tpl": "character turnaround reference sheet, three full-body views of the same "
+                "woman side by side: front view, side view, back view. Standing straight, "
+                "feet aligned on one baseline, equal scale, head to toe fully visible. "
+                "Plain white seamless studio background, flat even light, no shadow, "
+                "no props, no scenery.\n"
+                "Consistent identity: the same one woman in all three views, identical "
+                "face, identical hairstyle, identical outfit.\n"
+                "{kw}\n"
+                "face clearly in focus in the front and side views, correct facial "
+                "proportions, sharp eyes, nose and mouth"},
+        # 面部四视图 = 四张脸，不是「一张大脸 + 三个全身」。后者把特写和全身
+        # 摆在同一张图上，两个尺度互相打架，模型只能把脸画糊；而它的职责本来
+        # 就只有「把脸定准」，体型服装交给三视图。
+        {"key": "faceSheet", "label": "面部四视图", "w": 1152, "h": 768,
+         "tpl": "character face reference sheet, four head close-ups of the same woman in "
+                "one row: front view, three-quarter view, side profile, slightly low angle. "
+                "Head and shoulders only, bust framing, no full body.\n"
+                "Consistent identity: identical face in all four, same hairstyle.\n"
+                "{kw}\n"
+                "plain white background, even soft light, sharp focus on eyes and mouth, "
+                "natural skin texture, realistic film photography"},
         {"key": "portrait", "label": "定妆半身", "w": 768, "h": 1024,
          "tpl": "cinematic medium portrait of one Chinese character, {kw}, "
                 "shallow depth of field, film still, natural skin texture, muted color grade"},
@@ -125,6 +154,25 @@ def comfy_arch(unet=None):
     if "minimax_h3" in n:      # fl2va 等：视频链路，出不了静帧
         return COMFY_ARCH_H3_VIDEO
     return COMFY_ARCH_FLUX
+
+
+# --- 同一变体按架构给画幅 -------------------------------------------------
+# 三视图这种「一张图里并排三个全身」的任务对模型的构图控制要求很高：
+# · H3-Image（6 步）：1152² 方形能稳定出「正 / 侧 / 背 + 足底对齐 + 白底」，
+#   每格头高约 100px，三张脸认得出是同一人；
+# · Flux-schnell（4 步蒸馏）：方形画布控制不住，实测 1152² 会把第三个人
+#   裁出画面（只剩两个半），1344×896 更糟（只剩两个人）。它唯一能保住的
+#   是旧口径 1024×672 —— 虽然会画成半身，但至少三个人都在、不会丢内容。
+# 所以这里不改 Flux 的既有行为，只让 H3-Image 拿到它撑得住的画幅。
+VARIANT_SIZE_BY_ARCH = {
+    ("turnaround", COMFY_ARCH_FLUX): (1024, 672),
+    ("faceSheet", COMFY_ARCH_FLUX): (1024, 672),
+}
+
+
+def comfy_variant_size(v):
+    """变体 + 当前架构 → (w, h)。前端 / 出图 / 提示词预览共用同一个口径。"""
+    return VARIANT_SIZE_BY_ARCH.get((v["key"], comfy_arch()), (v["w"], v["h"]))
 
 
 def comfy_arch_info(unet=None):
@@ -203,8 +251,26 @@ def comfy_missing_files():
     return missing
 
 
+# 探测失败后的负缓存窗口（秒）。见 comfy_status() 的说明。
+STATUS_OFFLINE_TTL = 3.0
+_STATUS_OFFLINE_UNTIL = 0.0
+
+
 def comfy_status():
-    """探测本机 ComfyUI；不在线时前端把出图按钮置灰并给出明确原因。"""
+    """探测本机 ComfyUI；不在线时前端把出图按钮置灰并给出明确原因。
+
+    【离线负缓存】探测超时 4 秒，而这一步被十来个接口和每次页面加载同步调用。
+    ComfyUI 一断（隧道抖动、机器重启），用户看到的是「整站卡住」而不是「出图不可用」：
+    开一个页面并发五六个请求，每个都干等 4 秒。所以只缓存**失败**结果 ——
+    在线时行为一个字没变（套件切模型后立刻读 status 仍然即时），断开期间只有第一个
+    请求付 4 秒代价，3 秒后自动重探，恢复后立刻回到在线。
+    """
+    global _STATUS_OFFLINE_UNTIL
+    if time.time() < _STATUS_OFFLINE_UNTIL:
+        return {"online": False, "host": comfy_host(),
+                "detail": "刚探测失败（ComfyUI 未启动或隧道断开），%.0f 秒后自动重试"
+                          % max(0.0, _STATUS_OFFLINE_UNTIL - time.time()),
+                "qwen": qwen_image_status(), "h3": h3_image_status()}
     try:
         with _LOCAL_OPENER.open(comfy_host() + "/system_stats", timeout=4) as r:
             st = json.load(r)
@@ -219,10 +285,13 @@ def comfy_status():
             "arch": comfy_arch_info(),
             "qwen": qwen_image_status(),
             "h3": h3_image_status(),
-            "variants": {k: [{"key": v["key"], "label": v["label"], "w": v["w"], "h": v["h"]}
+            "variants": {k: [{"key": v["key"], "label": v["label"],
+                              "w": comfy_variant_size(v)[0],
+                              "h": comfy_variant_size(v)[1]}
                              for v in vs] for k, vs in COMFY_VARIANTS.items()},
         }
     except Exception as exc:
+        _STATUS_OFFLINE_UNTIL = time.time() + STATUS_OFFLINE_TTL
         return {"online": False, "host": comfy_host(), "detail": str(exc)[:160],
                 "qwen": qwen_image_status(), "h3": h3_image_status()}
 
@@ -237,25 +306,33 @@ def _en_subject(text):
     return (t[:1].lower() + t[1:]) if t else t
 
 
-def style_for_kind(style_en, kind):
-    """按资产类型收风格锚：物体剔掉人像词，全被剔光就退到物体锚。
-
-    道具图里出现人手，根因之一就是通用风格锚里的 "natural skin texture"
-    被无条件拼到了道具上 —— Flux 见到 skin 就画皮肤。
-    """
-    src = (style_en or "").strip() or STYLE_ANCHOR_EN_DEFAULT
-    if kind == "character":
-        return src
+def _strip_style_terms(src, terms, fallback):
+    """按逗号分段剔除命中 terms 的段；以 no 开头的负向约束一律保留。"""
     kept = []
     for part in src.split(","):
         p = part.strip()
         if not p:
             continue
         low = p.lower()
-        # 以 no 开头的负向约束（如 "no beautification filter"）保留
-        if low.startswith("no ") or not any(t in low for t in PERSON_ONLY_TERMS):
+        if low.startswith("no ") or not any(t in low for t in terms):
             kept.append(p)
-    return ", ".join(kept) or STYLE_ANCHOR_EN_OBJECT
+    return ", ".join(kept) or fallback
+
+
+def style_for_kind(style_en, kind, variant=""):
+    """按资产类型 + 出图变体收风格锚：尺度越小的画面越要剥掉微距词。
+
+    道具图里出现人手，根因之一就是通用风格锚里的 "natural skin texture"
+    被无条件拼到了道具上 —— Flux 见到 skin 就画皮肤。
+    三视图同理：脸只占几十像素时，皮肤纹理词会把原本就稀缺的像素预算
+    全吃掉，逼得模型把小脸画成一团。
+    """
+    src = (style_en or "").strip() or STYLE_ANCHOR_EN_DEFAULT
+    if kind == "character":
+        if variant in FACE_CLOSE_VARIANTS:
+            return src
+        return _strip_style_terms(src, SKIN_DETAIL_TERMS, STYLE_ANCHOR_EN_DEFAULT)
+    return _strip_style_terms(src, PERSON_ONLY_TERMS, STYLE_ANCHOR_EN_OBJECT)
 
 
 def build_comfy_prompt(asset, variant_key, style_en=""):
@@ -290,11 +367,12 @@ def build_comfy_prompt(asset, variant_key, style_en=""):
             kw = "inanimate prop object" + ((", " + cn) if cn else "")
     # 风格紧跟主体描述（权重高），技术收尾词放最后；没设风格时退到中性默认。
     # 逗号不能省：Flux 会把 "eyebrow photorealistic" 连读成一个怪词。
-    style = style_for_kind(style_en, kind)
+    style = style_for_kind(style_en, kind, variant_key)
     style_part = (", " + style) if len(style) < 240 else ""
     suffix = COMFY_SUFFIX_OBJECT if kind == "prop" else COMFY_SUFFIX
+    w, h = comfy_variant_size(v)
     return {"prompt": v["tpl"].format(kw=kw) + style_part + ", " + suffix,
-            "w": v["w"], "h": v["h"], "label": v["label"], "fallbackEn": fallback}
+            "w": w, "h": h, "label": v["label"], "fallbackEn": fallback}
 
 
 def comfy_prompt_rows(assets, variants, style_en=""):

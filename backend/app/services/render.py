@@ -110,8 +110,9 @@ def render_assets_md(pack, meta=None):
     L.append("- **风格锚（Flux 英文）**：%s" % (st.get("anchorEn") or STYLE_ANCHOR_EN_DEFAULT))
     L.append("- **负面词**：%s" % (st.get("negative") or NEGATIVE_DEFAULT))
     asp = st.get("aspect") or {}
-    L.append("- **画幅**：三视图 %s ／ 立绘 %s ／ 概念图 %s ／ 核心宽幕 %s" % (
-        asp.get("turnaround", "3:2"), asp.get("portrait", "3:4"),
+    L.append("- **画幅**：三视图 %s ／ 面部四视图 %s ／ 立绘 %s ／ 概念图 %s ／ 核心宽幕 %s" % (
+        asp.get("turnaround", "1:1"), asp.get("faceSheet", "3:2"),
+        asp.get("portrait", "3:4"),
         asp.get("concept", "16:9"), asp.get("coreWide", "2.35:1")))
     order = st.get("generationOrder") or []
     L.append("- **建议生成顺序**：%s" % (" → ".join(order) or "按 P0 优先"))
@@ -175,7 +176,9 @@ def asset_prompts_payload(pack, meta=None):
             if p.get(kind):
                 out.append({
                     "code": x.get("code"), "name": x.get("name"), "kind": kind,
-                    "aspect": "3:2", "prompt": p[kind],
+                    # 三视图走 1:1（三个全身的头需要足够像素），面部四视图仍是 3:2
+                    "aspect": "1:1" if kind == "turnaround" else "3:2",
+                    "prompt": p[kind],
                     "keyword": x.get("keyword") or "",
                     "refName": x.get("refName") or "",
                 })

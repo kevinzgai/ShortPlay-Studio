@@ -178,7 +178,8 @@ def build_asset_pack(data, scenes):
     return {
         "style": {
             "anchor": style, "anchorEn": style_en, "negative": negative,
-            "aspect": {"turnaround": "3:2", "portrait": "3:4",
+            # 三视图改 1:1：3:2 横版里三个全身的头只有 40–50px，脸必崩
+            "aspect": {"turnaround": "1:1", "faceSheet": "3:2", "portrait": "3:4",
                        "concept": "16:9", "coreWide": "2.35:1"},
             "generationOrder": [c["code"] for c in chars if c["priority"] == "P0"] +
                                [s["code"] for s in scenes_out if s["priority"] == "P0"],
