@@ -223,6 +223,10 @@ export function loadComfyModels(force) {
     .then((j) => {
       ui.engine.models = j.models || [];
       ui.engine.modelsHost = j.host || "";
+      // 同一个 models/unet/ 里混着 flux / h3-image / h3-video 三种架构，
+      // 光给文件名用户选不动（试一次才知道出不来），这里把架构一起存下来
+      ui.engine.modelArchs = j.archs || {};
+      ui.engine.modelCurrent = j.current || null;
       return ui.engine.models;
     })
     .catch(() => [])

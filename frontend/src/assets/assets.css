@@ -292,6 +292,10 @@
 .ap-gen-dot.off{background:#dc2626;box-shadow:0 0 0 3px rgba(220,38,38,.12)}
 .ap-gen-info{font:10.5px/1.4 var(--mono);color:var(--text-4)}
 .ap-gen-info.off{color:#dc2626}
+/* 架构徽标：同一个 ComfyUI 里可能选了 Flux 也可能选了 H3，标明用的是哪条链路 */
+.ap-gen-arch{font-style:normal;margin-left:6px;padding:1px 5px;border-radius:999px;
+  background:var(--primary-soft);color:var(--primary);font-size:9.5px;white-space:nowrap}
+.ap-gen-info.off .ap-gen-arch{background:var(--err-soft);color:var(--err)}
 .ap-gen-r{margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 /* 范围 / 画幅 是「参数」不是「动作」：加个小标题，避免被当成立即执行的按钮 */
 .ap-gen-grp{display:flex;align-items:center;gap:6px}

@@ -13,7 +13,7 @@ from app.config.engine_store import engine_config_public, comfy_host, comfy_unet
 from app.config.llm_store import (_llm_doc, llm_active_provider, llm_providers_public,
                                   llm_settings)
 from app.services.comfy import (ASSET_IMG_DIR, ASSET_IMG_NAME, COMFY_JOBS,
-                                COMFY_LOCK, comfy_status)
+                                COMFY_LOCK, comfy_arch_info, comfy_status)
 from app.services.parse_task import PARSE_TASKS, parse_task_latest, parse_task_snapshot
 from app.services.projects import (PROJECTS_DIR, project_get, project_list,
                                    project_ref_read, project_ref_thumb)
@@ -45,7 +45,14 @@ def _engine_config(h):
 
 
 def _comfy_models(h):
-    return json_response(h, {"models": comfy_unet_names(), "host": comfy_host()})
+    names = comfy_unet_names()
+    return json_response(h, {
+        "models": names, "host": comfy_host(),
+        # 同一个 models/unet/ 目录里混着三种架构，光给文件名用户没法选：
+        # archs 让界面能直接标出「哪个能出定妆 / 道具图」，不用试一次才知道
+        "archs": {n: comfy_arch_info(n) for n in names},
+        "current": comfy_arch_info(),
+    })
 
 
 def _comfy_status(h):

@@ -93,6 +93,116 @@ COMFY_SUFFIX_OBJECT = ("highly detailed, sharp focus, no text, no watermark, "
                        "no people, no human figure, no hands")
 
 
+# --------------------------------------------------------------------------
+# 模型架构识别：同一个 ComfyUI 的 models/unet/ 里混着不同架构的模型，
+# UNETLoader 不分架构全列出来，但工作流是完全不同的三套。
+# --------------------------------------------------------------------------
+COMFY_ARCH_FLUX = "flux"
+COMFY_ARCH_H3_IMAGE = "h3-image"
+COMFY_ARCH_H3_VIDEO = "h3-video"
+
+COMFY_ARCH_LABEL = {
+    COMFY_ARCH_FLUX: "Flux 文生图",
+    COMFY_ARCH_H3_IMAGE: "MiniMax H3-Image",
+    COMFY_ARCH_H3_VIDEO: "H3 视频（不能出静帧）",
+}
+
+# Flux-schnell 蒸馏过，4 步就够；H3-Image 官方口径是 6 步，少给了会糊。
+COMFY_DEFAULT_STEPS = {COMFY_ARCH_FLUX: 4, COMFY_ARCH_H3_IMAGE: 6,
+                       COMFY_ARCH_H3_VIDEO: 6}
+
+
+def comfy_arch(unet=None):
+    """按 unet 文件名判断走哪条工作流。不传就用当前 comfyModel。
+
+    认名字而不是去 /object_info 查节点组合：文件名是稳定线索，而 object_info
+    只能告诉你「这个 unet 存在」，告诉不了「它该配哪个 CLIP」。认不出来按
+    flux 处理 —— 保持旧行为，不能让用户配了个自定义 Flux 微调就出不了图。
+    """
+    n = (unet if unet is not None else comfy_model() or "").lower()
+    if "minimax_h3_image" in n:
+        return COMFY_ARCH_H3_IMAGE
+    if "minimax_h3" in n:      # fl2va 等：视频链路，出不了静帧
+        return COMFY_ARCH_H3_VIDEO
+    return COMFY_ARCH_FLUX
+
+
+def comfy_arch_info(unet=None):
+    """给前端的一句话说明：这个模型能不能用来出定妆 / 道具图。"""
+    a = comfy_arch(unet)
+    name = unet if unet is not None else comfy_model()
+    return {
+        "arch": a, "label": COMFY_ARCH_LABEL.get(a, a),
+        "usable": a != COMFY_ARCH_H3_VIDEO,
+        "steps": COMFY_DEFAULT_STEPS.get(a, 4),
+        "model": name or "",
+    }
+
+
+def comfy_arch_error():
+    """不可用模型的一句话原因（可用时返回空串）。
+
+    同步接口、批量任务、测试连接三处**共用这一句**：同一个问题在三个地方
+    说法不一致时，用户会以为是三个不同的毛病。
+    """
+    info = comfy_arch_info()
+    if info["usable"]:
+        return ""
+    return ("当前 comfyModel 是视频模型（%s）：它走 fl2v 视频链路（含 audio VAE），"
+            "出不了静帧。定妆 / 道具图请换成 flux1-schnell-fp8 或 minimax_h3_image"
+            % info["model"])
+
+
+def _object_options(node, field):
+    """读 /object_info/<node> 里某输入字段的候选值。
+
+    返回 None = 探测失败（连不上 / 节点不存在），**不要当成「文件缺失」**——
+    否则 ComfyUI 没起来时诊断会报一堆假缺失。
+    """
+    try:
+        with _LOCAL_OPENER.open(comfy_host() + "/object_info/" + node, timeout=6) as r:
+            info = json.load(r)
+        inp = ((info or {}).get(node) or {}).get("input") or {}
+        spec = (inp.get("required") or {}).get(field) or (inp.get("optional") or {}).get(field)
+        if isinstance(spec, list) and spec:
+            head = spec[0]
+            if isinstance(head, list):
+                return [str(x) for x in head]
+            if isinstance(head, dict):
+                return [str(x) for x in (head.get("options") or [])]
+        if isinstance(spec, dict):
+            return [str(x) for x in (spec.get("options") or [])]
+    except Exception:
+        return None
+    return []
+
+
+def comfy_required_files():
+    """当前架构的工作流要 ComfyUI 里真实存在哪些 clip / vae 文件。
+
+    【为什么要单独查】「unet 存在」不等于「能跑」：H3-Image 要的是
+    qwen3vl_32b（type=minimax）+ minimax_h3_image_vae，Flux 要 clip_l +
+    t5xxl + ae。少一个，提交时报的是节点校验失败，界面只会显示「出图失败」，
+    用户根本看不出是缺文件。测试连接时先查一遍，能把话说清楚。
+    """
+    if comfy_arch() == COMFY_ARCH_H3_IMAGE:
+        return [("CLIPLoader", "clip_name", "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors"),
+                ("VAELoader", "vae_name", "minimax_h3_image_vae_fp16.safetensors")]
+    return [("DualCLIPLoader", "clip_name1", "clip_l.safetensors"),
+            ("DualCLIPLoader", "clip_name2", "t5xxl_fp8_e4m3fn_scaled.safetensors"),
+            ("VAELoader", "vae_name", "ae.safetensors")]
+
+
+def comfy_missing_files():
+    """缺哪些依赖文件。空列表 = 齐了，或探测不到（探测不到不算缺）。"""
+    missing = []
+    for node, field, want in comfy_required_files():
+        opts = _object_options(node, field)
+        if opts and want not in opts:
+            missing.append(want)
+    return missing
+
+
 def comfy_status():
     """探测本机 ComfyUI；不在线时前端把出图按钮置灰并给出明确原因。"""
     try:
@@ -105,6 +215,8 @@ def comfy_status():
             "device": dev.get("name", ""),
             "vramFreeMB": int(dev.get("vram_free", 0) / (1024 * 1024)),
             "model": comfy_model(),
+            # 架构决定走哪条工作流；usable=false 时前端要把出图按钮置灰并说明原因
+            "arch": comfy_arch_info(),
             "qwen": qwen_image_status(),
             "h3": h3_image_status(),
             "variants": {k: [{"key": v["key"], "label": v["label"], "w": v["w"], "h": v["h"]}
@@ -212,12 +324,32 @@ def comfy_prompt_rows(assets, variants, style_en=""):
     return {"rows": rows, "styleEn": _as(style_en, "", 240) or STYLE_ANCHOR_EN_DEFAULT}
 
 
-def comfy_workflow(prompt, w, h, seed, steps=4):
-    """与 tools/gen_first_frame.py 完全一致：Flux.1-schnell fp8 / 4 步 / euler。
+def comfy_workflow(prompt, w, h, seed, steps=0):
+    """按 comfyModel 的架构出对应工作流。steps=0 表示「用该架构的默认步数」。
 
-    steps 只给同步接口 /v1/images 用；资产批量的异步链路仍走默认 4 步，
-    两边共用同一张工作流，不会出现「同步能出、异步出不来」的分叉。
+    【为什么不再写死 Flux.1-schnell】
+    `unet_name` 候选里一直混着三个模型，其中两个是 MiniMax H3 系（图像 / 视频），
+    而旧实现只会拼 Flux 链路（DualCLIPLoader clip_l+t5xxl / FluxGuidance /
+    EmptySD3LatentImage）。选了 minimax_h3_image 会一路 `mat1 and mat2 shapes
+    cannot be multiplied (256x4096 and 5120x5376)` —— 因为 H3 的 CLIP 是
+    qwen3vl_32b（5120 维），Flux 的 t5xxl 是 5376 维，接不上。
+    现在按模型名分派：flux 走原链路，H3-Image 走 CLIPLoader(type=minimax) +
+    MiniMaxH3ImageConditioning（该节点同时吐 conditioning 和 latent）。
+
+    两条链路共用同一套参数（prompt / w / h / seed / steps），上游「资产 × 变体」
+    的批量任务与 /v1/images 同步接口都不用关心用的是哪个架构。
     """
+    arch = comfy_arch()
+    n = int(steps) if steps else COMFY_DEFAULT_STEPS.get(arch, 4)
+    if arch == COMFY_ARCH_H3_VIDEO:
+        raise ValueError(comfy_arch_error())
+    if arch == COMFY_ARCH_H3_IMAGE:
+        return _workflow_h3_image(prompt, w, h, seed, n)
+    return _workflow_flux(prompt, w, h, seed, n)
+
+
+def _workflow_flux(prompt, w, h, seed, steps):
+    """Flux.1-schnell fp8 / 4 步 / euler，与 tools/gen_first_frame.py 完全一致。"""
     return {
         "1": {"class_type": "UNETLoader",
               "inputs": {"unet_name": comfy_model(), "weight_dtype": "default"}},
@@ -244,7 +376,44 @@ def comfy_workflow(prompt, w, h, seed, steps=4):
     }
 
 
-def comfy_submit(prompt, w, h, seed, steps=4):
+def _workflow_h3_image(prompt, w, h, seed, steps):
+    """MiniMax H3-Image：CLIPLoader(type=minimax) + MiniMaxH3ImageConditioning。
+
+    节点图逐字照抄本机 8000 网关（h3+seedvr2-gateway）的 /v1/images 工作流，
+    连默认步数 6 和 filename_prefix 的 `apiimg/` 子目录都不改 —— 两边出的图
+    要在同一条 ComfyUI 队列里排队、同一套 VAE，出图口径才可比。
+    唯一区别：prefix 换成 sp_asset，别把我们的图和网关的产物混在一个目录里。
+    """
+    return {
+        "1": {"class_type": "UNETLoader",
+              "inputs": {"unet_name": comfy_model(), "weight_dtype": "default"}},
+        "2": {"class_type": "CLIPLoader",
+              "inputs": {"clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+                         "type": "minimax", "device": "default"}},
+        "3": {"class_type": "VAELoader",
+              "inputs": {"vae_name": "minimax_h3_image_vae_fp16.safetensors"}},
+        # 这个节点一次吐两个东西：[0] conditioning 给 BasicGuider，[1] latent 给采样器
+        "5": {"class_type": "MiniMaxH3ImageConditioning",
+              "inputs": {"clip": ["2", 0], "vae": ["3", 0],
+                         "prompt": prompt, "width": w, "height": h}},
+        "6": {"class_type": "KSamplerSelect", "inputs": {"sampler_name": "euler"}},
+        "7": {"class_type": "RandomNoise", "inputs": {"noise_seed": seed}},
+        "8": {"class_type": "BasicScheduler",
+              "inputs": {"model": ["1", 0], "scheduler": "simple",
+                         "steps": steps, "denoise": 1.0}},
+        "9": {"class_type": "BasicGuider",
+              "inputs": {"model": ["1", 0], "conditioning": ["5", 0]}},
+        "10": {"class_type": "SamplerCustomAdvanced",
+               "inputs": {"noise": ["7", 0], "guider": ["9", 0], "sampler": ["6", 0],
+                          "sigmas": ["8", 0], "latent_image": ["5", 1]}},
+        "11": {"class_type": "VAEDecode", "inputs": {"samples": ["10", 0], "vae": ["3", 0]}},
+        "12": {"class_type": "SaveImage",
+               "inputs": {"images": ["11", 0], "filename_prefix": "sp_asset"}},
+    }
+
+
+def comfy_submit(prompt, w, h, seed, steps=0):
+    """steps=0 交给 comfy_workflow 按架构取默认值（Flux 4 / H3-Image 6）。"""
     body = json.dumps({"prompt": comfy_workflow(prompt, w, h, seed, steps),
                        "client_id": "shortplay-assets"}).encode("utf-8")
     req = urllib.request.Request(comfy_host() + "/prompt", data=body,
@@ -354,6 +523,12 @@ def comfy_job_start(assets, variants, style_en="", fixed_seed=0, engine="comfy",
     云端引擎 seq_n>1 时一次出一组图。
     """
     engine = engine if engine in ("comfy", "qwen", "h3") else "comfy"
+    # 架构不对就别建任务：否则界面先返回 jobId、再让每张图各自失败，
+    # 用户看到的是「N 张全失败」而不是「模型选错了」，白等一轮。
+    if engine == "comfy":
+        err = comfy_arch_error()
+        if err:
+            raise ValueError(err)
     seq_n = max(1, min(int(seq_n or 1), 4)) if engine in ("qwen", "h3") else 1
     plan = []
     for a in assets[:24]:
@@ -481,9 +656,14 @@ def sync_image(body):
     prompt = str(body.get("prompt") or "").strip()[:4000]
     if not prompt:
         raise ValueError("prompt 不能为空")
+    err = comfy_arch_error()
+    if err:
+        raise ValueError(err)
     w = _v1_int(body.get("width"), 1024, 256, 2048, "width")
     h = _v1_int(body.get("height"), 1024, 256, 2048, "height")
-    steps = _v1_int(body.get("steps"), 4, 1, 50, "steps")
+    # 0 = 不指定，按模型架构取默认（Flux 4 步 / H3-Image 6 步），
+    # 避免调用方为了「默认值」还得知道后端挂的是哪个模型。
+    steps = _v1_int(body.get("steps"), 0, 0, 50, "steps")
     timeout = _v1_int(body.get("timeout"), 600, 30, 1800, "timeout")
     seed = body.get("seed")
     if seed is None:
@@ -502,8 +682,12 @@ def sync_image(body):
     # ASSET_IMG_NAME 白名单；不用 ComfyUI 的原始文件名，杜绝路径穿越。
     filename = "%012x_00001_.png" % random.getrandbits(48)
     (ASSET_IMG_DIR / filename).write_bytes(png)
+    info = comfy_arch_info()
     return {
         "prompt_id": pid, "seed": seed, "status": "succeeded",
         "elapsed": round(time.time() - t0, 2),
+        # 实际用的步数与模型都回传：换过架构后排查「为什么 6 步还是糊」不用猜
+        "steps": int(steps) if steps else COMFY_DEFAULT_STEPS.get(info["arch"], 4),
+        "width": w, "height": h, "model": info["model"], "arch": info["arch"],
         "filename": filename, "url": V1_IMAGE_URL_PREFIX + filename,
     }

@@ -534,6 +534,9 @@ export function comfyCheck() {
     ui.comfy.host = s.host || "";
     ui.comfy.model = s.model || "";
     ui.comfy.detail = s.online ? "" : (s.detail || "未连接");
+    // 架构由后端按 comfyModel 判定（flux / h3-image / h3-video）：
+    // 界面靠它决定能不能出图，不再出现「点了才发现模型不对」
+    if (s.arch && s.arch.arch) ui.comfy.arch = s.arch;
     if (s.variants) ui.comfy.variants = s.variants;
     return ui.comfy.online;
   }).catch(() => {

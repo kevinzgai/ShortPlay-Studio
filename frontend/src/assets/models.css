@@ -101,6 +101,22 @@
 .es-f input::placeholder{color:#5c6169}
 .es-hint{font-size:10.5px;color:var(--text-4);line-height:1.6;word-break:break-all}
 .es-hint.warn{color:#b45309}
+/* 模型选择：同一个 models/unet/ 里混着 flux / h3-image / h3-video，
+   平铺成可点的一排，把架构直接标在名字下面，不让人试错。
+   配色只用 styles.css 里既有的语义变量（--line / --text-* / --primary*），
+   不引入新变量，免得和别的分支撞车。 */
+.es-models{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.es-model{display:flex;flex-direction:column;align-items:flex-start;gap:1px;
+  padding:5px 9px;border:1px solid var(--line);border-radius:7px;
+  background:transparent;cursor:pointer;text-align:left;max-width:100%}
+.es-model b{font:11px/1.2 var(--mono);font-weight:600;color:var(--text-2);
+  max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.es-model em{font-style:normal;font-size:9.5px;color:var(--text-4)}
+.es-model:hover{border-color:var(--line-2)}
+.es-model.on{border-color:var(--primary-line);background:var(--primary-soft)}
+.es-model.on b{color:var(--primary)}
+.es-model.bad{border-style:dashed}
+.es-model.bad em{color:var(--warn)}
 .es-hint code{font-family:var(--mono);background:rgba(255,255,255,.05);border-radius:3px;padding:1px 4px}
 .es-acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 /* 保存栏吸附底部：两个引擎区块加起来会超出弹窗高度，

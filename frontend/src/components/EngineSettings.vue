@@ -51,12 +51,27 @@ const res = computed(() => ui.engine.result);
 const saving = computed(() => ui.engine.busy === "save");
 const comfyModels = computed(() => ui.engine.models || []);
 
+/* 架构信息全部来自后端 /api/comfy/models（同一个函数 comfy_arch_info 也喂给
+   /api/comfy/status 与测试连接），前端不再自行按文件名猜，避免两套判断漂移。
+   只在「这个文件名确实在 ComfyUI 列表里」时才有标注；手敲的新名字查不到就不标，
+   真错了由「测试连接」兜住。 */
+const archOf = (m) => (ui.engine.modelArchs || {})[m] || null;
+const curArch = computed(() => archOf(form.comfyModel));
+const modelTitle = (m) => {
+  const a = archOf(m);
+  if (!a) return m;
+  return a.usable
+    ? m + " · " + a.label + " · 默认 " + a.steps + " 步"
+    : m + " · " + a.label + "：出不了静帧，只能做视频";
+};
+function pickModel(m) { form.comfyModel = m; }
+
 const engTabs = computed(() => [
   { k: "comfy", label: "本地 ComfyUI", on: !!ui.comfy.online,
     badge: ui.comfy.online ? "在线" : "离线" },
   { k: "qwen", label: "通义万相", on: keySet.value,
     badge: keySet.value ? (keyMask.value || "已配置") : "未配置" },
-  { k: "h3", label: "MiniMax H3", on: h3KeySet.value,
+  { k: "h3", label: "MiniMax H3（云端）", on: h3KeySet.value,
     badge: h3KeySet.value ? (h3KeyMask.value || "已配置") : "未配置" }
 ]);
 
@@ -93,7 +108,10 @@ function testH3() { testEngine("h3"); }
     <!-- 本地 ComfyUI -->
     <section v-if="engTab === 'comfy'" class="es-block" data-eng-panel="comfy">
       <p class="es-note">
-        本机跑 Flux，图不出门、不产生调用费。三视图、概念图、组图都走它。
+        本机出图，图不出门、不产生调用费。三视图、概念图、组图都走它。
+        <span v-if="curArch" class="es-sub">
+          当前 {{ curArch.label }} · {{ curArch.steps }} 步
+        </span>
         <span v-if="ui.comfy.online" class="es-sub">
           v{{ ui.comfy.version || "?" }} · {{ ui.comfy.vramFreeMB }}MB 可用显存
         </span>
@@ -114,11 +132,32 @@ function testH3() { testEngine("h3"); }
         <datalist id="comfy-unets">
           <option v-for="m in comfyModels" :key="m" :value="m"></option>
         </datalist>
-        <span v-if="comfyModels.length" class="es-hint" data-eng-models>
-          ComfyUI 里现有 {{ comfyModels.length }} 个：{{ comfyModels.join("、") }}
-        </span>
+        <!-- 平铺成可点的一排并标出架构：同一目录里混着 flux / h3-image / h3-video，
+             只给文件名的话用户得试一次才知道哪个能出定妆图 -->
+        <div v-if="comfyModels.length" data-eng-models>
+          <div class="es-models">
+            <button v-for="m in comfyModels" :key="m" type="button"
+              class="es-model" :class="{ on: form.comfyModel === m, bad: archOf(m) && !archOf(m).usable }"
+              :data-eng-model="m" :title="modelTitle(m)" @click="pickModel(m)">
+              <b>{{ m }}</b>
+              <em v-if="archOf(m)">{{ archOf(m).label }} · {{ archOf(m).steps }} 步</em>
+            </button>
+          </div>
+          <span class="es-hint">
+            ComfyUI 里现有 {{ comfyModels.length }} 个，点一个即可切换；
+            <b>虚线框</b>是视频模型，出不了定妆 / 道具图。
+          </span>
+        </div>
         <span v-else-if="!ui.comfy.online" class="es-hint">
           连上 ComfyUI 后可以在这里直接选现有模型，不用猜文件名。
+        </span>
+        <span v-if="curArch && !curArch.usable" class="es-hint warn" data-eng-arch-warn>
+          当前选的是视频模型（{{ curArch.label }}）：它走 fl2v 视频链路，出不了静帧。
+          换 flux1-schnell-fp8 或 minimax_h3_image 才能给定妆 / 道具出图。
+        </span>
+        <span v-else-if="curArch" class="es-hint" data-eng-arch-ok>
+          出图链路：{{ curArch.label }} · {{ curArch.steps }} 步
+          <template v-if="curArch.arch === 'h3-image'">（qwen3vl CLIP + H3 图像 VAE，与 8000 网关同一条工作流）</template>
         </span>
       </div>
 

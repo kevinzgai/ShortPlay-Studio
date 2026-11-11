@@ -176,7 +176,17 @@ py tools/gen_first_frame.py --indices 0,40    :: 本地 ComfyUI Flux 出起始�
 
 资产卡头部多了 **「✦ AI 补形象」**：只把剧本里提到这个角色 / 场景的行（±2 行）发给模型，补脸型 / 瑕疵 / 服装记忆点 / 固定关键词串与**英文关键词**；手填过的非空字段保留，改动进撤销栈。
 
-资产面板顶部是**本地出图工具条**（需本机 ComfyUI 跑在 `8188`）：选范围（当前资产 / P0 / 本栏全部）→ 勾素材类型（角色：三视图 / 面部四视图 / 定妆半身；场景：概念图 / 宽幕建立镜；道具：静物）→ 点「✦ 一键生成 N 张」。走 `Flux.1-schnell fp8`（4 步 / euler），单张 8–20 秒，进度条实时刷新，一次最多 12 张。出的图回挂到对应资产，第一张自动设为主参考图，原图落 `examples/assets/`。
+资产面板顶部是**本地出图工具条**（需本机 ComfyUI 跑在 `8188`）：选范围（当前资产 / P0 / 本栏全部）→ 勾素材类型（角色：三视图 / 面部四视图 / 定妆半身；场景：概念图 / 宽幕建立镜；道具：静物）→ 点「✦ 一键生成 N 张」。进度条实时刷新，一次最多 12 张。出的图回挂到对应资产，第一张自动设为主参考图，原图落 `examples/assets/`。
+
+**出图模型不再只有 Flux**：`models/unet/` 里常同时躺着几个不同架构的模型，工作流完全不是同一套，所以后端按模型名分派（`comfy_arch()`），界面把三个模型平铺成可点的 chip 并标出架构与默认步数：
+
+| 模型 | 架构 | 工作流 | 能否出定妆 / 道具图 |
+|---|---|---|---|
+| `flux1-schnell-fp8` | Flux | `DualCLIPLoader`(clip_l + t5xxl) + `FluxGuidance` + 4 步 euler | ✅ 默认 |
+| `minimax_h3_image_*` | MiniMax H3-Image | `CLIPLoader(type=minimax, qwen3vl_32b)` + `MiniMaxH3ImageConditioning` + 6 步 euler | ✅ |
+| `minimax_h3_fl2va_*` | H3 视频 | fl2v 视频链路（含 audio VAE） | ❌ 界面置灰，提交前直接拦 |
+
+H3-Image 的节点图逐字对齐本机 `8000` 网关的 `/v1/images`（连 6 步、`simple`/`euler` 都不改），所以两边出的图口径可比。**「unet 存在」不等于「能跑」**：H3-Image 还要 `qwen3vl_32b_minimax_h3_nvfp4_awq` 的 CLIP 与 `minimax_h3_image_vae_fp16` 的 VAE，少一个就会在提交时节点校验失败；现在「测试连接」会按架构把这些依赖文件逐个查一遍，缺什么直接点名，不再只报「模型名不匹配」。同理，选了视频模型时「测试连接」会明确失败，而不是以前那样假通过。
 
 **看大图**：点任意一张生成图进全屏预览（`←` `→` 切图、`Esc` 或点空白处关闭），可复制该张的英文 Flux 提示词、下载原图、直接设为主参考图。预览读的是落盘**原图**，不是 512px 缩略 dataURI —— 缩略图只用于卡片显示，分辨率不跟着涨，否则 `localStorage` 会被撑爆。卡片按每张图的真实画幅铺开，不再统一裁成 4:3：三视图 1024×672（3:2）、定妆 768×1024（3:4）、概念图 1152×640（16:9）、宽幕 1216×512（2.375:1）、静物 896×896。
 
@@ -215,6 +225,8 @@ py tools/gen_first_frame.py --indices 0,40    :: 本地 ComfyUI Flux 出起始�
 > 坑五：改了 `server.py` 要重启 8177 才生效；`Stop-Process` 只按端口杀容易留下旧进程继续抢请求（本机 Windows 允许同端口复用），按命令行匹配 `*shortplay-studio*server.py*` 全杀再起。
 
 > 坑六：**道具图里出现人手 / 人像**，是三个条件叠出来的：通用风格锚带 `natural skin texture`、道具没有英文主体（中文名被 T5 忽略）、道具模板漏写 `no people`。修法是分层风格锚 + `propEn` + 静物模板（`still life of a single … no people, no human figure, no hands, no face`），四者缺一都还会复发。同 seed 只换提示词的对照图见 `screenshots/prop_ab_cur.png`（坏）/ `prop_fix_coins_771.png`（好）。
+
+> 坑七：**`UNETLoader` 的候选列表不分架构**。它会把 `models/unet/` 下所有模型都列出来，但 Flux / H3-Image / H3 视频要的是三套完全不同的工作流。拿 H3 模型跑 Flux 链路，报错长这样：`mat1 and mat2 shapes cannot be multiplied (256x4096 and 5120x5376)` —— 因为 H3 的 CLIP 是 qwen3vl_32b（5120 维），Flux 的 t5xxl 是 5376 维。**看到这个维度不匹配就去查模型架构**，别去调分辨率或步数。
 
 **同步出图 `POST /v1/images`**（与上面 `jobId` 轮询并存，两条路共用 `comfy_workflow()`，设置里换的 `comfyHost` / `comfyModel` 对两边同时生效）：
 

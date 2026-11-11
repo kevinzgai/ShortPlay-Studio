@@ -336,6 +336,15 @@ const genCount = computed(() => scopeList.value.length * (ui.comfy.picked[S.asse
 const engineOnline = computed(() => cloudEngine.value
   ? (ui.comfy.engine === "qwen" ? ui.comfy.qwen.online : ui.comfy.h3.online)
   : ui.comfy.online);
+/* 引擎在线 ≠ 能出图：ComfyUI 里若选了视频模型（fl2va 等），提交上去必失败。
+   后端 /api/comfy/status 已按模型名判定架构，这里直接用它把按钮置灰。 */
+const archBlocked = computed(() => !cloudEngine.value
+  && !!ui.comfy.arch && ui.comfy.arch.usable === false);
+/* 耗时口径跟着架构说话：换成 H3-Image 还写「Flux 单张 6–12 秒」会误导 */
+const localHint = computed(() => {
+  const a = (ui.comfy.arch && ui.comfy.arch.arch) || "flux";
+  return (a === "h3-image" ? "H3-Image 单张约 6–12 秒" : "Flux 单张约 6–12 秒") + "，别关页面";
+});
 /* 这一行不是按钮、是「出图参数」：点完只会改这里的一行说明，真正出图在右边那个按钮 */
 const genSummary = computed(() => {
   const n = scopeList.value.length;
@@ -485,7 +494,8 @@ watch(() => sel.value && sel.value.id, () => { closePreview(); ui.comfy.preview 
         <div class="ap-gen-seg" title="切换出图引擎">
           <button :class="{ on: ui.comfy.engine === 'comfy' }" @click="comfySetEngine('comfy')">本地 ComfyUI</button>
           <button :class="{ on: ui.comfy.engine === 'qwen' }" @click="comfySetEngine('qwen')">通义万相</button>
-          <button :class="{ on: ui.comfy.engine === 'h3' }" @click="comfySetEngine('h3')">MiniMax H3</button>
+          <button :class="{ on: ui.comfy.engine === 'h3' }" @click="comfySetEngine('h3')"
+            title="云端 MiniMax，要配 API Key；本机那套 H3-Image 在「本地 ComfyUI」里换 unet">MiniMax H3（云端）</button>
         </div>
         <span v-if="ui.comfy.engine === 'qwen'" class="ap-gen-info" :class="{ off: !ui.comfy.qwen.online }">
           {{ ui.comfy.qwen.online ? (ui.comfy.qwen.model + ' · ' + ui.comfy.qwen.size + ' · 云端组图') : ui.comfy.qwen.detail }}
@@ -493,8 +503,12 @@ watch(() => sel.value && sel.value.id, () => { closePreview(); ui.comfy.preview 
         <span v-else-if="ui.comfy.engine === 'h3'" class="ap-gen-info" :class="{ off: !ui.comfy.h3.online }">
           {{ ui.comfy.h3.online ? (ui.comfy.h3.model + ' · ' + ui.comfy.h3.size + ' · 云端生图') : ui.comfy.h3.detail }}
         </span>
-        <span v-else-if="ui.comfy.online" class="ap-gen-info">
+        <span v-else-if="ui.comfy.online" class="ap-gen-info" :class="{ off: archBlocked }">
           ComfyUI {{ ui.comfy.version }} · {{ ui.comfy.model }} · 显存空闲 {{ vramText(ui.comfy.vramFreeMB) }}
+          <em v-if="ui.comfy.arch && ui.comfy.arch.label" class="ap-gen-arch"
+            :title="archBlocked ? '这个模型走视频链路，出不了定妆 / 道具图' : '当前出图架构与默认步数'">
+            {{ ui.comfy.arch.label }} · {{ ui.comfy.arch.steps }} 步
+          </em>
         </span>
         <span v-else class="ap-gen-info off">{{ ui.comfy.detail }} · 启动 8188 后重试</span>
         <button class="mini" title="重新探测出图引擎" @click="comfyCheck">↻</button>
@@ -525,9 +539,13 @@ watch(() => sel.value && sel.value.id, () => { closePreview(); ui.comfy.preview 
           </div>
         </div>
         <div class="ap-gen-act">
-          <span class="ap-gen-sum" :class="{ warn: !genCount }">{{ genSummary }}</span>
+          <span class="ap-gen-sum" :class="{ warn: !genCount || archBlocked }">
+            {{ archBlocked ? "当前模型是视频模型，出不了静帧" : genSummary }}
+          </span>
           <button class="btn sm primary" id="comfy-generate"
-            :disabled="ui.comfy.busy || !genCount" @click="doGenerate">
+            :disabled="ui.comfy.busy || !genCount || archBlocked"
+            :title="archBlocked ? '到「系统设置 · 出图引擎」把 unet 换成 flux1-schnell-fp8 或 minimax_h3_image' : ''"
+            @click="doGenerate">
             {{ ui.comfy.busy ? "生成中…" : "✦ 一键生成 " + genCount + " 张" }}
           </button>
         </div>
@@ -539,7 +557,7 @@ watch(() => sel.value && sel.value.id, () => { closePreview(); ui.comfy.preview 
         <div class="ap-gen-bar"><i :style="{ width: genPct + '%' }"></i></div>
         <span>已出 {{ ui.comfy.done }} / {{ ui.comfy.total }} 张</span>
         <span class="ap-gen-cur">{{ ui.comfy.current || "排队中…" }}</span>
-        <span class="ap-gen-hint">{{ cloudEngine ? '云端生图单批约 20–60 秒，别关页面' : 'Flux 单张约 6–12 秒，别关页面' }}</span>
+        <span class="ap-gen-hint">{{ cloudEngine ? '云端生图单批约 20–60 秒，别关页面' : localHint }}</span>
       </template>
       <template v-else>
         <span class="ok">✓ 完成 {{ ui.comfy.results.length }} 张，已挂到对应资产</span>

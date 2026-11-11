@@ -464,6 +464,10 @@ D4 无批量按钮；`npm run build` 通过。
 | `backend/app/services/comfy.py` `sync_image()` | **同步出图**：`POST /v1/images` 提交→等→下载→落盘→回 `url`，与 `comfy_job_start()` 的异步 job 并存，两条路共用 `comfy_workflow()`。别在这里另写一张工作流，否则「设置里换模型只对一边生效」 |
 | `backend/app/asgi.py` `v1_images` / `v1_image` | `/v1/images` 与 `/v1/images/file/{filename}` 的 FastAPI 挂载点。**出图阻塞几十秒，必须 `anyio.to_thread.run_sync`**，直接写在 async 里会卡死整个事件循环（与 SSE 同一个坑） |
 | `backend/app/web/routes_get.py` `v1_image_file()` | 供图：与 `/api/comfy/image` 共用 `ASSET_IMG_DIR` + `ASSET_IMG_NAME` 白名单，但走 `inline=True`（浏览器直显，不当附件下载） |
+| `backend/app/services/comfy.py` `comfy_arch()` / `comfy_arch_info()` | **模型架构分派**：按 unet 名判 flux / h3-image / h3-video，决定走 `_workflow_flux()` 还是 `_workflow_h3_image()`；认不出来的自定义微调一律按 flux（保持旧行为）。**不要再往 `comfy_workflow()` 里写死某个架构** |
+| `backend/app/services/comfy.py` `_workflow_h3_image()` | H3-Image 节点图，**逐字对齐本机 8000 网关的 `/v1/images`**（`CLIPLoader type=minimax` + `qwen3vl_32b` CLIP + `MiniMaxH3ImageConditioning` + 6 步 simple/euler）。改它之前先确认网关那边同步改了，否则两边出图口径分叉 |
+| `backend/app/services/comfy.py` `comfy_missing_files()` | 按架构查 CLIP / VAE 依赖文件是否真在 ComfyUI 里。**「unet 存在」不等于「能跑」**，这是专治 `mat1 and mat2 shapes` 那类报错的探测器 |
+| `frontend/src/components/EngineSettings.vue` `.es-model` | 模型平铺 chip（带架构 + 默认步数、视频模型虚线框）。`data-eng-model` 是回归钩子；`[data-eng-models]` 仍是列表容器（旧断言依赖它） |
 
 ### 业务层（历史条目，路径见上方提示）
 
@@ -572,6 +576,7 @@ git remote set-url origin git@github.com:kevinzgai/ShortPlay-Studio.git
 |---|---|
 | ~~万相有效 Key / 只判有没有填不判真伪~~ | **2026-11-11 用户明确注销**。它是 ComfyUI 之外的可选备用引擎，默认引擎是 `comfy`；`qwenKey` 为空时诊断只降级为 `warn`，不影响主流程与回归 |
 | ~~新建项目道具分组默认空~~ | **2026-11-11 核查结案，不是缺陷**。① AI 分解路径道具完整（实测产出 3 个）；② 只有离线引擎 `engine.js:1069` 的 props 只继承不推断，属有意设计（道具名无可靠正则特征）；③ 绑定链路正常（fixture 44 镜中 8 镜正确绑定） |
+| ~~ComfyUI 三个模型「选不动 / 选了出图失败」~~ | **2026-11-11 已修**。根因不是 UI 而是 `comfy_workflow()` 写死 Flux 链路，而 `UNETLoader` 把三种架构混列。现在按模型名分派（`comfy_arch()`）、界面平铺 chip 标架构、视频模型置灰 + 三条链路统一拦截、「测试连接」校验架构与 CLIP/VAE 依赖。实测 `minimax_h3_image` 出定妆 1024×672 13.4s、道具 896×896 7.0s，UI 套件 26/26 |
 
 ### 历史限制（保留供溯源）
 

@@ -96,6 +96,8 @@ export const ui = reactive({
   comfy: {
     online: false, checked: false, checking: false, detail: "",
     version: "", vramFreeMB: 0, host: "", model: "",
+    // 当前 unet 的架构：flux / h3-image / h3-video。usable=false 时出图按钮要置灰
+    arch: { arch: "flux", label: "Flux 文生图", usable: true, steps: 4, model: "" },
     variants: { character: [], scene: [], prop: [] },
     scope: "one", picked: { character: ["turnaround"], scene: ["concept"], prop: ["prop"] },
     jobId: "", busy: false, done: 0, total: 0, current: "",
@@ -113,7 +115,9 @@ export const ui = reactive({
   // 出图引擎配置（全局单例，与语言模型的分条列表不同）：纯界面态，不进撤销
   engine: {
     loaded: false, busy: "", testing: "", result: null,
-    config: {}, models: [], modelsBusy: false, modelsHost: ""
+    config: {}, models: [], modelsBusy: false, modelsHost: "",
+    // models 里每个文件的架构（flux / h3-image / h3-video），换模型时标出哪个能用
+    modelArchs: {}, modelCurrent: null
   },
   // 后端拆解任务的实时进度（纯界面态：不进撤销快照、不落盘，刷新后由 /api/parse/latest 接回）
   parse: {
