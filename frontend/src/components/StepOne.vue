@@ -188,7 +188,7 @@ function onDrop(e) {
         </div>
         <div class="how-item"><div class="n">三种稿子 · 三条路</div><p><b>已有场次头</b>：直接拆解，零成本。<b>简易剧本</b>（有对白没场次头）：本地按空行补场号，不改字。<b>小说 / 散文</b>：AI 忠实转写，模型只判断「哪几句属于哪一场」，正文逐字拼回。</p></div>
         <div class="how-item"><div class="n">转写为什么可信</div><p>不让模型重写长文（会被 max_tokens 截断）。它只输出结构 JSON，正文由原句拼装，转完再按句比对：句子保留率、引语保留率都列出来，低于 90% 会直接告警。</p></div>
-        <div class="how-item"><div class="n">下一步做什么</div><p>格式齐了就去「分集」，看分集方案、场次清单和体检问题；确认后第 3 步排镜头、第 4 步定妆。</p></div>
+        <div class="how-item"><div class="n">下一步做什么</div><p>格式齐了就去「分集」，看分集方案、场次清单和体检问题；确认后第 3 步排镜头，分镜表就是完整交付物，出片可选。</p></div>
       </div>
     </aside>
   </div>

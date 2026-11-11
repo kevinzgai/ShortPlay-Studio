@@ -4,7 +4,7 @@
    设计约束（Design skill / 本项目）：
      · 0 阴影卡片，1px 边分层；重点项用左侧 3px 重边线，不靠投影
      · hover 只变边色，不做位移；所有过渡 150ms
-     · 主色沿用本项目 indigo #7170ff，不复用其它项目品牌变量
+     · 主色跟随 styles.css 的 --primary（V1 克制灰阶 · 近黑）
      · 不新增计数徽标 / 进度装饰
    实现约束：
      · 纯 CSS，零第三方依赖，不改任何 DOM / id / class 名 / 事件委托
@@ -161,7 +161,7 @@ button:focus-visible, [role="button"]:focus-visible {
 .btn:active:not(:disabled) { filter: brightness(.96); }
 .btn:disabled { background: var(--surface-2); color: var(--text-3); border-color: var(--line); opacity: .6; }
 .btn.primary {
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.22);   /* 顶部内高光，不是投影 */
+  box-shadow: inset 0 1px 0 rgba(var(--tint),.22);   /* 顶部内高光，不是投影 */
 }
 .btn.primary:active:not(:disabled) { filter: brightness(.95); }
 .btn.sm { min-height: 28px; }

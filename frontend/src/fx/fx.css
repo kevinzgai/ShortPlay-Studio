@@ -8,12 +8,12 @@
 /* ---------------------------------------------------------------- 极光背景 */
 .fx-aurora{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
 .fx-aurora .fx-blob{position:absolute;display:block;border-radius:50%;filter:blur(96px);will-change:transform}
-.fx-aurora .b1{width:52vw;height:52vw;left:-14vw;top:-20vw;background:radial-gradient(circle,rgba(113,112,255,.20),rgba(113,112,255,0) 70%);animation:fxFloat1 22s ease-in-out infinite}
+.fx-aurora .b1{width:52vw;height:52vw;left:-14vw;top:-20vw;background:radial-gradient(circle,rgba(88,96,160,.20),rgba(88,96,160,0) 70%);animation:fxFloat1 22s ease-in-out infinite}
 .fx-aurora .b2{width:46vw;height:46vw;right:-12vw;top:8vh;background:radial-gradient(circle,rgba(80,190,255,.17),rgba(80,190,255,0) 70%);animation:fxFloat2 27s ease-in-out infinite}
 .fx-aurora .b3{width:40vw;height:40vw;left:32vw;bottom:-22vw;background:radial-gradient(circle,rgba(196,120,255,.14),rgba(196,120,255,0) 70%);animation:fxFloat3 31s ease-in-out infinite}
 .fx-aurora .fx-grid{position:absolute;inset:0;opacity:.35;
-  background-image:linear-gradient(rgba(113,112,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(113,112,255,.045) 1px,transparent 1px);
-  background-size:44px 44px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.7),transparent 78%)}
+  background-image:linear-gradient(rgba(88,96,160,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(88,96,160,.045) 1px,transparent 1px);
+  background-size:44px 44px;mask-image:linear-gradient(to bottom,var(--shade70),transparent 78%)}
 @keyframes fxFloat1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(9vw,7vh) scale(1.16)}}
 @keyframes fxFloat2{0%,100%{transform:translate(0,0) scale(1.05)}50%{transform:translate(-8vw,10vh) scale(.9)}}
 @keyframes fxFloat3{0%,100%{transform:translate(0,0) scale(.95)}50%{transform:translate(6vw,-9vh) scale(1.2)}}
@@ -28,19 +28,19 @@ body.fx-on .busy-card{
   border:1px solid transparent;
   background:
     linear-gradient(rgba(20,21,25,.86),rgba(20,21,25,.86)) padding-box,
-    linear-gradient(135deg,rgba(113,112,255,.48),rgba(113,112,255,.06) 44%,rgba(72,199,255,.34)) border-box;
+    linear-gradient(135deg,rgba(88,96,160,.48),rgba(var(--tint),.04) 44%,rgba(72,199,255,.34)) border-box;
   backdrop-filter:blur(16px) saturate(155%);
   -webkit-backdrop-filter:blur(16px) saturate(155%);
   box-shadow:0 1px 22px rgba(80,80,170,.045);
 }
 body.fx-on .shot{transition:transform 180ms cubic-bezier(.2,.9,.2,1),box-shadow 180ms ease,border-color 180ms ease}
 body.fx-on .shot:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(90,88,210,.10)}
-body.fx-on .shot.active{box-shadow:0 0 0 1px rgba(113,112,255,.28),0 10px 30px rgba(90,88,210,.12)}
+body.fx-on .shot.active{box-shadow:0 0 0 1px rgba(var(--tint),.22),0 10px 30px rgba(90,88,210,.12)}
 body.fx-on .stat:hover{transform:translateY(-2px)}
 body.fx-on .stat{transition:transform 180ms cubic-bezier(.2,.9,.2,1)}
-body.fx-on .topbar{background:rgba(8,9,10,.82);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%)}
+body.fx-on .topbar{background:var(--topbar-bg);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%)}
 body.fx-on .topbar:after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;
-  background:linear-gradient(90deg,transparent,rgba(113,112,255,.42),rgba(72,199,255,.3),transparent)}
+  background:linear-gradient(90deg,transparent,rgba(88,96,160,.42),rgba(72,199,255,.3),transparent)}
 body.fx-on .modal-veil{backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
 
 /* ---------------------------------------------------------------- 流光主按钮 / 水波纹 */
@@ -52,7 +52,7 @@ body.fx-on .btn.primary{
 }
 body.fx-on .btn.primary:hover:not(:disabled){filter:none;box-shadow:0 9px 26px rgba(88,86,225,.34)}
 body.fx-on .btn.primary:after{content:"";position:absolute;top:-40%;bottom:-40%;width:46%;left:-60%;transform:skewX(-22deg);
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.42),transparent);animation:fxSweep 4.2s ease-in-out infinite;pointer-events:none}
+  background:linear-gradient(90deg,transparent,rgba(var(--tint),.42),transparent);animation:fxSweep 4.2s ease-in-out infinite;pointer-events:none}
 @keyframes fxFlow{0%{background-position:0% 50%}100%{background-position:260% 50%}}
 @keyframes fxSweep{0%,62%{left:-60%}100%{left:130%}}
 body.fx-on .btn,
@@ -60,17 +60,17 @@ body.fx-on .step-pill,
 body.fx-on .ghost-btn,
 body.fx-on .icon-btn{position:relative;overflow:hidden}
 .fx-ripple{position:absolute;border-radius:50%;pointer-events:none;transform:scale(0);
-  background:radial-gradient(circle,rgba(113,112,255,.40),rgba(113,112,255,0) 70%);
+  background:radial-gradient(circle,rgba(88,96,160,.40),rgba(88,96,160,0) 70%);
   animation:fxRipple .68s cubic-bezier(.2,.7,.3,1) forwards;z-index:0}
 @keyframes fxRipple{to{transform:scale(1);opacity:0}}
 
 /* 药丸 tab 滑动高亮 + 呼吸点 */
 body.fx-on .step-pill.active:before{content:"";position:absolute;inset:0;border-radius:inherit;
-  background:linear-gradient(120deg,rgba(113,112,255,.12),rgba(72,199,255,.08));animation:fxBreath 3.4s ease-in-out infinite;pointer-events:none}
+  background:linear-gradient(120deg,rgba(88,96,160,.12),rgba(72,199,255,.08));animation:fxBreath 3.4s ease-in-out infinite;pointer-events:none}
 @keyframes fxBreath{0%,100%{opacity:.5}50%{opacity:1}}
 body.fx-on .chip.indigo:before{content:"";width:5px;height:5px;border-radius:50%;background:var(--primary);
-  box-shadow:0 0 0 0 rgba(113,112,255,.5);animation:fxPulse 2.4s ease-out infinite}
-@keyframes fxPulse{0%{box-shadow:0 0 0 0 rgba(113,112,255,.5)}70%{box-shadow:0 0 0 7px rgba(113,112,255,0)}100%{box-shadow:0 0 0 0 rgba(113,112,255,0)}}
+  box-shadow:0 0 0 0 var(--primary-line);animation:fxPulse 2.4s ease-out infinite}
+@keyframes fxPulse{0%{box-shadow:0 0 0 0 var(--primary-line)}70%{box-shadow:0 0 0 7px rgba(88,96,160,0)}100%{box-shadow:0 0 0 0 rgba(88,96,160,0)}}
 
 /* 入场交错 + 通知玻璃化 */
 body.fx-on .view:not(.hidden)>*{animation:fxRise .38s cubic-bezier(.2,.9,.25,1) both}
@@ -88,7 +88,7 @@ body.fx-on .toast .t-ico{box-shadow:0 0 10px currentColor}
 .fx-hud{display:flex;align-items:center;gap:12px;padding:9px 15px;border-radius:999px;
   border:1px solid transparent;
   background:linear-gradient(rgba(19,20,24,.88),rgba(19,20,24,.88)) padding-box,
-             linear-gradient(120deg,rgba(113,112,255,.55),rgba(72,199,255,.38)) border-box;
+             linear-gradient(120deg,rgba(88,96,160,.55),rgba(72,199,255,.38)) border-box;
   backdrop-filter:blur(20px) saturate(170%);-webkit-backdrop-filter:blur(20px) saturate(170%);
   box-shadow:0 8px 28px rgba(80,80,170,.14);
   opacity:0;transform:translateY(10px) scale(.96);pointer-events:none;
@@ -101,11 +101,11 @@ body.fx-on .toast .t-ico{box-shadow:0 0 10px currentColor}
 .fx-hud-sep{width:1px;height:17px;background:var(--line-2)}
 .fx-hud.shimmer{position:relative;overflow:hidden}
 .fx-hud.shimmer:after{content:"";position:absolute;inset:0;
-  background:linear-gradient(90deg,transparent,rgba(113,112,255,.20),transparent);animation:fxSweep 2.2s linear infinite}
+  background:linear-gradient(90deg,transparent,rgba(88,96,160,.20),transparent);animation:fxSweep 2.2s linear infinite}
 
 .fx-panel{width:262px;padding:15px 16px 13px;border-radius:16px;border:1px solid transparent;
   background:linear-gradient(rgba(17,18,21,.97),rgba(17,18,21,.97)) padding-box,
-             linear-gradient(135deg,rgba(113,112,255,.55),rgba(72,199,255,.35)) border-box;
+             linear-gradient(135deg,rgba(88,96,160,.55),rgba(72,199,255,.35)) border-box;
   backdrop-filter:blur(26px) saturate(170%);-webkit-backdrop-filter:blur(26px) saturate(170%);
   box-shadow:0 18px 48px rgba(40,40,100,.18);animation:fxRise .3s cubic-bezier(.2,.9,.2,1) both}
 .fx-panel-head{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:680;margin-bottom:12px}
@@ -113,7 +113,7 @@ body.fx-on .toast .t-ico{box-shadow:0 0 10px currentColor}
   background:var(--primary-soft);border:1px solid var(--primary-line);padding:4px 7px;border-radius:999px}
 .fx-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:9px 0;font-size:11.5px;color:var(--text-2)}
 .fx-switch{width:36px;height:20px;border-radius:999px;border:1px solid var(--line-2);background:var(--surface-3);padding:0;position:relative;transition:.2s}
-.fx-switch i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.2);transition:.2s}
+.fx-switch i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 4px var(--shade20);transition:.2s}
 .fx-switch.on{background:linear-gradient(120deg,var(--primary),#5f8bff);border-color:transparent}
 .fx-switch.on i{left:18px}
 .fx-seg{display:flex;gap:3px;padding:3px;border-radius:9px;background:var(--surface-3);border:1px solid var(--line)}
@@ -124,11 +124,11 @@ body.fx-on .toast .t-ico{box-shadow:0 0 10px currentColor}
 .fx-tip{margin-top:12px;padding-top:10px;border-top:1px dashed var(--line-2);font-size:10.5px;color:var(--text-3)}
 .fx-tip kbd,.fx-palette kbd{font:600 10px/1 var(--mono);padding:2px 5px;border:1px solid var(--line-2);border-radius:5px;background:var(--surface-2);color:var(--text-2)}
 
-.fx-orb{width:46px;height:46px;border-radius:50%;border:1px solid rgba(255,255,255,.5);cursor:pointer;
+.fx-orb{width:46px;height:46px;border-radius:50%;border:1px solid rgba(var(--tint),.5);cursor:pointer;
   background:conic-gradient(from 0deg,#6d6bff,#8a7bff,#4f8cff,#59d0ff,#6d6bff);
   color:#fff;font-size:20px;display:grid;place-items:center;position:relative;
   box-shadow:0 10px 28px rgba(88,86,225,.38);transition:transform .25s cubic-bezier(.2,.9,.2,1),box-shadow .25s}
-.fx-orb:before{content:"";position:absolute;inset:-5px;border-radius:50%;border:1px solid rgba(113,112,255,.42);
+.fx-orb:before{content:"";position:absolute;inset:-5px;border-radius:50%;border:1px solid rgba(88,96,160,.42);
   animation:fxHalo 3.6s ease-in-out infinite}
 .fx-orb:after{content:"";position:absolute;inset:3px;border-radius:50%;background:rgba(20,20,55,.18)}
 .fx-orb span{position:relative;z-index:1;line-height:1;transition:transform .35s}
@@ -143,7 +143,7 @@ body.fx-on .toast .t-ico{box-shadow:0 0 10px currentColor}
 @keyframes fxFade{from{opacity:0}to{opacity:1}}
 .fx-palette{width:min(620px,92vw);border-radius:18px;overflow:hidden;border:1px solid transparent;
   background:linear-gradient(rgba(17,18,21,.95),rgba(17,18,21,.95)) padding-box,
-             linear-gradient(135deg,rgba(113,112,255,.7),rgba(72,199,255,.45)) border-box;
+             linear-gradient(135deg,rgba(88,96,160,.7),rgba(72,199,255,.45)) border-box;
   backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);
   box-shadow:0 32px 90px rgba(25,25,70,.30);animation:fxPop .26s cubic-bezier(.2,.9,.2,1) both}
 @keyframes fxPop{from{opacity:0;transform:translateY(-14px) scale(.97)}to{opacity:1;transform:none}}
@@ -154,7 +154,7 @@ body.fx-on .toast .t-ico{box-shadow:0 0 10px currentColor}
 .fx-palette-list{max-height:360px;overflow:auto;padding:8px}
 .fx-palette-item{display:flex;align-items:center;gap:11px;width:100%;text-align:left;border:1px solid transparent;
   background:transparent;border-radius:10px;padding:9px 11px;color:var(--text);font-size:12.5px;transition:.14s}
-.fx-palette-item.on{border-color:var(--primary-line);background:linear-gradient(100deg,var(--primary-soft),rgba(113,112,255,.03))}
+.fx-palette-item.on{border-color:var(--primary-line);background:linear-gradient(100deg,var(--primary-soft),rgba(88,96,160,.03))}
 .fx-palette-ico{width:24px;height:24px;flex:0 0 24px;display:grid;place-items:center;border-radius:7px;
   background:var(--surface-3);color:var(--primary-deep);font-size:12px;font-weight:700}
 .fx-palette-item.on .fx-palette-ico{background:var(--primary);color:#fff}
@@ -191,7 +191,7 @@ body.fx-dark .fx-palette{
   background:
     linear-gradient(rgba(20,24,41,.95),rgba(20,24,41,.95)) padding-box,
     linear-gradient(135deg,rgba(143,141,255,.62),rgba(143,141,255,.08) 46%,rgba(72,199,255,.42)) border-box;
-  box-shadow:0 2px 26px rgba(0,0,0,.28);
+  box-shadow:0 2px 26px var(--shade28);
 }
 body.fx-dark .topbar{background:rgba(18,22,38,.80)}
 body.fx-dark .shot.active{background:rgba(36,37,77,.80)}

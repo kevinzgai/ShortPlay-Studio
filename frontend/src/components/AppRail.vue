@@ -32,14 +32,16 @@ const stageProg = (key) => stepsOf(key).filter((s) => stepNo.value >= s.no).leng
         <span class="rail-stage-note">{{ st.note }}</span>
       </div>
       <nav class="rail-steps" :aria-label="st.name">
+        <div v-if="stepsOf(st.key).some((s) => s.optional)" class="rail-opt-label">可选动作 · 不算主流程</div>
         <button
           v-for="s in stepsOf(st.key)" :key="s.no"
           class="rail-step"
-          :class="{ active: s.no === stepNo, done: isDone(s.no) }"
+          :class="{ active: s.no === stepNo, done: isDone(s.no), 'rail-step-opt': s.optional }"
           :data-step="s.no"
+          :data-optional="s.optional ? '1' : null"
           @click="goStep(s.no)"
         >
-          <span class="num">{{ isDone(s.no) ? "✓" : s.no }}</span>
+          <span class="num">{{ isDone(s.no) ? "✓" : (s.optional ? "↗" : s.no) }}</span>
           <span class="txt"><b>{{ s.label }}</b><em>{{ s.hint }}</em></span>
         </button>
       </nav>

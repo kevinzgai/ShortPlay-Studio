@@ -71,10 +71,10 @@ onUnmounted(() => {
         <button class="fx-switch" :class="{ on: fx.on }" aria-label="特效总开关" @click="setFx(!fx.on)"><i></i></button>
       </div>
       <div class="fx-row">
-        <span>皮肤</span>
+        <span>特效配色</span>
         <div class="fx-seg">
-          <button :class="{ on: !fx.dark }" @click="setDark(false)">浅色极光</button>
-          <button :class="{ on: fx.dark }" @click="setDark(true)">暗夜霓虹</button>
+          <button :class="{ on: !fx.dark }" @click="setDark(false)">极光</button>
+          <button :class="{ on: fx.dark }" @click="setDark(true)">霓虹</button>
         </div>
       </div>
       <div class="fx-row">
@@ -85,7 +85,7 @@ onUnmounted(() => {
           <button :class="{ on: fx.motion === 'off' }" @click="setMotion('off')">静止</button>
         </div>
       </div>
-      <div class="fx-tip">按 <kbd>Ctrl</kbd> / <kbd>⌘</kbd> + <kbd>K</kbd> 打开命令面板</div>
+      <div class="fx-tip">外观主题（浅色 / 暗色）在顶栏切换<br>按 <kbd>Ctrl</kbd> / <kbd>⌘</kbd> + <kbd>K</kbd> 打开命令面板</div>
     </div>
 
     <button

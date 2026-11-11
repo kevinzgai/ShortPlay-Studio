@@ -273,7 +273,7 @@ export const framesGate = computed(() => {
   const dressed = all.filter((a) => a && (a.refImage || (a.genImages || []).length)).length;
   const shots = S.shots.length;
   if (Number(S.step) !== 4)
-    return { ok: false, reason: "先到第 4 步资产定妆", dressed: dressed, shots: shots };
+    return { ok: false, reason: "打开出片工具完成定妆", dressed: dressed, shots: shots };
   if (!shots)
     return { ok: false, reason: "先在第 3 步排出镜头", dressed: dressed, shots: shots };
   if (!S.assetPack)
@@ -360,15 +360,24 @@ export function regenFrames(silent) {
 }
 
 const PROMPT_LABEL = {
-  keyword: "固定关键词串", turnaround: "三视图提示词", faceSheet: "面部四视图提示词",
-  concept: "场景概念图提示词", wide: "宽幕版提示词"
+  keyword: "固定关键词串", main: "出图提示词",
+  turnaround: "出图提示词", faceSheet: "出图提示词", concept: "场景概念图提示词",
+  wide: "宽幕版提示词"
 };
-/** 每类资产能复制哪些中文提示词（道具没有预生成提示词，靠名称 + 描述拼一条） */
+/** 每类资产能复制哪些中文提示词。
+ *  【一资产一组】角色 / 场景只有一条出图提示词（main，兼容旧包的
+ *  turnaround / faceSheet / concept 取一条），英文单独成条与它成对；
+ *  道具没有预生成提示词，靠名称 + 描述拼一条。多视角按规则拆独立资产。 */
 const ASSET_PROMPT_KEYS = {
-  character: [["turnaround", "三视图提示词"], ["faceSheet", "面部四视图提示词"]],
-  scene: [["concept", "场景概念图提示词"], ["wide", "宽幕版提示词"]],
+  character: [["main", "出图提示词"]],
+  scene: [["main", "场景概念图提示词"]],
   prop: []
 };
+/** 旧资产包里的多组提示词按优先级收敛成一条，避免同一资产挂两组。 */
+function mainPromptText(a) {
+  const p = a.prompts || {};
+  return String(p.main || p.turnaround || p.faceSheet || p.concept || p.wide || "").trim();
+}
 
 /** 道具没出图提示词：用名称 + 描述 + 绑定角色拼一句可直接塞进镜头的话 */
 function propPromptText(a) {
@@ -379,23 +388,25 @@ function propPromptText(a) {
 }
 
 /**
- * 一个资产的全部提示词，拆成可单独复制的条目。
- * 英文单独成条：Flux / Midjourney / 即梦这类工具只吃英文，之前英文串存了却拿不出来。
+ * 一个资产的提示词 = 一条中文出图提示词 + 一条英文（成对，同一视角）。
+ * 固定关键词串是镜头一致性锚点，不算出图提示词，单独一条给出（角色）。
+ * 英文单独成条：Flux / Midjourney / 即梦这类工具只吃英文。
  */
 export function assetPromptBlocks(a) {
   if (!a) return [];
   const out = [];
-  const prompts = a.prompts || {};
-  (ASSET_PROMPT_KEYS[a.kind] || []).forEach(([key, label]) => {
-    const text = String(prompts[key] || "").trim();
-    if (text) out.push({ key: key, label: label, lang: "cn", text: text });
-  });
+  const main = mainPromptText(a);
   if (a.kind === "prop") {
     out.push({ key: "prop", label: "道具描述", lang: "cn", text: propPromptText(a) });
-  } else if (String(a.keyword || "").trim()) {
+  } else if (main) {
+    out.push({ key: "main", label: a.kind === "scene" ? "场景概念图提示词" : "出图提示词",
+      lang: "cn", text: main });
+  }
+  if (a.kind !== "prop" && String(a.keyword || "").trim()) {
     out.push({ key: "keyword", label: "固定关键词串", lang: "cn", text: String(a.keyword).trim() });
   }
-  const en = String(a.kind === "character" ? (a.keywordEn || "") : (a.kind === "scene" ? (a.sceneEn || "") : "")).trim();
+  const en = String(a.kind === "character" ? (a.keywordEn || a.promptEn || "")
+    : (a.kind === "scene" ? (a.promptEn || a.sceneEn || "") : "")).trim();
   if (en) out.push({ key: "en", label: a.kind === "character" ? "英文关键词（Flux / MJ）" : "英文场景描述（Flux / MJ）", lang: "en", text: en });
   return out;
 }
@@ -430,7 +441,7 @@ export function copyAssetPrompt(id, which) {
     label = (block && block.label) || PROMPT_LABEL[mode] || "提示词";
   }
   if (!text) {
-    if (mode === "en") toast("「" + a.name + "」还没有英文提示词 —— 先点「✦ AI 补形象」生成", "warn");
+    if (mode === "en") toast("「" + a.name + "」还没有英文提示词 —— 先点「AI 补形象」生成", "warn");
     else toast("这一项还没生成，先做一次资产分解", "warn");
     return;
   }
@@ -467,6 +478,29 @@ export function saveAssetAnchor(id, key, value) {
   if (key === "props" && a.kind === "scene") a.appearance = v.join("；");
   S.shots = E.bindAssets(S.shots, S.assets);
   save();
+}
+
+/** 提示词正文直接编辑：出图提示词（main）与英文串（promptEn，兼容旧 keywordEn/sceneEn 读）。
+ *  这些字段不进镜头签名（assetSignature 只看外观/参考图），改完不用重绑镜头；
+ *  hasAuthored 会把它们算作手工痕迹，重新解析剧本不会丢。 */
+export function saveAssetPrompt(id, key, value) {
+  const a = findAnyAsset(id);
+  if (!a) return;
+  const v = String(value ?? "").trim();
+  const cur = key === "promptEn" ? enOf(a)
+    : String((a.prompts || {})[key] || "");
+  if (cur === v) return;
+  begin();
+  if (key === "promptEn") a.promptEn = v;
+  else { a.prompts = a.prompts || {}; a.prompts[key] = v; }
+  a.touched = a.touched || {};
+  a.touched["prompts." + key] = true;
+  save();
+}
+
+/** 英文提示词唯一读取口：新字段 promptEn 优先，老项目的 keywordEn / sceneEn 兜底。 */
+function enOf(a) {
+  return String((a && (a.promptEn || a.keywordEn || a.sceneEn)) || "").trim();
 }
 
 /** 关键词串是唯一一致性真源，改完立刻重绑镜头，让提示词生效。 */
@@ -579,6 +613,8 @@ export function fillAssetWithAI(id) {
         ["age", "role", "wardrobe", "keyword", "keywordEn"].forEach((k) => {
           if (r[k]) { a[k] = r[k]; a.touched[k] = 1; }
         });
+        // 英文唯一出口 promptEn：AI 返回的 keywordEn 同步写进来，读侧才不用分叉
+        if (r.keywordEn) { a.promptEn = r.keywordEn; a.touched.promptEn = 1; }
         if (r.face) { a.appearance = r.face; a.touched.appearance = 1; }
         a.anchors = Object.assign({}, a.anchors || {});
         ["face", "flaw", "wardrobeHook"].forEach((k) => {
@@ -586,7 +622,11 @@ export function fillAssetWithAI(id) {
         });
       } else if (a.kind === "scene") {
         if (r.appearance) { a.appearance = r.appearance; a.touched.appearance = 1; }
-        if (r.sceneEn) { a.sceneEn = r.sceneEn; a.touched.sceneEn = 1; }
+        if (r.sceneEn) {
+          a.sceneEn = r.sceneEn;
+          a.promptEn = r.sceneEn;
+          a.touched.sceneEn = 1; a.touched.promptEn = 1;
+        }
         a.anchors = Object.assign({}, a.anchors || {});
         if (r.light) { a.anchors.light = r.light; a.touched["anchors.light"] = 1; }
         if (r.lens) { a.anchors.lens = r.lens; a.touched["anchors.lens"] = 1; }
@@ -711,8 +751,11 @@ function comfyPayload(list) {
     const hit = (a.genImages || []).find((x) => x.dataUri && x.dataUri === a.refImage);
     return {
       id: a.id, kind: a.kind, name: a.name, code: a.code || "",
-      keywordEn: a.keywordEn || "", keyword: a.keyword || "",
-      sceneEn: a.sceneEn || "", appearance: a.appearance || "", propEn: a.propEn || "",
+      // 英文串读写统一 promptEn，老数据 keywordEn / sceneEn 兜底（出图后端仍吃这两个旧键）
+      keywordEn: a.promptEn || a.keywordEn || "",
+      keyword: a.keyword || "",
+      sceneEn: a.promptEn || a.sceneEn || "",
+      appearance: a.appearance || "", propEn: a.propEn || "",
       refFile: (hit && hit.file) ? String(hit.file).split("/").pop() : ""
     };
   });

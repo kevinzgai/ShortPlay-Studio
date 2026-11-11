@@ -1192,7 +1192,9 @@
         visibility: c.visibility || "", age: c.age || "", role: c.role || "",
         wardrobe: c.wardrobe || "", appearance: c.appearance || "",
         persona: (p && p.persona) || "",
-        anchors: c.anchors || {}, keyword: c.keyword || "", keywordEn: c.keywordEn || "",
+        anchors: c.anchors || {}, keyword: c.keyword || "",
+        // 英文提示词唯一出口 promptEn（老包没有时兜底 keywordEn，读写两侧同一规则）
+        keywordEn: c.keywordEn || "", promptEn: c.promptEn || c.keywordEn || "",
         prompts: c.prompts || {}, source: c.source || "inferred",
         evidence: c.evidence || [], sceneNos: c.sceneNos || [],
         weight: c.weight || 3, lines: (p && p.lines) || 0,
@@ -1238,7 +1240,10 @@
         intExt: sc.intExt || (prevItem && prevItem.intExt) || "",
         time: sc.time || (prevItem && prevItem.time) || "",
         appearance: sc.appearance || ((sc.anchors && sc.anchors.props) || []).join("；"),
-        anchors: sc.anchors || {}, sceneEn: sc.sceneEn || "",
+        anchors: sc.anchors || {},
+        // 英文提示词唯一出口 promptEn（老包读 sceneEn 兜底）
+        sceneEn: sc.sceneEn || sc.promptEn || "",
+        promptEn: sc.promptEn || sc.sceneEn || "",
         prompts: sc.prompts || {}, source: sc.source || "inferred",
         evidence: sc.evidence || [], sceneNos: nos,
         touched: {}, refImage: "", refName: "", locked: false, starred: false

@@ -67,7 +67,7 @@ def render_assets_md(pack, meta=None):
                                      an.get("light")) if y), 200)))
     L.append("")
 
-    L.append("## 三、角色三视图 / 四视图提示词\n")
+    L.append("## 三、角色出图提示词（一资产一组，多视角拆独立资产）\n")
     for x in chars:
         p = x.get("prompts") or {}
         L.append("### %s %s（%s · %s）" % (x.get("code") or "", x.get("name") or "",
@@ -75,23 +75,26 @@ def render_assets_md(pack, meta=None):
                                           x.get("role") or x.get("visibility") or "角色"))
         if x.get("keyword"):
             L.append("\n**固定关键词串（复制到每个镜头，一字不改）**\n\n```\n%s\n```" % x["keyword"])
-        for label, key in (("三视图", "turnaround"), ("面部四视图", "faceSheet")):
-            if p.get(key):
-                L.append("\n**%s**\n\n```\n%s\n```" % (label, p[key]))
-        if p.get("lineart"):
-            L.append("\n**线稿**：%s" % p["lineart"])
+        main = p.get("main") or p.get("turnaround") or ""
+        if main:
+            L.append("\n**出图提示词**\n\n```\n%s\n```" % main)
+        en = x.get("promptEn") or x.get("keywordEn") or ""
+        if en:
+            L.append("\n**英文提示词（Flux / MJ）**\n\n```%s\n```\n" % en)
         L.append("")
 
-    L.append("## 四、场景概念图提示词\n")
+    L.append("## 四、场景出图提示词\n")
     for x in scenes:
         p = x.get("prompts") or {}
         L.append("### %s %s（%s · %s%s）" % (
             x.get("code") or "", x.get("name") or "", x.get("priority") or "P1",
             x.get("intExt") or "未注明", (" · " + x["time"]) if x.get("time") else ""))
-        if p.get("concept"):
-            L.append("\n```\n%s\n```" % p["concept"])
-        if p.get("wide"):
-            L.append("\n**宽银幕版**：%s" % p["wide"])
+        main = p.get("main") or p.get("concept") or ""
+        if main:
+            L.append("\n```\n%s\n```" % main)
+        en = x.get("promptEn") or x.get("sceneEn") or ""
+        if en:
+            L.append("\n**英文场景描述（Flux / MJ）**\n\n```\n%s\n```\n" % en)
         L.append("")
 
     if props:
@@ -165,30 +168,42 @@ def render_assets_csv(pack):
 
 
 def asset_prompts_payload(pack, meta=None):
-    """给批量出图脚本消费：一条提示词一个对象，字段不含中文说明。"""
+    """给批量出图脚本消费：一条提示词一个对象，字段不含中文说明。
+
+    【一资产一条】每个资产只出一条 main 提示词；兼容旧包里的
+    turnaround / faceSheet / concept（只取其中一条，不重复输出）。
+    """
     pack = pack if isinstance(pack, dict) else {}
     a = pack.get("assets") if isinstance(pack.get("assets"), dict) else {}
     st = pack.get("style") if isinstance(pack.get("style"), dict) else {}
     out = []
+
+    def first_prompt(x, keys):
+        p = x.get("prompts") or {}
+        for k in keys:
+            if p.get(k):
+                return p[k]
+        return ""
+
     for x in (a.get("characters") or []):
-        p = x.get("prompts") or {}
-        for kind in ("turnaround", "faceSheet"):
-            if p.get(kind):
-                out.append({
-                    "code": x.get("code"), "name": x.get("name"), "kind": kind,
-                    # 三视图走 1:1（三个全身的头需要足够像素），面部四视图仍是 3:2
-                    "aspect": "1:1" if kind == "turnaround" else "3:2",
-                    "prompt": p[kind],
-                    "keyword": x.get("keyword") or "",
-                    "refName": x.get("refName") or "",
-                })
-    for x in (a.get("scenes") or []):
-        p = x.get("prompts") or {}
-        if p.get("concept"):
+        main = first_prompt(x, ("main", "turnaround", "faceSheet"))
+        if main:
             out.append({
-                "code": x.get("code"), "name": x.get("name"), "kind": "concept",
-                "aspect": "16:9", "prompt": p["concept"],
-                "keyword": x.get("sceneEn") or "", "refName": x.get("refName") or "",
+                "code": x.get("code"), "name": x.get("name"), "kind": "main",
+                "aspect": "3:4",
+                "prompt": main,
+                "keyword": x.get("keyword") or "",
+                "promptEn": x.get("promptEn") or x.get("keywordEn") or "",
+                "refName": x.get("refName") or "",
+            })
+    for x in (a.get("scenes") or []):
+        main = first_prompt(x, ("main", "concept"))
+        if main:
+            out.append({
+                "code": x.get("code"), "name": x.get("name"), "kind": "main",
+                "aspect": "16:9", "prompt": main,
+                "keyword": x.get("promptEn") or x.get("sceneEn") or "",
+                "refName": x.get("refName") or "",
             })
     return {
         "style": {"anchor": st.get("anchor") or STYLE_ANCHOR_DEFAULT,

@@ -45,7 +45,7 @@ const rows = computed(() => {
       value: !checked.value ? "检测中…"
         : comfyOk ? "在线 · v" + (ui.comfy.version || "?") + " · " + (ui.comfy.model || "")
         : (comfyDetail.value || "未连接"),
-      why: comfyOk ? "" : "资产定妆的三视图 / 概念图出不来",
+      why: comfyOk ? "" : "出片工具的三视图 / 概念图出不来",
       fix: !checked.value ? "" : comfyOk ? "" : (proxyHit.value
         ? "本机探测被系统代理拦了：带 NO_PROXY=127.0.0.1,localhost 重启服务"
         : "确认 ComfyUI 已在 8188 启动，地址与「出图引擎」里填的一致")

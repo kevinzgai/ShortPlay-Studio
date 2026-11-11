@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>出图工作区 · 4 个去 AI 味方向</title>
+<style>
+/* ============ 原子化 utility（demo 用，正式版迁 UnoCSS） ============ */
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:#ececee;font-family:-apple-system,"PingFang SC","Helvetica Neue",sans-serif;color:#18181b}
+button{font:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid #111;outline-offset:1px}
+.page{max-width:1180px;margin:0 auto;padding:40px 24px 80px}
+
+/* utilities */
+.row{display:flex;align-items:center}
+.col{display:flex;flex-direction:column}
+.wrap{flex-wrap:wrap}
+.jb{justify-content:space-between}
+.g4{gap:4px}.g6{gap:6px}.g8{gap:8px}.g10{gap:10px}.g14{gap:14px}
+.grow{flex:1;min-width:0}
+.t10{font-size:10px}.t11{font-size:11px}.t12{font-size:12px}.t13{font-size:13px}.t15{font-size:15px}.t18{font-size:18px}
+.fw6{font-weight:600}.fw5{font-weight:500}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.up{text-transform:uppercase;letter-spacing:.08em}
+.dim{color:var(--text-3)}
+.dim2{color:var(--text-2)}
+.ellip{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* 页头说明 */
+.intro{background:#fff;border:1px solid #e4e4e7;border-radius:14px;padding:22px 26px;margin-bottom:34px}
+.intro h1{margin:0 0 6px;font-size:20px;letter-spacing:-.02em}
+.intro p{margin:0;font-size:13px;color:#52525b;line-height:1.7}
+.ai-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;padding:0;list-style:none}
+.ai-list li{font-size:11.5px;color:#52525b;background:#f4f4f5;border:1px solid #e4e4e7;border-radius:6px;padding:4px 10px}
+.ai-list li b{color:#18181b;font-weight:600}
+
+/* 版本区块 */
+.demo{margin-bottom:44px}
+.demo-h{display:flex;align-items:baseline;gap:12px;margin:0 4px 12px}
+.demo-h h2{margin:0;font-size:16px;letter-spacing:-.01em}
+.demo-h .tag{font-size:11px;color:#71717a}
+.demo-d{margin:0 4px 14px;font-size:12.5px;color:#52525b;line-height:1.7;max-width:860px}
+.demo-d b{color:#18181b;font-weight:600}
+
+/* ============ 共享组件骨架（颜色 / 圆角 / 选中态全部走版本变量） ============ */
+.mock{background:var(--bg);border:1px solid var(--line-soft);border-radius:16px;padding:18px}
+.m-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:2px 2px 14px}
+.chip{font-size:11px;color:var(--text-2);border:1px solid var(--line);border-radius:6px;padding:2px 8px;background:transparent}
+.chip b{font-weight:600;color:var(--text)}
+.gh-btn{font-size:12px;color:var(--text-2);border:1px solid var(--line);border-radius:var(--r-ctl);background:var(--panel);padding:5px 12px}
+.gh-btn:hover{color:var(--text);border-color:var(--text-3)}
+
+.ws{display:grid;grid-template-columns:196px minmax(0,1fr);gap:12px;align-items:start}
+.rail{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-card);padding:12px}
+.rail-h{display:flex;align-items:center;gap:7px;margin-bottom:10px}
+.rail-h b{font-size:12px;font-weight:600;color:var(--text)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--ok);flex:none}
+.rail-h .mini{margin-left:auto;border:0;background:transparent;color:var(--text-3);font-size:12px;padding:2px}
+.rail-h .mini:hover{color:var(--text)}
+
+.seg{display:flex;gap:2px;padding:2px;border:1px solid var(--line);border-radius:var(--r-ctl);background:var(--panel)}
+.seg.col2{flex-direction:column;gap:2px}
+.seg button{font-size:11.5px;color:var(--text-2);border:1px solid transparent;border-radius:calc(var(--r-ctl) - 2px);background:transparent;padding:5px 10px;text-align:left;white-space:nowrap}
+.seg.row2 button{text-align:center}
+.seg button:hover{color:var(--text);background:var(--hover)}
+.seg button.on{background:var(--sel-bg);color:var(--sel-ink);font-weight:500;border-color:var(--sel-line)}
+
+.rail-meta{display:flex;flex-direction:column;align-items:flex-start;gap:7px;margin-top:10px}
+.rail-meta .line1{font-size:10.5px;color:var(--text-3);line-height:1.5}
+.model-name{font-size:10px;color:var(--text-2);border:1px solid var(--line);border-radius:5px;padding:3px 6px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.arch{font-size:9.5px;color:var(--text-2);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+.tip{margin:10px 0 0;font-size:10.5px;line-height:1.6;color:var(--text-3)}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden}
+.tabs{display:flex;align-items:center;gap:4px;flex-wrap:wrap;padding:8px 10px;border-bottom:1px solid var(--line-soft)}
+.tab{font-size:12px;color:var(--text-2);border:1px solid transparent;border-radius:6px;background:transparent;padding:4px 10px}
+.tab:hover{color:var(--text);background:var(--hover)}
+.tab.on{background:var(--sel-bg);color:var(--sel-ink);font-weight:500;border-color:var(--sel-line)}
+.tab .n{font-size:10px;color:var(--text-3);margin-left:3px}
+.sep{width:1px;height:14px;background:var(--line);margin:0 4px}
+.p0f{font-size:11px;color:var(--text-2);border:1px solid var(--line);border-radius:999px;padding:2px 10px;margin-left:auto;background:transparent}
+
+.body2{display:grid;grid-template-columns:216px minmax(0,1fr)}
+.list{border-right:1px solid var(--line-soft);display:flex;flex-direction:column}
+.search{padding:8px;border-bottom:1px solid var(--line-soft)}
+.search input{width:100%;font-size:11.5px;color:var(--text);border:1px solid var(--line);border-radius:var(--r-ctl);background:var(--bg);padding:5px 9px}
+.lrow{display:flex;align-items:center;gap:8px;padding:7px 10px;font-size:12.5px;color:var(--text-2);border-bottom:1px solid var(--line-soft)}
+.lrow:last-child{border-bottom:0}
+.lrow:hover{background:var(--hover)}
+.lrow.on{background:var(--sel-bg);color:var(--sel-ink);font-weight:500}
+.lrow .cd{font-size:10px;color:var(--text-3);margin-left:auto}
+.lrow .p0{font-size:9px;color:#b45309;border:1px solid #e5d5b8;border-radius:3px;padding:0 3px}
+.avatar{width:20px;height:20px;border-radius:5px;background:var(--hover);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text-2);flex:none}
+
+.detail{padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.d-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.d-head .nm{font-size:15px;font-weight:600;color:var(--text)}
+.d-acts{margin-left:auto;display:flex;gap:6px}
+.d-acts .gh-btn{padding:4px 10px;font-size:11px}
+.anchor{display:grid;grid-template-columns:52px minmax(0,1fr);gap:8px;align-items:center}
+.anchor label{font-size:11px;color:var(--text-3)}
+.anchor input{font-size:12px;color:var(--text);border:1px solid var(--line);border-radius:var(--r-ctl);background:var(--bg);padding:6px 10px;width:100%}
+.anchor input::placeholder{color:var(--text-3)}
+.fluxline{display:flex;align-items:center;gap:10px;border-top:1px solid var(--line-soft);padding-top:10px}
+.fluxline .k{font-size:11px;font-weight:600;color:var(--text-2)}
+.fluxline .v{font-size:10.5px;color:var(--text-3);font-family:ui-monospace,Menlo,monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fluxline button{margin-left:auto;border:0;background:transparent;font-size:11px;color:var(--text-2)}
+.fluxline button:hover{color:var(--text)}
+
+/* 底部出图操作 */
+.ops{border-top:1px solid var(--line);padding:10px 14px 12px;background:var(--ops-bg)}
+.ops-h{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.ops-h b{font-size:11.5px;font-weight:600;color:var(--text)}
+.ops-h span{font-size:10.5px;color:var(--text-3)}
+.target{margin-left:auto;font-size:10px;color:var(--text-2);border:1px solid var(--line);border-radius:5px;padding:2px 8px}
+.ops-r{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.grp{display:flex;align-items:center;gap:7px}
+.grp .cap{font-size:10px;color:var(--text-3);letter-spacing:.05em}
+.sum{font-size:10.5px;color:var(--text-3);margin-left:auto}
+.cta{font-size:12px;font-weight:600;color:var(--accent-ink);background:var(--accent);border:1px solid var(--accent);border-radius:var(--r-ctl);padding:6px 16px}
+.cta:hover{filter:brightness(1.08)}
+.cta:disabled{opacity:.45;cursor:not-allowed}
+
+/* ============ V1 · 克制灰阶 ============ */
+.v1{--bg:#f7f7f8;--panel:#ffffff;--line:#e4e4e7;--line-soft:#eeeef0;
+    --text:#18181b;--text-2:#52525b;--text-3:#8f8f99;
+    --accent:#18181b;--accent-ink:#ffffff;
+    --sel-bg:#f1f1f3;--sel-ink:#18181b;--sel-line:#dcdce0;--hover:#f6f6f7;
+    --r-card:10px;--r-ctl:7px;--ok:#16a34a;--ops-bg:transparent}
+.v1 .mock{box-shadow:0 1px 2px rgba(0,0,0,.04)}
+
+/* ============ V2 · 暖纸工作室 ============ */
+.v2{--bg:#f4f1ea;--panel:#fdfbf6;--line:#ddd5c6;--line-soft:#e9e3d6;
+    --text:#26211a;--text-2:#5d564a;--text-3:#97907f;
+    --accent:#3d3427;--accent-ink:#fdfbf6;
+    --sel-bg:#efe9db;--sel-ink:#26211a;--sel-line:#d8cfba;--hover:#f3efe5;
+    --r-card:12px;--r-ctl:8px;--ok:#5e7d46;--ops-bg:#faf7f0}
+.v2 .m-head h2,.v2 .rail-h b,.v2 .d-head .nm{font-family:"Noto Serif SC",Georgia,"Songti SC",serif}
+
+/* ============ V3 · 瑞士网格 ============ */
+.v3{--bg:#ffffff;--panel:#ffffff;--line:#141414;--line-soft:#e2e2e2;
+    --text:#0c0c0c;--text-2:#3d3d3d;--text-3:#808080;
+    --accent:#0c0c0c;--accent-ink:#ffffff;
+    --sel-bg:#0c0c0c;--sel-ink:#ffffff;--sel-line:#0c0c0c;--hover:#f2f2f2;
+    --r-card:3px;--r-ctl:3px;--ok:#0c0c0c;--ops-bg:#ffffff}
+.v3 .rail,.v3 .card{box-shadow:3px 3px 0 rgba(12,12,12,.08)}
+.v3 .seg{border-color:#141414}
+.v3 .grp .cap,.v3 .rail-h b,.v3 .ops-h b,.v3 .tabs .tab{letter-spacing:.04em}
+.v3 .lrow.on .cd,.v3 .lrow.on .p0{color:#fff;border-color:#fff}
+.v3 .dot{background:#0c0c0c;border-radius:0;width:7px;height:7px}
+.v3 .fluxline .k{text-transform:uppercase;font-size:10px;letter-spacing:.08em}
+
+/* ============ V4 · 柔和现代（现有设计去 AI 味） ============ */
+.v4{--bg:#fafafd;--panel:#ffffff;--line:#e3e5ee;--line-soft:#edeff6;
+    --text:#1c1f2e;--text-2:#4d5266;--text-3:#8d92a6;
+    --accent:#4f54e0;--accent-ink:#ffffff;
+    --sel-bg:#eef0fb;--sel-ink:#3c40b8;--sel-line:#d8dbf5;--hover:#f5f6fa;
+    --r-card:14px;--r-ctl:8px;--ok:#2e9e5b;--ops-bg:#fafafe}
+.v4 .mock{box-shadow:0 6px 24px rgba(28,31,46,.05)}
+
+.foot{background:#fff;border:1px solid #e4e4e7;border-radius:14px;padding:20px 26px;font-size:12.5px;color:#52525b;line-height:1.8}
+.foot b{color:#18181b}
+.foot code{font-family:ui-monospace,Menlo,monospace;font-size:11px;background:#f4f4f5;border:1px solid #e4e4e7;border-radius:4px;padding:1px 6px}
+@media(max-width:900px){.ws{grid-template-columns:1fr}.body2{grid-template-columns:1fr}.list{border-right:0;border-bottom:1px solid var(--line-soft)}}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="intro">
+    <h1>出图工作区 · 4 个「去 AI 味」方向</h1>
+    <p>同一块内容（模型设置侧栏 + 资产卡片 + 底部出图操作），四种视觉语言。以下「AI 味」元素在四个版本中<b>全部移除</b>，请对比整体气质后挑一个：</p>
+    <ul class="ai-list">
+      <li><b>紫色糊满全局</b> → 收敛为单一主色，只给主按钮和选中态</li>
+      <li><b>渐变 / 光晕 / 发光点</b> → 纯色、细边框、无 shadow 彩晕</li>
+      <li><b>✦ 花哨符号</b> → 按钮只说人话</li>
+      <li><b>药丸徽章满天飞</b> → 方角小标签或纯文字</li>
+      <li><b>满屏圆角胶囊</b> → 控制圆角统一、克制</li>
+    </ul>
+  </header>
+
+  <!-- ================= V1 ================= -->
+  <section class="demo v1" id="v1">
+    <div class="demo-h"><h2>V1 · 克制灰阶</h2><span class="tag">Linear / Notion 气质 · 最不像 AI</span></div>
+    <p class="demo-d">黑白灰打底，<b>黑色就是主色</b>：唯一的强调色给了「生成」按钮。选中态是浅灰底而不是紫色填充。信息密度高、视觉最安静，和分镜工作台的 Linear 风格最连贯。</p>
+    <div class="mock">
+      <div class="m-head">
+        <span class="t15 fw6">资产包</span>
+        <span class="chip"><b>8</b> 角色 · <b>11</b> 场景 · <b>10</b> 道具</span>
+        <span class="chip">6 张参考图</span>
+        <span style="margin-left:auto" class="row g6">
+          <button class="gh-btn">重新分解资产</button>
+        </span>
+      </div>
+      <div class="ws">
+        <aside class="rail">
+          <div class="rail-h"><span class="dot"></span><b>出图模型</b><button class="mini" title="重新探测">↻</button></div>
+          <div class="seg col2">
+            <button class="on">本地 ComfyUI</button>
+            <button>通义万相</button>
+            <button>MiniMax H3（云端）</button>
+          </div>
+          <div class="rail-meta">
+            <span class="line1">ComfyUI 0.45.0 · 显存空闲 6.3G</span>
+            <span class="model-name">flux1-schnell-fp8.safetensors</span>
+            <span class="arch">Flux · 4 步</span>
+            <span class="line1">风格 · 写实电影质感</span>
+          </div>
+          <p class="tip">换 unet / 配 Key 在「系统设置 · 出图引擎」</p>
+        </aside>
+        <div class="card">
+          <div class="tabs">
+            <button class="tab">▦ 按分镜</button>
+            <button class="tab on">☰ 全部资产</button>
+            <span class="sep"></span>
+            <button class="tab on">角色<span class="n">8</span></button>
+            <button class="tab">场景<span class="n">11</span></button>
+            <button class="tab">道具<span class="n">10</span></button>
+            <button class="p0f">只看 P0 · 3</button>
+          </div>
+          <div class="body2">
+            <div class="list">
+              <div class="search"><input placeholder="搜名称 / 编号 / 关键词"></div>
+              <div class="lrow on"><span class="avatar">林</span>林晚<span class="p0">P0</span><span class="cd">C01</span></div>
+              <div class="lrow"><span class="avatar">陈</span>陈默<span class="cd">C02</span></div>
+              <div class="lrow"><span class="avatar">二</span>二狗<span class="cd">C03</span></div>
+              <div class="lrow"><span class="avatar">胖</span>胖子<span class="cd">C04</span></div>
+              <div class="lrow"><span class="avatar">强</span>强子<span class="cd">C05</span></div>
+            </div>
+            <div class="detail">
+              <div class="d-head">
+                <span class="cd mono t11 dim">C01</span><span class="nm">林晚</span>
+                <span class="t11 dim">27 岁 · 便利店店员</span>
+                <div class="d-acts"><button class="gh-btn">复制提示词</button><button class="gh-btn">AI 补形象</button><button class="gh-btn">参考图</button></div>
+              </div>
+              <div class="anchor"><label>面部</label><input value="内双丹凤眼，眼下青黑"></div>
+              <div class="anchor"><label>瑕疵</label><input value="右眉尾 0.5cm 浅疤"></div>
+              <div class="anchor"><label>记忆点</label><input value="颈挂红绳老青玉牌"></div>
+              <div class="fluxline"><span class="k">本地 Flux 提示词</span><span class="v">photorealistic film still, young woman, 35mm…</span><button>查看</button></div>
+            </div>
+          </div>
+          <div class="ops">
+            <div class="ops-h"><b>出图操作</b><span>作用于上方清单</span><span class="target">当前 · 林晚</span></div>
+            <div class="ops-r">
+              <div class="grp"><span class="cap">范围</span>
+                <div class="seg row2"><button class="on">当前资产</button><button>P0 资产</button><button>本栏全部</button></div>
+              </div>
+              <div class="grp"><span class="cap">画幅</span>
+                <div class="seg row2"><button class="on">三视图</button><button>面部四视图</button><button>定妆半身</button></div>
+              </div>
+              <span class="sum">1 个资产 × 1 种画幅 = 1 张</span>
+              <button class="cta">生成 1 张</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= V2 ================= -->
+  <section class="demo v2" id="v2">
+    <div class="demo-h"><h2>V2 · 暖纸工作室</h2><span class="tag">暖调纸感 · 有「剧组」的手作气质</span></div>
+    <p class="demo-d">米白纸底 + 墨色文字，标题用衬线字体，像<b>美术组的工作手册</b>而不是 SaaS 后台。选中年态是淡驼色填充，操作底栏带一层浅纸色。适合想和「电影 / 短剧」行业气质绑定的话。</p>
+    <div class="mock">
+      <div class="m-head">
+        <span class="t15 fw6">资产包</span>
+        <span class="chip"><b>8</b> 角色 · <b>11</b> 场景 · <b>10</b> 道具</span>
+        <span class="chip">6 张参考图</span>
+        <span style="margin-left:auto" class="row g6"><button class="gh-btn">重新分解资产</button></span>
+      </div>
+      <div class="ws">
+        <aside class="rail">
+          <div class="rail-h"><span class="dot"></span><b>出图模型</b><button class="mini" title="重新探测">↻</button></div>
+          <div class="seg col2">
+            <button class="on">本地 ComfyUI</button>
+            <button>通义万相</button>
+            <button>MiniMax H3（云端）</button>
+          </div>
+          <div class="rail-meta">
+            <span class="line1">ComfyUI 0.45.0 · 显存空闲 6.3G</span>
+            <span class="model-name">flux1-schnell-fp8.safetensors</span>
+            <span class="arch">Flux · 4 步</span>
+            <span class="line1">风格 · 写实电影质感</span>
+          </div>
+          <p class="tip">换 unet / 配 Key 在「系统设置 · 出图引擎」</p>
+        </aside>
+        <div class="card">
+          <div class="tabs">
+            <button class="tab">▦ 按分镜</button>
+            <button class="tab on">☰ 全部资产</button>
+            <span class="sep"></span>
+            <button class="tab on">角色<span class="n">8</span></button>
+            <button class="tab">场景<span class="n">11</span></button>
+            <button class="tab">道具<span class="n">10</span></button>
+            <button class="p0f">只看 P0 · 3</button>
+          </div>
+          <div class="body2">
+            <div class="list">
+              <div class="search"><input placeholder="搜名称 / 编号 / 关键词"></div>
+              <div class="lrow on"><span class="avatar">林</span>林晚<span class="p0">P0</span><span class="cd">C01</span></div>
+              <div class="lrow"><span class="avatar">陈</span>陈默<span class="cd">C02</span></div>
+              <div class="lrow"><span class="avatar">二</span>二狗<span class="cd">C03</span></div>
+              <div class="lrow"><span class="avatar">胖</span>胖子<span class="cd">C04</span></div>
+              <div class="lrow"><span class="avatar">强</span>强子<span class="cd">C05</span></div>
+            </div>
+            <div class="detail">
+              <div class="d-head">
+                <span class="cd mono t11 dim">C01</span><span class="nm">林晚</span>
+                <span class="t11 dim">27 岁 · 便利店店员</span>
+                <div class="d-acts"><button class="gh-btn">复制提示词</button><button class="gh-btn">AI 补形象</button><button class="gh-btn">参考图</button></div>
+              </div>
+              <div class="anchor"><label>面部</label><input value="内双丹凤眼，眼下青黑"></div>
+              <div class="anchor"><label>瑕疵</label><input value="右眉尾 0.5cm 浅疤"></div>
+              <div class="anchor"><label>记忆点</label><input value="颈挂红绳老青玉牌"></div>
+              <div class="fluxline"><span class="k">本地 Flux 提示词</span><span class="v">photorealistic film still, young woman, 35mm…</span><button>查看</button></div>
+            </div>
+          </div>
+          <div class="ops">
+            <div class="ops-h"><b>出图操作</b><span>作用于上方清单</span><span class="target">当前 · 林晚</span></div>
+            <div class="ops-r">
+              <div class="grp"><span class="cap">范围</span>
+                <div class="seg row2"><button class="on">当前资产</button><button>P0 资产</button><button>本栏全部</button></div>
+              </div>
+              <div class="grp"><span class="cap">画幅</span>
+                <div class="seg row2"><button class="on">三视图</button><button>面部四视图</button><button>定妆半身</button></div>
+              </div>
+              <span class="sum">1 个资产 × 1 种画幅 = 1 张</span>
+              <button class="cta">生成 1 张</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= V3 ================= -->
+  <section class="demo v3" id="v3">
+    <div class="demo-h"><h2>V3 · 瑞士网格</h2><span class="tag">黑白硬边 · 专业工具感最强</span></div>
+    <p class="demo-d">接近印刷排版的<b>硬边网格</b>：1px 黑边、近方角、mono 大写小标签、硬阴影。选中态直接反白（黑底白字），对比最强烈。看起来「贵」但改动幅度最大，全站要跟着统一。</p>
+    <div class="mock">
+      <div class="m-head">
+        <span class="t15 fw6">资产包</span>
+        <span class="chip"><b>8</b> 角色 · <b>11</b> 场景 · <b>10</b> 道具</span>
+        <span class="chip">6 张参考图</span>
+        <span style="margin-left:auto" class="row g6"><button class="gh-btn">重新分解资产</button></span>
+      </div>
+      <div class="ws">
+        <aside class="rail">
+          <div class="rail-h"><span class="dot"></span><b>出图模型</b><button class="mini" title="重新探测">↻</button></div>
+          <div class="seg col2">
+            <button class="on">本地 ComfyUI</button>
+            <button>通义万相</button>
+            <button>MiniMax H3（云端）</button>
+          </div>
+          <div class="rail-meta">
+            <span class="line1">ComfyUI 0.45.0 · 显存空闲 6.3G</span>
+            <span class="model-name">flux1-schnell-fp8.safetensors</span>
+            <span class="arch">FLUX · 4 STEPS</span>
+            <span class="line1">风格 · 写实电影质感</span>
+          </div>
+          <p class="tip">换 unet / 配 Key 在「系统设置 · 出图引擎」</p>
+        </aside>
+        <div class="card">
+          <div class="tabs">
+            <button class="tab">▦ 按分镜</button>
+            <button class="tab on">☰ 全部资产</button>
+            <span class="sep"></span>
+            <button class="tab on">角色<span class="n">8</span></button>
+            <button class="tab">场景<span class="n">11</span></button>
+            <button class="tab">道具<span class="n">10</span></button>
+            <button class="p0f">只看 P0 · 3</button>
+          </div>
+          <div class="body2">
+            <div class="list">
+              <div class="search"><input placeholder="搜名称 / 编号 / 关键词"></div>
+              <div class="lrow on"><span class="avatar">林</span>林晚<span class="p0">P0</span><span class="cd">C01</span></div>
+              <div class="lrow"><span class="avatar">陈</span>陈默<span class="cd">C02</span></div>
+              <div class="lrow"><span class="avatar">二</span>二狗<span class="cd">C03</span></div>
+              <div class="lrow"><span class="avatar">胖</span>胖子<span class="cd">C04</span></div>
+              <div class="lrow"><span class="avatar">强</span>强子<span class="cd">C05</span></div>
+            </div>
+            <div class="detail">
+              <div class="d-head">
+                <span class="cd mono t11 dim">C01</span><span class="nm">林晚</span>
+                <span class="t11 dim">27 岁 · 便利店店员</span>
+                <div class="d-acts"><button class="gh-btn">复制提示词</button><button class="gh-btn">AI 补形象</button><button class="gh-btn">参考图</button></div>
+              </div>
+              <div class="anchor"><label>面部</label><input value="内双丹凤眼，眼下青黑"></div>
+              <div class="anchor"><label>瑕疵</label><input value="右眉尾 0.5cm 浅疤"></div>
+              <div class="anchor"><label>记忆点</label><input value="颈挂红绳老青玉牌"></div>
+              <div class="fluxline"><span class="k">Flux Prompt</span><span class="v">photorealistic film still, young woman, 35mm…</span><button>查看</button></div>
+            </div>
+          </div>
+          <div class="ops">
+            <div class="ops-h"><b>出图操作</b><span>作用于上方清单</span><span class="target">当前 · 林晚</span></div>
+            <div class="ops-r">
+              <div class="grp"><span class="cap">范围</span>
+                <div class="seg row2"><button class="on">当前资产</button><button>P0 资产</button><button>本栏全部</button></div>
+              </div>
+              <div class="grp"><span class="cap">画幅</span>
+                <div class="seg row2"><button class="on">三视图</button><button>面部四视图</button><button>定妆半身</button></div>
+              </div>
+              <span class="sum">1 个资产 × 1 种画幅 = 1 张</span>
+              <button class="cta">生成 1 张</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= V4 ================= -->
+  <section class="demo v4" id="v4">
+    <div class="demo-h"><h2>V4 · 柔和现代</h2><span class="tag">现有设计直接「去 AI 味」· 改动最小</span></div>
+    <p class="demo-d">保留现在的靛蓝骨架，但靛蓝<b>只出现在生成按钮和选中态</b>；去掉渐变、光晕、✦、药丸徽章；圆角统一为 14/8，卡片换成极轻投影。和现状最连续，用户不需要重新学习。</p>
+    <div class="mock">
+      <div class="m-head">
+        <span class="t15 fw6">资产包</span>
+        <span class="chip"><b>8</b> 角色 · <b>11</b> 场景 · <b>10</b> 道具</span>
+        <span class="chip">6 张参考图</span>
+        <span style="margin-left:auto" class="row g6"><button class="gh-btn">重新分解资产</button></span>
+      </div>
+      <div class="ws">
+        <aside class="rail">
+          <div class="rail-h"><span class="dot"></span><b>出图模型</b><button class="mini" title="重新探测">↻</button></div>
+          <div class="seg col2">
+            <button class="on">本地 ComfyUI</button>
+            <button>通义万相</button>
+            <button>MiniMax H3（云端）</button>
+          </div>
+          <div class="rail-meta">
+            <span class="line1">ComfyUI 0.45.0 · 显存空闲 6.3G</span>
+            <span class="model-name">flux1-schnell-fp8.safetensors</span>
+            <span class="arch">Flux · 4 步</span>
+            <span class="line1">风格 · 写实电影质感</span>
+          </div>
+          <p class="tip">换 unet / 配 Key 在「系统设置 · 出图引擎」</p>
+        </aside>
+        <div class="card">
+          <div class="tabs">
+            <button class="tab">▦ 按分镜</button>
+            <button class="tab on">☰ 全部资产</button>
+            <span class="sep"></span>
+            <button class="tab on">角色<span class="n">8</span></button>
+            <button class="tab">场景<span class="n">11</span></button>
+            <button class="tab">道具<span class="n">10</span></button>
+            <button class="p0f">只看 P0 · 3</button>
+          </div>
+          <div class="body2">
+            <div class="list">
+              <div class="search"><input placeholder="搜名称 / 编号 / 关键词"></div>
+              <div class="lrow on"><span class="avatar">林</span>林晚<span class="p0">P0</span><span class="cd">C01</span></div>
+              <div class="lrow"><span class="avatar">陈</span>陈默<span class="cd">C02</span></div>
+              <div class="lrow"><span class="avatar">二</span>二狗<span class="cd">C03</span></div>
+              <div class="lrow"><span class="avatar">胖</span>胖子<span class="cd">C04</span></div>
+              <div class="lrow"><span class="avatar">强</span>强子<span class="cd">C05</span></div>
+            </div>
+            <div class="detail">
+              <div class="d-head">
+                <span class="cd mono t11 dim">C01</span><span class="nm">林晚</span>
+                <span class="t11 dim">27 岁 · 便利店店员</span>
+                <div class="d-acts"><button class="gh-btn">复制提示词</button><button class="gh-btn">AI 补形象</button><button class="gh-btn">参考图</button></div>
+              </div>
+              <div class="anchor"><label>面部</label><input value="内双丹凤眼，眼下青黑"></div>
+              <div class="anchor"><label>瑕疵</label><input value="右眉尾 0.5cm 浅疤"></div>
+              <div class="anchor"><label>记忆点</label><input value="颈挂红绳老青玉牌"></div>
+              <div class="fluxline"><span class="k">本地 Flux 提示词</span><span class="v">photorealistic film still, young woman, 35mm…</span><button>查看</button></div>
+            </div>
+          </div>
+          <div class="ops">
+            <div class="ops-h"><b>出图操作</b><span>作用于上方清单</span><span class="target">当前 · 林晚</span></div>
+            <div class="ops-r">
+              <div class="grp"><span class="cap">范围</span>
+                <div class="seg row2"><button class="on">当前资产</button><button>P0 资产</button><button>本栏全部</button></div>
+              </div>
+              <div class="grp"><span class="cap">画幅</span>
+                <div class="seg row2"><button class="on">三视图</button><button>面部四视图</button><button>定妆半身</button></div>
+              </div>
+              <span class="sum">1 个资产 × 1 种画幅 = 1 张</span>
+              <button class="cta">生成 1 张</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <b>关于原子化 CSS</b>：这页 demo 全部用 utility class（<code>.row</code> <code>.g8</code> <code>.t12</code> <code>.fw6</code>…）+ 版本级 CSS 变量写成，四个版本共用一套骨架、只换变量——这就是原子化的好处。正式迁移建议 <b>UnoCSS</b>（Vite + Vue 生态首选，按需生成、零运行时）：先用 <code>presets-uno</code>（Tailwind 语法）在新改的组件上试水，老样式文件按「改到哪个组件就迁哪个」的节奏渐进替换，不搞一次性重写。挑好版本告诉我，我把选中的方向落回 <code>AssetPanel.vue</code> 真实组件。
+  </footer>
+</div>
+</body>
+</html>

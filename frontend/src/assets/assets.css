@@ -13,7 +13,7 @@
 
 /* ------------------------------ 空状态引导 ------------------------------ */
 .ap-intro{padding:14px 16px;border:1px dashed var(--line-2);border-radius:var(--radius-lg);
-  background:rgba(255,255,255,.015);margin-bottom:14px}
+  background:rgba(var(--tint),.015);margin-bottom:14px}
 .ap-intro-t{font-size:13px;color:var(--text-2);line-height:1.65;margin-bottom:10px}
 .ap-intro-t b{color:var(--text);font-weight:510}
 .ap-intro ul{margin:0;padding-left:18px;display:grid;gap:4px}
@@ -25,15 +25,15 @@
 /* ------------------------------ 覆盖率 / 风格锚 ------------------------------ */
 .ap-cov{display:flex;align-items:stretch;gap:6px;flex-wrap:wrap;margin-bottom:8px}
 .ap-cov-i{flex:0 0 auto;min-width:76px;padding:6px 10px;border:1px solid var(--line);
-  border-radius:var(--radius);background:rgba(255,255,255,.02)}
+  border-radius:var(--radius);background:rgba(var(--tint),.02)}
 .ap-cov-i b{display:block;font:590 16px/1.2 var(--font);letter-spacing:-.3px;color:var(--text)}
 .ap-cov-i b i{font-style:normal;font-size:11px;font-weight:400;color:var(--text-4);letter-spacing:0}
 .ap-cov-i span{font-size:10px;color:var(--text-4)}
 /* --------------------- 剧本视觉风格定义 --------------------- */
 .ap-style-bar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:10px;
   padding:7px 10px;border:1px solid var(--line);border-radius:var(--radius);
-  background:rgba(113,112,255,.05)}
-.ap-style-bar .lbl{flex:none;font-size:10.5px;color:var(--primary-deep);letter-spacing:.3px;font-weight:600}
+  background:transparent}
+.ap-style-bar .lbl{flex:none;font-size:10.5px;color:var(--text-2);letter-spacing:.3px;font-weight:600}
 .ap-style-bar .val{min-width:0;flex:1 1 260px;overflow:hidden;text-overflow:ellipsis;
   white-space:nowrap;font-size:12px;color:var(--text-2)}
 .ap-style-bar .src{flex:none;font:10px var(--mono);color:var(--text-4);
@@ -46,18 +46,15 @@
 .ap-style-presets{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .ap-style-presets .lbl{font-size:10.5px;color:var(--text-4);margin-right:2px}
 .ap-style-chip{border:1px solid var(--line-2);background:transparent;color:var(--text-3);
-  border-radius:20px;padding:4px 11px;font-size:11px;cursor:pointer}
-.ap-style-chip:hover{color:var(--text);background:rgba(255,255,255,.05)}
-.ap-style-chip.on{background:#7170ff;border-color:#7170ff;color:#fff;font-weight:600}
+  border-radius:8px;padding:4px 11px;font-size:11px;cursor:pointer}
+.ap-style-chip:hover{color:var(--text);background:rgba(var(--tint),.05)}
+.ap-style-chip.on{background:var(--primary-soft);border-color:var(--primary-line);color:var(--primary-deep);font-weight:600}
 .ap-style-f{display:grid;gap:5px}
 .ap-style-f>span{font-size:11.5px;color:var(--text-2)}
 .ap-style-f i{font-style:normal;font-size:10.5px;color:var(--text-4);margin-left:6px}
 .ap-style-f .ap-input{width:100%}
 .ap-style-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .ap-style-note{margin-right:auto;font-size:10.5px;color:var(--text-4);line-height:1.5}
-.ap-gen-style{flex:none;font:10.5px var(--mono);color:#a5a4ff;white-space:nowrap;
-  border:1px solid rgba(113,112,255,.35);border-radius:4px;padding:2px 7px;
-  background:rgba(113,112,255,.09)}
 @media (max-width:900px){
   .ap-style-bar .val{flex-basis:100%}
   .ap-style-note{flex-basis:100%;margin-right:0}
@@ -81,12 +78,12 @@
 .ap-tab{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:6px;
   border:1px solid transparent;background:transparent;color:var(--text-3);font-size:12.5px;
   transition:background var(--ease),color var(--ease),border-color var(--ease)}
-.ap-tab:hover{background:rgba(255,255,255,.04);color:var(--text-2)}
-.ap-tab span{font:10px/1.5 var(--mono);background:rgba(255,255,255,.05);border:1px solid var(--line);
+.ap-tab:hover{background:rgba(var(--tint),.04);color:var(--text-2)}
+.ap-tab span{font:10px/1.5 var(--mono);background:rgba(var(--tint),.05);border:1px solid var(--line);
   border-radius:4px;padding:0 4px;color:var(--text-4)}
-.ap-tab.active{background:rgba(255,255,255,.06);border-color:var(--line-2);color:var(--text);font-weight:510}
+.ap-tab.active{background:rgba(var(--tint),.06);border-color:var(--line-2);color:var(--text);font-weight:510}
 .ap-tab.active span{background:var(--primary-soft);border-color:var(--primary-line);color:var(--primary-deep)}
-.ap-filter{padding:3px 9px;font-size:11.5px;border-radius:999px;border:1px solid var(--line);
+.ap-filter{padding:3px 9px;font-size:11.5px;border-radius:8px;border:1px solid var(--line);
   background:transparent;color:var(--text-3);transition:all var(--ease)}
 .ap-filter:hover{color:var(--text-2);border-color:var(--line-2)}
 .ap-filter.on{background:var(--primary-soft);border-color:var(--primary-line);color:var(--primary-deep)}
@@ -98,28 +95,28 @@
   height:min(620px,calc(100vh - 210px));min-height:420px}
 
 .ap-side{display:flex;flex-direction:column;min-width:0;overflow:hidden;
-  border:1px solid var(--line);border-radius:var(--radius-lg);background:rgba(255,255,255,.018)}
+  border:1px solid var(--line);border-radius:var(--radius-lg);background:rgba(var(--tint),.018)}
 .ap-search{position:relative;flex:none;padding:6px;border-bottom:1px solid var(--line-soft)}
-.ap-search .ap-input{width:100%;background:rgba(255,255,255,.04);padding:4px 22px 4px 8px;font-size:11.5px}
+.ap-search .ap-input{width:100%;background:rgba(var(--tint),.04);padding:4px 22px 4px 8px;font-size:11.5px}
 .ap-q-x{position:absolute;right:11px;top:50%;transform:translateY(-50%);width:16px;height:16px;
   border:none;background:transparent;color:var(--text-4);font-size:13px;line-height:1;cursor:pointer;padding:0}
 .ap-q-x:hover{color:var(--text-2)}
 
 .ap-rows{flex:1;min-height:0;overflow:auto;padding:4px;display:flex;flex-direction:column;gap:1px}
 .ap-rows::-webkit-scrollbar{width:8px}
-.ap-rows::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:4px}
+.ap-rows::-webkit-scrollbar-thumb{background:rgba(var(--tint),.08);border-radius:4px}
 
 .ap-row{display:flex;align-items:center;gap:7px;width:100%;min-height:34px;padding:4px 6px;
   border:1px solid transparent;border-radius:6px;background:transparent;cursor:pointer;text-align:left;
   transition:background var(--ease),border-color var(--ease)}
-.ap-row:hover{background:rgba(255,255,255,.045)}
-.ap-row.on{background:rgba(255,255,255,.07);border-color:var(--line-2)}
+.ap-row:hover{background:rgba(var(--tint),.045)}
+.ap-row.on{background:rgba(var(--tint),.07);border-color:var(--line-2)}
 .ap-row.on .ap-row-nm{color:var(--text);font-weight:510}
 .ap-row-th{flex:0 0 22px;width:22px;height:22px;border-radius:4px;overflow:hidden;
   display:flex;align-items:center;justify-content:center;
   background:var(--primary-soft);border:1px solid var(--primary-line);
   font:510 11px/1 var(--font);color:var(--primary-deep)}
-.ap-row-th.blank{background:rgba(255,255,255,.05);border-color:var(--line-2);color:var(--text-3)}
+.ap-row-th.blank{background:rgba(var(--tint),.05);border-color:var(--line-2);color:var(--text-3)}
 .ap-row-th img{width:100%;height:100%;object-fit:cover;display:block}
 .ap-row-nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   font-size:12.5px;color:var(--text-2)}
@@ -129,14 +126,14 @@
 .ap-row-lk{flex:none;font-size:9px;opacity:.75}
 /* S5 · 资产引用徽标：行内、不换行、行高 18px（清单行必须 ≤36px）。零引用用琥珀色区分。 */
 .ap-row-us{flex:none;font:9.5px/18px var(--mono);color:var(--text-4);white-space:nowrap;
-  padding:0 4px;border-radius:3px;background:rgba(255,255,255,.045)}
+  padding:0 4px;border-radius:3px;background:rgba(var(--tint),.045)}
 .ap-row-us.orphan{color:#e8b96a;background:rgba(232,185,106,.12)}
 .ap-shot-us{margin-top:2px;font:9.5px/1.5 var(--mono);color:var(--text-4);
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ap-shot-us.orphan{color:#e8b96a}
 /* 行由 button 改成 div（内层要放复制按钮），把按钮的默认排版补回来 */
 .ap-row{font-family:inherit;color:inherit;font-size:inherit}
-.ap-row:focus-visible{outline:none;border-color:var(--primary-line);background:rgba(255,255,255,.05)}
+.ap-row:focus-visible{outline:none;border-color:var(--primary-line);background:rgba(var(--tint),.05)}
 .ap-row-none{padding:14px 8px;font-size:11.5px;color:var(--text-4);text-align:center;line-height:1.6}
 
 .ap-side-f{flex:none;display:flex;align-items:center;justify-content:space-between;gap:8px;
@@ -144,19 +141,19 @@
 .ap-side-cp{flex:none;padding:2px 6px;border:1px solid transparent;background:transparent;
   border-radius:4px;color:var(--text-4);font:inherit;font-size:10px;cursor:pointer;
   transition:color var(--ease),background var(--ease),border-color var(--ease)}
-.ap-side-cp:hover:not(:disabled){color:var(--text-2);background:rgba(255,255,255,.05);border-color:var(--line-2)}
+.ap-side-cp:hover:not(:disabled){color:var(--text-2);background:rgba(var(--tint),.05);border-color:var(--line-2)}
 .ap-side-cp:disabled{opacity:.4;cursor:default}
 
 /* ------------------------------ 资产卡 ------------------------------ */
 .ap-list{display:flex;flex-direction:column;gap:8px}
-.ap-item{border:1px solid var(--line);border-radius:var(--radius-lg);background:rgba(255,255,255,.018);
+.ap-item{border:1px solid var(--line);border-radius:var(--radius-lg);background:rgba(var(--tint),.018);
   transition:border-color var(--ease),background var(--ease)}
-.ap-item:hover{border-color:var(--line-2);background:rgba(255,255,255,.028)}
-.ap-item:focus-within{border-color:var(--primary-line);background:rgba(255,255,255,.03)}
+.ap-item:hover{border-color:var(--line-2);background:rgba(var(--tint),.028)}
+.ap-item:focus-within{border-color:var(--primary-line);background:rgba(var(--tint),.03)}
 /* 右侧编辑区：自己滚，列表位置不动 */
 .ap-detail{display:flex;flex-direction:column;min-width:0;overflow:auto}
 .ap-detail::-webkit-scrollbar{width:8px}
-.ap-detail::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:4px}
+.ap-detail::-webkit-scrollbar-thumb{background:rgba(var(--tint),.08);border-radius:4px}
 
 .ap-nav{display:inline-flex;align-items:center;gap:2px;flex:none}
 .ap-nav .mini{width:20px;height:20px;font-size:12px;color:var(--text-3);border-color:var(--line)}
@@ -175,7 +172,7 @@
   border:1px solid var(--primary-line);border-radius:4px;padding:1px 5px;white-space:nowrap}
 .ap-pri{font:510 10px/1.6 var(--mono);border-radius:4px;padding:1px 5px;border:1px solid transparent}
 .ap-pri.p0{color:#ffb3b3;background:rgba(255,107,107,.12);border-color:rgba(255,107,107,.28)}
-.ap-pri.p1{color:var(--text-3);background:rgba(255,255,255,.04);border-color:var(--line)}
+.ap-pri.p1{color:var(--text-3);background:rgba(var(--tint),.04);border-color:var(--line)}
 .ap-name{font-size:13.5px;font-weight:510;color:var(--text);letter-spacing:-.1px}
 .ap-alias{font-size:11.5px;color:var(--text-4)}
 .ap-src{font-size:10.5px;border-radius:4px;padding:1px 6px;border:1px solid transparent;white-space:nowrap}
@@ -193,7 +190,7 @@
   display:flex;align-items:center;justify-content:center;
   background:var(--primary-soft);border:1px solid var(--primary-line);
   font:510 15px/1 var(--font);color:var(--primary-deep)}
-.ap-ava.blank{background:rgba(255,255,255,.05);border-color:var(--line-2);color:var(--text-3)}
+.ap-ava.blank{background:rgba(var(--tint),.05);border-color:var(--line-2);color:var(--text-3)}
 .ap-ava img{width:100%;height:100%;object-fit:cover;display:block}
 /* 有图时整块可点：48px 缩略看不出脸，点开看原图 */
 .ap-ava.has{padding:0;cursor:zoom-in;position:relative}
@@ -218,7 +215,7 @@
 
 /* 固定关键词串：唯一一致性真源，单独一行，视觉上要压过普通字段 */
 .ap-kw{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:6px;
-  background:rgba(113,112,255,.07);border:1px solid var(--primary-line);min-width:0}
+  background:rgba(var(--tint),.03);border:1px solid var(--line);min-width:0}
 .ap-kw .lbl{flex:none;font-size:10.5px;color:var(--primary-deep);letter-spacing:.2px}
 .ap-kw input{flex:1;min-width:0;border:none;background:transparent;font-size:12px;color:var(--text);
   padding:2px 0;outline:none}
@@ -232,10 +229,10 @@
 .ap-bound{font-size:12px;color:var(--text-3);font-family:var(--mono)}
 .ap-tip{margin-top:2px;padding:8px 10px;border:1px dashed var(--line-2);border-radius:6px;
   font-size:11.5px;color:var(--text-4);line-height:1.6}
-.ap-input{flex:1;min-width:0;border:1px solid #24282c;background:rgba(255,255,255,.03);
+.ap-input{flex:1;min-width:0;border:1px solid var(--field-line);background:rgba(var(--tint),.03);
   border-radius:5px;padding:5px 8px;font-size:12px;color:var(--text);outline:none;
   transition:border-color var(--ease),background var(--ease),box-shadow var(--ease)}
-.ap-input:focus{border-color:var(--primary);background:rgba(255,255,255,.05);
+.ap-input:focus{border-color:var(--primary);background:rgba(var(--tint),.05);
   box-shadow:0 0 0 3px var(--primary-soft)}
 .ap-input::placeholder{color:var(--text-4)}
 
@@ -247,9 +244,9 @@
 .ap-prompts summary::before{content:"▸";font-size:9px;color:var(--text-4);transition:transform var(--ease)}
 .ap-prompts[open] summary::before{transform:rotate(90deg)}
 .ap-prompts summary:hover{color:var(--text-2)}
-.ap-prompts-n{font:10px/1.5 var(--mono);color:var(--text-4);background:rgba(255,255,255,.04);
+.ap-prompts-n{font:10px/1.5 var(--mono);color:var(--text-4);background:rgba(var(--tint),.04);
   border:1px solid var(--line);border-radius:4px;padding:0 4px}
-.ap-prompt{margin-top:8px;border:1px solid var(--line);border-radius:6px;background:rgba(0,0,0,.25)}
+.ap-prompt{margin-top:8px;border:1px solid var(--line);border-radius:6px;background:var(--shade25)}
 .ap-prompt-h{display:flex;align-items:center;gap:8px;padding:5px 8px;border-bottom:1px solid var(--line-soft);
   font-size:11px;color:var(--text-3)}
 /* .mini 是 23×23 的方形图标按钮，放两个字会被挤成竖排 —— 这里放开成胶囊 */
@@ -258,6 +255,16 @@
 .ap-kw .mini{width:23px;height:23px}
 .ap-kw .mini.done{color:var(--ok);border-color:var(--ok-line);background:var(--ok-soft)}
 .ap-prompt-h .mini.done{color:var(--ok);border-color:var(--ok-line);background:var(--ok-soft)}
+/* 折叠条右侧的「可直接改」说明 + 空槽标记 */
+.ap-prompts-edit{margin-left:auto;font-size:10px;color:var(--text-4)}
+.ap-prompt-empty{font-size:10px;color:var(--warn,#a56d00)}
+.ap-prompt-h .mini:disabled{opacity:.4;cursor:default}
+/* 提示词正文 = 可编辑 textarea（原为只读 <pre>）：失焦保存，高度跟随内容 */
+.ap-prompt-ta{display:block;width:100%;margin:0;padding:8px 10px;
+  font:11.5px/1.7 var(--font);color:var(--text-2);background:transparent;
+  border:0;outline:0;resize:vertical;min-height:64px;max-height:280px;
+  white-space:pre-wrap;word-break:break-word}
+.ap-prompt-ta:focus{background:var(--shade03)}
 .ap-prompt pre{margin:0;padding:8px 10px;font:11.5px/1.7 var(--font);color:var(--text-2);
   white-space:pre-wrap;word-break:break-word;max-height:190px;overflow:auto}
 
@@ -265,7 +272,7 @@
 .ap-empty{padding:16px;border:1px dashed var(--line-2);border-radius:var(--radius);
   color:var(--text-4);font-size:12.5px;text-align:center;line-height:1.6}
 .ap-add{display:flex;gap:8px;margin-top:10px}
-.ap-add .ap-input{flex:1;background:rgba(255,255,255,.04)}
+.ap-add .ap-input{flex:1;background:rgba(var(--tint),.04)}
 
 /* ------------------------------ 窄屏：清单在上、编辑区在下 ------------------------------ */
 @media (max-width:1100px){
@@ -281,44 +288,83 @@
   .ap-cov-style{flex-basis:100%}
 }
 
-/* --------------------- 本地 ComfyUI 批量出图 --------------------- */
-.ap-gen{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px;
-  padding:9px 12px;border:1px solid var(--line);border-radius:var(--radius);
-  background:rgba(113,112,255,.05)}
-.ap-gen-l{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--text-3);flex-wrap:wrap}
-.ap-gen-l b{font-size:12px;color:var(--text-2);font-weight:600;white-space:nowrap}
+/* --------------------- 出图工作区：左侧模型设置 / 右侧资产模块 ---------------------
+   旧版是一条两行横条：引擎切换、模型信息与范围、画幅、生成按钮挤在一起，
+   与下方资产清单被切成两块。现在模型设置收进左侧竖栏，出图动作变成
+   资产卡片的底栏，tabs / 清单 / 详情 / 动作 / 进度同属一张卡片。 */
+.ap-gen.ap-workspace{display:grid;grid-template-columns:186px minmax(0,1fr);gap:10px;
+  align-items:start;margin-top:10px;background:transparent;border:0;padding:0}
+.ap-work-main{min-width:0}
+.ap-work-card{border:1px solid var(--line);border-radius:var(--radius-lg);
+  background:rgba(var(--tint),.018);overflow:hidden}
+.ap-work-card>.ap-tabs{margin:0;padding:7px 9px;background:rgba(var(--tint),.02);
+  border-bottom:1px solid var(--line-soft)}
+.ap-work-card>.ap-body{height:min(520px,calc(100vh - 300px));gap:0}
+.ap-work-card .ap-side{border:0;border-right:1px solid var(--line-soft);
+  border-radius:0;background:transparent}
+.ap-work-card .ap-right{padding:10px 12px}
+.ap-work-card>.ap-empty{margin:10px}
+.ap-work-card>.ap-add{margin:10px}
+
+/* 左侧：模型 / 引擎设置竖栏 */
+.ap-gen-engine{display:flex;flex-direction:column;gap:9px;padding:12px}
+.ap-gen-engine-h{display:flex;align-items:center;gap:7px}
+.ap-gen-engine-h b{font-size:12px;color:var(--text-2);font-weight:600;white-space:nowrap}
+.ap-gen-engine-h .mini{margin-left:auto;flex:none}
 .ap-gen-dot{width:7px;height:7px;border-radius:50%;flex:none}
-.ap-gen-dot.on{background:#16a34a;box-shadow:0 0 0 3px rgba(22,163,74,.14)}
+.ap-gen-dot.on{background:#2e9e5b;box-shadow:0 0 0 3px rgba(46,158,91,.14)}
 .ap-gen-dot.off{background:#dc2626;box-shadow:0 0 0 3px rgba(220,38,38,.12)}
-.ap-gen-info{font:10.5px/1.4 var(--mono);color:var(--text-4)}
+.ap-gen-engine-seg{flex-direction:column}
+.ap-gen-engine-seg button{width:100%;text-align:left;padding:5px 8px}
+.ap-gen-engine-meta{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.ap-gen-info{font:10.5px/1.5 var(--mono);color:var(--text-4);word-break:break-all}
 .ap-gen-info.off{color:#dc2626}
-/* 架构徽标：同一个 ComfyUI 里可能选了 Flux 也可能选了 H3，标明用的是哪条链路 */
-.ap-gen-arch{font-style:normal;margin-left:6px;padding:1px 5px;border-radius:999px;
-  background:var(--primary-soft);color:var(--primary);font-size:9.5px;white-space:nowrap}
-.ap-gen-info.off .ap-gen-arch{background:var(--err-soft);color:var(--err)}
-.ap-gen-r{margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-/* 范围 / 画幅 是「参数」不是「动作」：加个小标题，避免被当成立即执行的按钮 */
+.ap-gen-model{display:block;width:100%;max-width:100%;font:10px/1.45 var(--mono);
+  color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  padding:4px 6px;border:1px solid var(--line);border-radius:5px;background:rgba(var(--tint),.03)}
+.ap-gen-model.off{color:#dc2626;border-color:var(--err-line)}
+.ap-gen-arch{font-style:normal;padding:1px 6px;border-radius:6px;max-width:100%;
+  overflow:hidden;text-overflow:ellipsis;
+  background:var(--primary-soft);color:var(--primary);font:9.5px/1.5 var(--mono);white-space:nowrap}
+.ap-gen-style{flex:none;max-width:100%;overflow:hidden;text-overflow:ellipsis;
+  font:10.5px var(--mono);color:var(--apx-text2,var(--text-2));white-space:nowrap;
+  border:1px solid var(--apx-line,var(--line));border-radius:4px;padding:2px 7px;
+  background:transparent}
+.ap-gen-engine-tip{margin:0;font-size:10.5px;line-height:1.55;color:var(--text-4)}
+
+/* 卡片底栏：对资产出图的动作 */
+.ap-gen-ops{border-top:1px solid var(--line-soft);padding:9px 11px}
+.ap-gen-ops-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:7px}
+.ap-gen-ops-h b{font-size:11.5px;color:var(--text-2);font-weight:600}
+.ap-gen-ops-h>span{font-size:10.5px;color:var(--text-4)}
+.ap-gen-ops-h>span.ap-gen-target{margin-left:auto;font:10px/1 var(--mono);
+  color:var(--primary-deep);font-weight:600;
+  background:var(--primary-soft);border:1px solid var(--primary-line);
+  border-radius:8px;padding:3px 8px}
+.ap-gen-ops .ap-gen-r{margin-left:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .ap-gen-grp{display:flex;align-items:center;gap:6px}
 .ap-gen-cap{font:10.5px var(--mono);color:var(--text-4);letter-spacing:.3px;white-space:nowrap}
-.ap-gen-act{display:flex;align-items:center;gap:8px}
+.ap-gen-act{display:flex;align-items:center;gap:8px;margin-left:auto}
 .ap-gen-sum{font:10.5px var(--mono);color:var(--text-4);white-space:nowrap}
 .ap-gen-sum.warn{color:#b45309}
 .ap-gen-seg{display:flex;gap:2px;padding:2px;border:1px solid var(--line);
-  border-radius:8px;background:rgba(0,0,0,.03)}
+  border-radius:8px;background:var(--shade03)}
 .ap-gen-seg button{font-size:11px;color:var(--text-3);padding:5px 10px;
+  border:1px solid transparent;background:transparent;
   border-radius:6px;white-space:nowrap;cursor:pointer}
-.ap-gen-seg button:hover{color:var(--text-2);background:rgba(0,0,0,.05)}
-.ap-gen-seg button.on{background:#7170ff;color:#fff}
-.ap-gen-seg.vars button.on{background:#5b5ae6;color:#fff}
-#comfy-generate{background:#7170ff;border-color:#7170ff;color:#fff;font-weight:600}
+.ap-gen-seg button:hover{color:var(--text-2);background:var(--shade05)}
+.ap-workspace .ap-gen-seg button.on{background:var(--apx-sel);border-color:var(--apx-sel-line);color:var(--apx-accent,var(--apx-text));font-weight:500}
+.ap-workspace .ap-gen-seg.vars button.on{background:var(--apx-accent);border-color:var(--apx-accent);color:var(--apx-accent-ink)}
+#comfy-generate{background:var(--apx-accent,#4f54e0);border-color:var(--apx-accent,#4f54e0);color:#fff;font-weight:600}
+#comfy-generate:hover:not(:disabled){filter:brightness(1.08)}
 #comfy-generate:disabled{opacity:.5;cursor:not-allowed}
 
-.ap-gen-status{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px;
-  padding:8px 12px;border:1px solid var(--line);border-radius:8px;
-  font-size:11.5px;color:var(--text-3)}
+.ap-gen-status{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:8px 11px;border-top:1px solid var(--line-soft);
+  background:rgba(var(--tint),.02);font-size:11.5px;color:var(--text-3)}
 .ap-gen-bar{flex:1;min-width:120px;height:5px;border-radius:5px;
-  background:rgba(0,0,0,.09);overflow:hidden}
-.ap-gen-bar i{display:block;height:100%;background:linear-gradient(90deg,#7170ff,#a78bfa);
+  background:var(--shade09);overflow:hidden}
+.ap-gen-bar i{display:block;height:100%;background:var(--apx-accent,#4f54e0);
   transition:width .3s var(--ease)}
 .ap-gen-cur{font:10.5px var(--mono);color:var(--text-2)}
 .ap-gen-hint,.ap-gen-info{color:var(--text-4)}
@@ -327,12 +373,86 @@
 .ap-gen-errs{flex-basis:100%;margin:4px 0 0;padding-left:16px;
   color:#dc2626;font-size:11px;line-height:1.6}
 
+/* 窄屏：模型设置栏改成横排，叠在资产模块上方；资产模块本身仍是完整一张卡 */
+@media (max-width:1100px){
+  .ap-gen.ap-workspace{grid-template-columns:1fr}
+  .ap-gen-engine{flex-direction:row;flex-wrap:wrap;align-items:center}
+  .ap-gen-engine-seg{flex-direction:row}
+  .ap-gen-engine-meta{flex-direction:row;flex-wrap:wrap;align-items:center}
+  .ap-gen-engine-tip{display:none}
+}
+@media (max-width:900px){
+  .ap-work-card>.ap-body{height:auto}
+  .ap-work-card .ap-side{border-right:0;border-bottom:1px solid var(--line-soft)}
+}
+
+/* ==========================================================================
+   V4 · 柔和现代（apx 前缀）—— 出图工作区去 AI 味
+   冷调浅底 + 靛蓝只给主按钮与选中态；无渐变 / 光晕 / ✦ / 药丸徽章。
+   圆角统一：卡 14 / 控件 8；浅色下卡片极轻投影。原子类（UnoCSS）写布局。
+   暗色主题下整块跟随 .apx 变量反转，与全站一致。
+   ========================================================================== */
+.apx{
+  --apx-bg:#fafafd; --apx-panel:#fff;
+  --apx-line:#e3e5ee; --apx-line-soft:#edeff6;
+  --apx-text:#1c1f2e; --apx-text2:#4d5266; --apx-text3:#8d92a6;
+  --apx-hover:#f5f6fa; --apx-sel:#eef0fb; --apx-sel-line:#d8dbf5;
+  --apx-accent:#4f54e0; --apx-accent-ink:#fff;
+  --apx-ok:#2e9e5b; --apx-err:#dc2626;
+  --apx-shadow:0 6px 24px rgba(28,31,46,.05);
+}
+:root[data-theme="dark"] .apx,
+[data-theme="dark"] .apx{
+  --apx-bg:rgba(255,255,255,.02); --apx-panel:rgba(255,255,255,.03);
+  --apx-line:rgba(255,255,255,.12); --apx-line-soft:rgba(255,255,255,.07);
+  --apx-text:#f7f8f8; --apx-text2:#b6bac2; --apx-text3:#82868f;
+  --apx-hover:rgba(255,255,255,.05); --apx-sel:rgba(109,114,240,.20); --apx-sel-line:rgba(109,114,240,.42);
+  --apx-accent:#6d72f0; --apx-accent-ink:#fff;
+  --apx-ok:#34d399; --apx-err:#f87171;
+  --apx-shadow:none;
+}
+/* 左侧模型竖栏 */
+.apx-rail{background:var(--apx-panel);border:1px solid var(--apx-line);border-radius:14px;padding:12px;
+  box-shadow:var(--apx-shadow)}
+.apx-rail .mini{border:0;background:transparent;color:var(--apx-text3);padding:2px}
+.apx-rail .mini:hover{color:var(--apx-text)}
+.seg-box--col{flex-direction:column}
+.seg-box--col .seg-btn{text-align:left}
+.seg-btn.seg-on{background:var(--apx-sel);color:var(--apx-accent,var(--apx-text));border-color:var(--apx-sel-line);font-weight:500}
+.apx-rail-meta{display:flex;flex-direction:column;align-items:flex-start;gap:7px;margin-top:10px}
+.apx-rail-tip{margin:10px 0 0;font-size:10.5px;line-height:1.6;color:var(--apx-text3)}
+/* 出图操作底栏 */
+.apx-ops{border-top:1px solid var(--apx-line)}
+.apx-ops-h{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.apx-cap{font-size:10px;color:var(--apx-text3);letter-spacing:.05em}
+.apx-target{margin-left:auto;font-size:10px;color:var(--apx-text2);
+  border:1px solid var(--apx-line);border-radius:8px;padding:2px 8px;white-space:nowrap;max-width:200px;
+  overflow:hidden;text-overflow:ellipsis}
+.apx-cta{background:var(--apx-accent);border-color:var(--apx-accent);color:var(--apx-accent-ink)}
+.apx-cta:hover:not(:disabled){filter:brightness(1.08)}
+/* 语义细节：模型名 / 架构 / 风格 走 apx 冷灰 */
+.ap-workspace .ap-gen-model{color:var(--apx-text2);border-color:var(--apx-line);background:transparent}
+.ap-workspace .ap-gen-model.off{color:var(--apx-err);border-color:var(--apx-err)}
+.ap-workspace .ap-gen-arch{background:transparent;color:var(--apx-text2);border:1px solid var(--apx-line);border-radius:6px}
+.ap-workspace .ap-gen-style{color:var(--apx-text2);border-color:var(--apx-line);background:transparent}
+.ap-workspace .ap-gen-info{color:var(--apx-text3)}
+.ap-workspace .ap-gen-info.off{color:var(--apx-err)}
+.ap-workspace .ap-gen-dot.on{background:var(--apx-ok);box-shadow:none}
+.ap-workspace .ap-gen-dot.off{background:var(--apx-err);box-shadow:none}
+.ap-workspace .ap-gen-sum{color:var(--apx-text3)}
+.ap-workspace .ap-gen-sum.warn{color:var(--apx-err)}
+.ap-workspace .seg-btn{color:var(--apx-text2)}
+.ap-workspace .seg-btn:hover{background:var(--apx-hover);color:var(--apx-text)}
+.ap-workspace .seg-box{border-color:var(--apx-line);background:transparent;border-radius:8px}
+.ap-work-card{border-color:var(--apx-line);border-radius:14px;background:var(--apx-panel);box-shadow:var(--apx-shadow)}
+.ap-work-card>.ap-tabs{background:transparent}
+
 .ap-flux{border-top:1px solid var(--line-soft);padding-top:8px;margin-top:6px}
 .ap-flux-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:11.5px;color:var(--text-2)}
 .ap-flux-h .btn{padding:2px 8px;font-size:10.5px}
 .ap-flux-note{font-size:10.5px;color:var(--text-4);line-height:1.5}
 .ap-flux-list{margin-top:6px;display:flex;flex-direction:column;gap:6px;max-height:230px;overflow:auto}
-.ap-flux-row{padding:6px 8px;border:1px solid var(--line-soft);border-radius:4px;background:rgba(255,255,255,.02)}
+.ap-flux-row{padding:6px 8px;border:1px solid var(--line-soft);border-radius:4px;background:rgba(var(--tint),.02)}
 .ap-flux-row b{font-size:10.5px;font-weight:600;color:var(--text-2)}
 .ap-flux-row em{font:9.5px/1 var(--mono);color:var(--text-4);font-style:normal;margin-left:6px}
 .ap-flux-row .warn{font-size:9.5px;color:var(--warn);margin-left:6px}
@@ -347,16 +467,16 @@
 /* 生成图按各自真实画幅铺开，不再统一裁成 4:3：16:9 场景图、3:4 定妆图都能看全 */
 .ap-genimgs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));
   gap:12px;align-items:start}
-.ap-genimgs-grid figure{margin:0;border:1px solid var(--line);border-radius:9px;
-  overflow:hidden;background:rgba(0,0,0,.03)}
-.ap-genimgs-grid figure.primary{border-color:#7170ff;box-shadow:0 0 0 1px #7170ff}
+.ap-genimgs-grid figure{margin:0;border:1px solid var(--line);border-radius:12px;
+  overflow:hidden;background:var(--shade03)}
+.ap-genimgs-grid figure.primary{border-color:var(--apx-accent,#4f54e0);box-shadow:0 0 0 1px var(--apx-accent,#4f54e0)}
 .ap-genimgs-shot{display:block;position:relative;width:100%;padding:0;border:0;
-  background:#14161f;cursor:zoom-in;line-height:0;overflow:hidden}
-.ap-genimgs-grid img{display:block;width:100%;object-fit:contain;background:#14161f;
+  background:var(--media-bg);cursor:zoom-in;line-height:0;overflow:hidden}
+.ap-genimgs-grid img{display:block;width:100%;object-fit:contain;background:var(--media-bg);
   transition:filter .18s ease}
 .ap-genimgs-shot:hover img{filter:brightness(1.1)}
-.ap-genimgs-zoom{position:absolute;right:7px;bottom:7px;padding:3px 8px;border-radius:20px;
-  background:rgba(8,9,10,.78);border:1px solid rgba(255,255,255,.16);color:#f7f8f8;
+.ap-genimgs-zoom{position:absolute;right:7px;bottom:7px;padding:3px 8px;border-radius:6px;
+  background:var(--overlay-bg);border:1px solid rgba(var(--tint),.16);color:var(--text);
   font-size:10.5px;line-height:1.5;white-space:nowrap;opacity:0;transform:translateY(3px);
   transition:opacity .18s,transform .18s;pointer-events:none}
 .ap-genimgs-shot:hover .ap-genimgs-zoom{opacity:1;transform:none}
@@ -367,7 +487,7 @@
 .ap-genimgs-meta{display:block;padding:0 9px;font:10px/1.4 var(--mono);color:var(--text-4)}
 .ap-genimgs-grid .mini.wide{display:block;width:calc(100% - 14px);height:24px;
   margin:6px 7px;font-size:10.5px;border-radius:5px}
-.ap-genimgs-primary{display:block;padding:6px 9px;font-size:10.5px;color:#5b5ae6;font-weight:600}
+.ap-genimgs-primary{display:block;padding:6px 9px;font-size:10.5px;color:var(--apx-text2,var(--text-2));font-weight:600}
 
 /* --------------------- 素材图大图预览灯箱 --------------------- */
 .ap-lb{position:fixed;inset:0;z-index:100;display:grid;
@@ -380,16 +500,16 @@
 .ap-lb-tools{margin-left:auto;display:flex;align-items:center;gap:10px;flex:none}
 .ap-lb-tools a.btn{text-decoration:none;display:inline-flex;align-items:center}
 .ap-lb-tools .btn{padding:0 11px;white-space:nowrap}
-.ap-lb-primary{font-size:11px;color:#a5a4ff;font-weight:600;white-space:nowrap}
+.ap-lb-primary{font-size:11px;color:var(--apx-text2,var(--text-2));font-weight:600;white-space:nowrap}
 .ap-lb-close{width:30px;height:30px;border:1px solid var(--line-2);border-radius:7px;
   background:transparent;color:var(--text-3);font-size:20px;line-height:1;cursor:pointer}
-.ap-lb-close:hover{background:rgba(255,255,255,.08);color:var(--text)}
+.ap-lb-close:hover{background:rgba(var(--tint),.08);color:var(--text)}
 .ap-lb-stage{position:relative;display:grid;place-items:center;min-height:0;
   padding:18px 72px;overflow:hidden}
 .ap-lb-stage img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;
-  border-radius:6px;box-shadow:0 18px 60px rgba(0,0,0,.65)}
+  border-radius:6px;box-shadow:0 18px 60px var(--shade65)}
 .ap-lb-nav{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;
-  border:1px solid var(--line-2);border-radius:50%;background:rgba(21,23,26,.85);
+  border:1px solid var(--line-2);border-radius:50%;background:var(--overlay-btn);
   color:var(--text-2);font-size:25px;line-height:1;cursor:pointer;z-index:1}
 .ap-lb-nav:hover{background:#2a2d33;color:#fff}
 .ap-lb-nav.prev{left:18px} .ap-lb-nav.next{right:18px}
@@ -401,8 +521,8 @@
   cursor:zoom-out;border-radius:0;box-shadow:none}
 .ap-lb-zoom{height:26px;padding:0 9px;border:1px solid var(--line-2);border-radius:7px;
   background:transparent;color:var(--text-3);font:11px var(--mono);cursor:pointer;white-space:nowrap}
-.ap-lb-zoom:hover{background:rgba(255,255,255,.06);color:var(--text)}
-.ap-lb-zoom.on{color:#a5a4ff;border-color:var(--primary-line)}
+.ap-lb-zoom:hover{background:rgba(var(--tint),.06);color:var(--text)}
+.ap-lb-zoom.on{color:var(--apx-text,var(--text));border-color:var(--apx-line,var(--line-2))}
 .ap-lb-foot{padding:10px 18px 16px;border-top:1px solid var(--line-soft);min-height:0}
 .ap-lb-meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;
   font:10.5px var(--mono);color:var(--text-4)}
@@ -423,17 +543,17 @@
 
 /* --------------------- 按分镜分组视图（参考分镜任务列表 + 资产卡片） --------------------- */
 .ap-views{display:inline-flex;gap:2px;padding:2px;border:1px solid var(--line);
-  border-radius:999px;background:rgba(255,255,255,.03)}
+  border-radius:8px;background:rgba(var(--tint),.03)}
 .ap-views button{border:0;background:transparent;color:var(--text-3);font-size:11.5px;
-  padding:4px 12px;border-radius:999px;cursor:pointer;white-space:nowrap}
+  padding:4px 12px;border-radius:6px;cursor:pointer;white-space:nowrap}
 .ap-views button:hover{color:var(--text-2)}
-.ap-views button.on{background:#7170ff;color:#fff;font-weight:600}
+.ap-views button.on{background:var(--apx-sel,#eef0fb);color:var(--apx-accent,var(--primary-deep));font-weight:500}
 .ap-views-sep{width:1px;height:18px;background:var(--line-2);margin:0 6px}
 .ap-view-note{font-size:10.5px;color:var(--text-4)}
 
 .ap-right{display:flex;flex-direction:column;min-width:0;gap:10px;overflow:auto;padding-right:2px}
 .ap-right::-webkit-scrollbar{width:8px}
-.ap-right::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:4px}
+.ap-right::-webkit-scrollbar-thumb{background:rgba(var(--tint),.08);border-radius:4px}
 .ap-body:not(.is-shot) .ap-right{gap:0}
 .ap-body:not(.is-shot) .ap-detail{flex:1;overflow:auto}
 .ap-body.is-shot{grid-template-columns:250px minmax(0,1fr);
@@ -447,19 +567,18 @@
 .ap-shot-nav-stats{display:flex;gap:8px;margin-top:5px;font-size:10.5px}
 .ap-shot-nav-stats .ok{color:var(--ok)}
 .ap-shot-nav-stats .warn{color:var(--warn)}
-.ap-shot-ep{margin-top:7px;width:100%;font-size:11px;background:rgba(255,255,255,.04);padding:3px 6px}
+.ap-shot-ep{margin-top:7px;width:100%;font-size:11px;background:rgba(var(--tint),.04);padding:3px 6px}
 .ap-shot-rows{flex:1;min-height:0;overflow:auto;padding:5px;display:flex;flex-direction:column;gap:5px}
 .ap-shot-rows::-webkit-scrollbar{width:8px}
-.ap-shot-rows::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:4px}
+.ap-shot-rows::-webkit-scrollbar-thumb{background:rgba(var(--tint),.08);border-radius:4px}
 .ap-shot-row{display:flex;gap:8px;padding:7px;border:1px solid var(--line);border-radius:8px;
-  background:rgba(255,255,255,.018);cursor:pointer;position:relative;transition:all var(--ease)}
-.ap-shot-row:hover{border-color:var(--line-2);background:rgba(255,255,255,.04)}
-.ap-shot-row.on{border-color:#7170ff;background:rgba(113,112,255,.10);
-  box-shadow:0 0 0 1px rgba(113,112,255,.25)}
+  background:rgba(var(--tint),.018);cursor:pointer;position:relative;transition:all var(--ease)}
+.ap-shot-row:hover{border-color:var(--line-2);background:rgba(var(--tint),.04)}
+.ap-shot-row.on{border-color:var(--apx-sel-line,#d8dbf5);background:var(--apx-sel,#eef0fb)}
 .ap-shot-row.on::before{content:"";position:absolute;left:0;top:8px;bottom:8px;
-  width:2px;border-radius:2px;background:#7170ff}
+  width:2px;border-radius:2px;background:var(--apx-accent,#4f54e0)}
 .ap-shot-row-th{flex:0 0 54px;width:54px;height:40px;border-radius:5px;overflow:hidden;
-  background:#15171a;border:1px solid var(--line);display:grid;place-items:center;
+  background:var(--surface-2);border:1px solid var(--line);display:grid;place-items:center;
   font-size:14px;color:var(--text-4)}
 .ap-shot-row-th img{width:100%;height:100%;object-fit:cover}
 .ap-shot-row-b{flex:1;min-width:0}
@@ -474,23 +593,23 @@
 .ap-shot-row-f i{margin-left:auto;font-style:normal;border-radius:3px;padding:0 4px;flex:none}
 .ap-shot-row-f i.ok{color:var(--ok);background:var(--ok-soft)}
 .ap-shot-row-f i.warn{color:var(--warn);background:var(--warn-soft)}
-.ap-shot-row-f i.empty{color:var(--text-4);background:rgba(255,255,255,.05)}
+.ap-shot-row-f i.empty{color:var(--text-4);background:rgba(var(--tint),.05)}
 
 /* 右：分镜描述头 */
 .ap-shot-hero{border:1px solid var(--line);border-radius:var(--radius-lg);padding:12px 14px;
-  background:linear-gradient(180deg,rgba(113,112,255,.07),rgba(255,255,255,.012))}
+  background:rgba(var(--tint),.02)}
 .ap-shot-hero-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .ap-shot-hero-h b{font-size:15px;font-weight:600;color:var(--text)}
 .ap-shot-hero-code{font:10.5px/1.5 var(--mono);color:var(--primary-deep);background:var(--primary-soft);
   border:1px solid var(--primary-line);border-radius:4px;padding:1px 6px}
 .ap-shot-hero-sub{font-size:10.5px;color:var(--text-4)}
-.ap-shot-hero-state{margin-left:auto;font-size:10.5px;border-radius:999px;
+.ap-shot-hero-state{margin-left:auto;font-size:10.5px;border-radius:8px;
   padding:2px 9px;border:1px solid var(--line-2)}
 .ap-shot-hero-state.ok{color:var(--ok);border-color:var(--ok-line);background:var(--ok-soft)}
 .ap-shot-hero-state.warn{color:var(--warn);border-color:var(--warn-line);background:var(--warn-soft)}
 .ap-shot-hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
 .ap-shot-hero-box{border:1px solid var(--line);border-radius:8px;
-  background:rgba(0,0,0,.18);padding:8px 10px;min-width:0}
+  background:var(--shade18);padding:8px 10px;min-width:0}
 .ap-shot-hero-box h4{margin:0 0 5px;font-size:10.5px;font-weight:600;
   color:var(--primary-deep);letter-spacing:.3px}
 .ap-shot-hero-box p{margin:0;font-size:11.5px;line-height:1.65;color:var(--text-2);
@@ -500,7 +619,7 @@
   font-size:10.5px;color:var(--text-4)}
 .ap-shot-hero-sum b{color:var(--text-2);font-weight:600}
 .ap-shot-frame{border:1px solid var(--line);border-radius:8px;
-  padding:8px 10px;background:rgba(255,255,255,.015)}
+  padding:8px 10px;background:rgba(var(--tint),.015)}
 .ap-shot-frame summary{cursor:pointer;font-size:11px;color:var(--text-3)}
 .ap-shot-frame pre{margin:8px 0 0;max-height:150px;overflow:auto;white-space:pre-wrap;
   word-break:break-word;font:10.5px/1.7 var(--mono);color:var(--text-3)}
@@ -509,26 +628,26 @@
 .ap-shot-group{margin-top:2px}
 .ap-shot-group-h{display:flex;align-items:center;gap:7px;margin-bottom:7px}
 .ap-shot-group-h b{font-size:12.5px;font-weight:600;color:var(--text)}
-.ap-shot-group-n{font:10px/1.6 var(--mono);color:var(--text-4);background:rgba(255,255,255,.05);
+.ap-shot-group-n{font:10px/1.6 var(--mono);color:var(--text-4);background:rgba(var(--tint),.05);
   border:1px solid var(--line);border-radius:4px;padding:0 5px}
 .ap-shot-group-cap{font-size:10.5px;color:var(--text-4)}
 .ap-shot-group-h .mini{margin-left:auto;width:auto;height:22px;padding:0 9px;font-size:10.5px}
 .ap-shot-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(164px,1fr));gap:10px}
-.ap-shot-card{border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.022);
+.ap-shot-card{border:1px solid var(--line);border-radius:10px;background:rgba(var(--tint),.022);
   overflow:hidden;cursor:pointer;transition:border-color var(--ease),background var(--ease)}
-.ap-shot-card:hover{border-color:var(--line-2);background:rgba(255,255,255,.04)}
-.ap-shot-card.on{border-color:#7170ff;box-shadow:0 0 0 1px rgba(113,112,255,.35)}
-.ap-shot-card-img{position:relative;aspect-ratio:16/10;background:#14161f;
+.ap-shot-card:hover{border-color:var(--line-2);background:rgba(var(--tint),.04)}
+.ap-shot-card.on{border-color:var(--apx-accent,#4f54e0);box-shadow:0 0 0 1px var(--apx-accent,#4f54e0)}
+.ap-shot-card-img{position:relative;aspect-ratio:16/10;background:var(--media-bg);
   overflow:hidden;display:grid;place-items:center}
 .ap-shot-card-img>img{width:100%;height:100%;object-fit:cover;display:block}
 .ap-shot-card-ph{display:grid;place-items:center;width:100%;height:100%;color:var(--text-4)}
 .ap-shot-card-ph svg{width:30px;height:30px;opacity:.55}
 .ap-shot-card-badge{position:absolute;left:7px;top:7px;font-size:9.5px;border-radius:4px;
-  padding:2px 6px;background:rgba(8,9,10,.72);border:1px solid rgba(255,255,255,.14);color:var(--text-2)}
+  padding:2px 6px;background:var(--veil-bg);border:1px solid rgba(var(--tint),.14);color:var(--text-2)}
 .ap-shot-card-badge.ok{color:#7ee2b8;border-color:rgba(61,220,151,.4)}
 .ap-shot-card-badge.off{color:var(--text-4)}
 .ap-shot-card-zoom{position:absolute;right:6px;top:6px;width:22px;height:22px;border-radius:5px;
-  border:1px solid rgba(255,255,255,.18);background:rgba(8,9,10,.7);color:#fff;
+  border:1px solid rgba(var(--tint),.18);background:var(--overlay-bg-2);color:var(--text);
   font-size:11px;cursor:zoom-in}
 .ap-shot-card-b{padding:8px 9px 6px}
 .ap-shot-card-t{display:flex;align-items:baseline;gap:5px;min-width:0}
@@ -543,7 +662,7 @@
 .ap-shot-card-act .mini{flex:1;width:auto;height:24px;font-size:10.5px;border-radius:6px;
   border:1px solid var(--line-2);background:transparent;color:var(--text-3);
   display:inline-flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
-.ap-shot-card-act .mini:hover{color:var(--text);background:rgba(255,255,255,.06)}
+.ap-shot-card-act .mini:hover{color:var(--text);background:rgba(var(--tint),.06)}
 .ap-shot-card-act input.ap-file{display:none}
 .ap-shot-group-empty{padding:10px;border:1px dashed var(--line-2);border-radius:8px;
   font-size:11px;color:var(--text-4);text-align:center}
@@ -568,7 +687,7 @@
 /* ------------------ 制作阶段：资产定妆页统计条 / 分镜表资产状态 ------------------ */
 .asset-strip{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;
   padding:9px 12px;border:1px solid var(--line);border-radius:var(--radius-lg);
-  background:rgba(255,255,255,.018)}
+  background:rgba(var(--tint),.018)}
 .asset-strip-item{display:flex;align-items:baseline;gap:6px;padding-right:11px;
   border-right:1px solid var(--line-soft);font-size:11.5px;color:var(--text-3)}
 .asset-strip-item:last-of-type{border-right:none;padding-right:0}

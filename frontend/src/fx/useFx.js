@@ -13,7 +13,7 @@ const saved = read();
 
 export const fx = reactive({
   on: saved.on === true,                                    // 默认关闭（Linear 深色为基线）
-  dark: saved.dark === true,                                // 默认「浅色极光」
+  dark: saved.dark === true,                                // 默认「极光」特效配色（与外观主题无关）
   motion: MOTIONS.includes(saved.motion) ? saved.motion : "full",
   orbOpen: false,
   palette: false

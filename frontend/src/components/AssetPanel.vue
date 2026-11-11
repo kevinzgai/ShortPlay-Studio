@@ -4,7 +4,7 @@ import {
   S, ui, assetTabs, assetSummary, assetUsage, staleAssetCount, refreshAssets, setAssetTab,
   onAssetFocusin, onAssetChange, toggleAssetLock, uploadAssetRef, clearAssetRef,
   addProp, delAsset, assetPackStats, buildAssetPack, regenFrames,
-  copyAssetPrompt, copyAllAssetPrompts, assetPromptBlocks, saveAssetAnchor, saveAssetKeyword, copyText,
+  copyAssetPrompt, copyAllAssetPrompts, assetPromptBlocks, saveAssetAnchor, saveAssetKeyword, saveAssetPrompt, copyText,
   comfyCheck, fillAssetWithAI, comfyGenerateImages, comfyToggleVariant, comfyPreviewPrompts,
   comfySetScope, comfySetEngine, comfySetSeqN, setPrimaryGenImage, clearGenImages,
   STYLE_PRESETS, currentStyle, saveStyleConfig, resetStyleConfig
@@ -127,12 +127,12 @@ function cardDesc(a) {
   return t.slice(0, 56) || "由剧本分解自动提取设定";
 }
 function cardVariant(a) {
+  const label = ((a.genImages || [])[0] || {}).label;
+  if (label) return label;
   const p = a.prompts || {};
-  if (p.turnaround) return "三视图";
-  if (p.faceSheet) return "面部四视图";
-  if (p.concept) return "场景概念图";
-  if (p.wide) return "宽幕建立镜";
-  return ((a.genImages || [])[0] || {}).label || "设定图";
+  if (p.main || p.turnaround || p.faceSheet) return "出图提示词 · 1 条";
+  if (p.concept || p.wide) return "场景提示词 · 1 条";
+  return "待生成";
 }
 function pickShotAsset(a) {
   if (S.assetTab !== a.kind) setAssetTab(a.kind);
@@ -242,14 +242,27 @@ function anchorValue(a, key) {
   const v = (a.anchors || {})[key];
   return Array.isArray(v) ? v.join("、") : (v || "");
 }
+/* 【一资产一组提示词】中文出图提示词一条（main，旧包从 turnaround/faceSheet/concept 收敛）
+   + 英文一条（promptEn，老数据读 keywordEn / sceneEn）+ 角色的固定关键词串。
+   多视角（三视图 / 四视图 / 宽幕）按规则拆独立资产，不再在同一资产上叠多组。 */
 const PROMPTS = {
-  character: [["turnaround", "三视图"], ["faceSheet", "面部四视图"]],
-  scene: [["concept", "场景概念图"], ["wide", "宽幕版"]],
+  character: [["main", "出图提示词"]],
+  scene: [["main", "场景概念图提示词"]],
   prop: []
 };
 function promptsOf(a) {
-  const raw = a.prompts || {};
-  const list = (PROMPTS[a.kind] || []).filter(([k]) => raw[k]).map(([k, label]) => [k, label, raw[k]]);
+  const list = [];
+  const p = a.prompts || {};
+  const main = String(p.main || p.turnaround || p.faceSheet || p.concept || p.wide || "").trim();
+  (PROMPTS[a.kind] || []).forEach(([k, label]) => {
+    list.push([k, label, k === "main" ? main : (p[k] || "")]);
+  });
+  // 英文串是本地出图 / Flux / MJ 真正吃的：没填也给空槽，可手写，不用等 AI
+  const enKey = a.kind === "character" || a.kind === "scene" ? "promptEn" : "";
+  if (enKey) {
+    const en = String(a.promptEn || a.keywordEn || a.sceneEn || "").trim();
+    list.push([enKey, "英文关键词（Flux / MJ / 本地出图）", en]);
+  }
   // 道具没有预生成提示词，但「名称 + 描述」这一句本身就能直接塞进镜头，照样给出来可复制
   if (a.kind === "prop") {
     const blk = assetPromptBlocks(a).find((b) => b.key === "prop");
@@ -487,88 +500,8 @@ watch(() => sel.value && sel.value.id, () => { closePreview(); ui.comfy.preview 
       </div>
     </div>
 
-    <!-- 本地 ComfyUI 出图工具条：AI 填好的设定 → 一键批量出素材图 -->
-    <div v-show="open" v-if="ui.comfy.checked" class="ap-gen">
-      <div class="ap-gen-l">
-        <span class="ap-gen-dot" :class="engineOnline ? 'on' : 'off'"></span>
-        <div class="ap-gen-seg" title="切换出图引擎">
-          <button :class="{ on: ui.comfy.engine === 'comfy' }" @click="comfySetEngine('comfy')">本地 ComfyUI</button>
-          <button :class="{ on: ui.comfy.engine === 'qwen' }" @click="comfySetEngine('qwen')">通义万相</button>
-          <button :class="{ on: ui.comfy.engine === 'h3' }" @click="comfySetEngine('h3')"
-            title="云端 MiniMax，要配 API Key；本机那套 H3-Image 在「本地 ComfyUI」里换 unet">MiniMax H3（云端）</button>
-        </div>
-        <span v-if="ui.comfy.engine === 'qwen'" class="ap-gen-info" :class="{ off: !ui.comfy.qwen.online }">
-          {{ ui.comfy.qwen.online ? (ui.comfy.qwen.model + ' · ' + ui.comfy.qwen.size + ' · 云端组图') : ui.comfy.qwen.detail }}
-        </span>
-        <span v-else-if="ui.comfy.engine === 'h3'" class="ap-gen-info" :class="{ off: !ui.comfy.h3.online }">
-          {{ ui.comfy.h3.online ? (ui.comfy.h3.model + ' · ' + ui.comfy.h3.size + ' · 云端生图') : ui.comfy.h3.detail }}
-        </span>
-        <span v-else-if="ui.comfy.online" class="ap-gen-info" :class="{ off: archBlocked }">
-          ComfyUI {{ ui.comfy.version }} · {{ ui.comfy.model }} · 显存空闲 {{ vramText(ui.comfy.vramFreeMB) }}
-          <em v-if="ui.comfy.arch && ui.comfy.arch.label" class="ap-gen-arch"
-            :title="archBlocked ? '这个模型走视频链路，出不了定妆 / 道具图' : '当前出图架构与默认步数'">
-            {{ ui.comfy.arch.label }} · {{ ui.comfy.arch.steps }} 步
-          </em>
-        </span>
-        <span v-else class="ap-gen-info off">{{ ui.comfy.detail }} · 启动 8188 后重试</span>
-        <button class="mini" title="重新探测出图引擎" @click="comfyCheck">↻</button>
-        <span class="ap-gen-style" :title="'出图风格锚：' + curStyle.anchorEn">风格 · {{ styleShort }}</span>
-      </div>
-      <div v-if="engineOnline" class="ap-gen-r">
-        <div class="ap-gen-grp">
-          <span class="ap-gen-cap" title="决定给几个资产出图">出图范围</span>
-          <div class="ap-gen-seg">
-            <button v-for="s in SCOPES" :key="s.k" :class="{ on: ui.comfy.scope === s.k }"
-              :title="s.h" @click="comfySetScope(s.k)">{{ s.t }}</button>
-          </div>
-        </div>
-        <div class="ap-gen-grp">
-          <span class="ap-gen-cap" title="同一个资产出几种画幅，可多选">画幅</span>
-          <div class="ap-gen-seg vars">
-            <button v-for="v in genVariants" :key="v.key"
-              :class="{ on: (ui.comfy.picked[S.assetTab] || []).includes(v.key) }"
-              :title="'画幅 ' + (v.w || '?') + '×' + (v.h || '?')"
-              @click="comfyToggleVariant(S.assetTab, v.key)">{{ v.label }}</button>
-          </div>
-        </div>
-        <div v-if="cloudEngine" class="ap-gen-grp">
-          <span class="ap-gen-cap" title="一次生成几张前后一致的组图">组图张数</span>
-          <div class="ap-gen-seg">
-            <button v-for="k in [1, 2, 3, 4]" :key="k" :class="{ on: ui.comfy.seqN === k }"
-              @click="comfySetSeqN(k)">{{ k }}</button>
-          </div>
-        </div>
-        <div class="ap-gen-act">
-          <span class="ap-gen-sum" :class="{ warn: !genCount || archBlocked }">
-            {{ archBlocked ? "当前模型是视频模型，出不了静帧" : genSummary }}
-          </span>
-          <button class="btn sm primary" id="comfy-generate"
-            :disabled="ui.comfy.busy || !genCount || archBlocked"
-            :title="archBlocked ? '到「系统设置 · 出图引擎」把 unet 换成 flux1-schnell-fp8 或 minimax_h3_image' : ''"
-            @click="doGenerate">
-            {{ ui.comfy.busy ? "生成中…" : "✦ 一键生成 " + genCount + " 张" }}
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div v-show="open" v-if="ui.comfy.busy || ui.comfy.results.length || ui.comfy.errors.length" class="ap-gen-status">
-      <template v-if="ui.comfy.busy">
-        <div class="ap-gen-bar"><i :style="{ width: genPct + '%' }"></i></div>
-        <span>已出 {{ ui.comfy.done }} / {{ ui.comfy.total }} 张</span>
-        <span class="ap-gen-cur">{{ ui.comfy.current || "排队中…" }}</span>
-        <span class="ap-gen-hint">{{ cloudEngine ? '云端生图单批约 20–60 秒，别关页面' : localHint }}</span>
-      </template>
-      <template v-else>
-        <span class="ok">✓ 完成 {{ ui.comfy.results.length }} 张，已挂到对应资产</span>
-        <span v-if="ui.comfy.results.some((r) => r.fallbackEn)" class="warn">
-          部分资产缺英文关键词，出图用了中文兜底 → 建议先「AI 补形象」
-        </span>
-      </template>
-      <ul v-if="ui.comfy.errors.length" class="ap-gen-errs">
-        <li v-for="(e, i) in ui.comfy.errors" :key="i">{{ e.assetName }} · {{ e.variantLabel }}：{{ e.detail }}</li>
-      </ul>
-    </div>
+    <!-- 出图模型设置与出图动作不在顶部横条里了：
+         模型设置收进下方工作区左侧竖栏，生成动作贴着资产模块底部。 -->
 
     <div v-show="open">
       <!-- 没做过分解：说清楚能拿到什么，而不是只给一个空列表 -->
@@ -642,6 +575,46 @@ watch(() => sel.value && sel.value.id, () => { closePreview(); ui.comfy.preview 
         <ul><li v-for="(w, i) in S.assetWarnings" :key="i">{{ w }}</li></ul>
       </div>
 
+      <!-- 出图工作区：左侧一列「模型设置」，右侧一整块「资产模块」。
+           V1 克制灰阶：黑白灰打底，唯一强调色给生成按钮；原子类 + apx 主题变量。 -->
+      <div class="ap-gen ap-workspace apx">
+        <aside class="ap-gen-engine apx-rail" v-if="ui.comfy.checked">
+          <div class="flex items-center gap-2 mb-2.5">
+            <span class="ap-gen-dot" :class="engineOnline ? 'on' : 'off'"></span>
+            <b class="text-12px fw6 text-[color:var(--apx-text)]">出图模型</b>
+            <button class="mini ml-auto" title="重新探测出图引擎" @click="comfyCheck">↻</button>
+          </div>
+          <div class="seg-box seg-box--col" role="tablist" title="切换出图引擎">
+            <button class="seg-btn" :class="{ 'seg-on': ui.comfy.engine === 'comfy' }" @click="comfySetEngine('comfy')">本地 ComfyUI</button>
+            <button class="seg-btn" :class="{ 'seg-on': ui.comfy.engine === 'qwen' }" @click="comfySetEngine('qwen')">通义万相</button>
+            <button class="seg-btn" :class="{ 'seg-on': ui.comfy.engine === 'h3' }" @click="comfySetEngine('h3')"
+              title="云端 MiniMax，要配 API Key；本机那套 H3-Image 在「本地 ComfyUI」里换 unet">MiniMax H3（云端）</button>
+          </div>
+          <div class="apx-rail-meta">
+            <span v-if="ui.comfy.engine === 'qwen'" class="ap-gen-info" :class="{ off: !ui.comfy.qwen.online }">
+              {{ ui.comfy.qwen.online ? (ui.comfy.qwen.model + ' · ' + ui.comfy.qwen.size + ' · 云端组图') : ui.comfy.qwen.detail }}
+            </span>
+            <span v-else-if="ui.comfy.engine === 'h3'" class="ap-gen-info" :class="{ off: !ui.comfy.h3.online }">
+              {{ ui.comfy.h3.online ? (ui.comfy.h3.model + ' · ' + ui.comfy.h3.size + ' · 云端生图') : ui.comfy.h3.detail }}
+            </span>
+            <template v-else-if="ui.comfy.online">
+              <span class="ap-gen-info" :class="{ off: archBlocked }">
+                ComfyUI {{ ui.comfy.version }} · 显存空闲 {{ vramText(ui.comfy.vramFreeMB) }}
+              </span>
+              <span class="ap-gen-model" :class="{ off: archBlocked }" :title="ui.comfy.model">{{ ui.comfy.model }}</span>
+              <span v-if="ui.comfy.arch && ui.comfy.arch.label" class="ap-gen-arch"
+                :title="archBlocked ? '这个模型走视频链路，出不了定妆 / 道具图' : '当前出图架构与默认步数'">
+                {{ ui.comfy.arch.label }} · {{ ui.comfy.arch.steps }} 步
+              </span>
+            </template>
+            <span v-else class="ap-gen-info off">{{ ui.comfy.detail }} · 启动 8188 后重试</span>
+            <span class="ap-gen-style" :title="'出图风格锚：' + curStyle.anchorEn">风格 · {{ styleShort }}</span>
+          </div>
+          <p class="apx-rail-tip">换 unet / 配 Key 在「系统设置 · 出图引擎」</p>
+        </aside>
+
+        <div class="ap-work-main">
+          <div class="ap-work-card">
       <div class="ap-tabs">
         <div class="ap-views" title="切换资产浏览方式">
           <button :class="{ on: viewMode === 'shot' }" @click="setViewMode('shot')">▦ 按分镜</button>
@@ -873,7 +846,7 @@ watch(() => sel.value && sel.value.id, () => { closePreview(); ui.comfy.preview 
               :disabled="!!ui.comfy.filling || !aiReady"
               :title="aiReady ? fillTitle : '需要先配置大模型 Key'"
               @click="fillAssetWithAI(sel.id)">
-              {{ ui.comfy.filling === sel.id ? "补全中…" : "✦ AI 补形象" }}
+              {{ ui.comfy.filling === sel.id ? "补全中…" : "AI 补形象" }}
             </button>
             <label class="btn sm quiet ap-upload"
               :title="sel.refImage ? '换一张参考图（原图不压缩）' : '挂一张参考图：原图不压缩，会一起打包'">
@@ -957,15 +930,23 @@ watch(() => sel.value && sel.value.id, () => { closePreview(); ui.comfy.preview 
                 <summary>
                   <span>{{ sel.kind === "prop" ? "道具提示词" : "出图提示词 · 外部工具" }}</span>
                   <span class="ap-prompts-n">{{ promptsOf(sel).length }} 条</span>
+                  <span class="ap-prompts-edit">可直接改，失焦保存</span>
                 </summary>
                 <div v-for="p in promptsOf(sel)" :key="p[0]" class="ap-prompt">
                   <div class="ap-prompt-h">
                     <span>{{ p[1] }}</span>
+                    <span v-if="!p[2]" class="ap-prompt-empty">空 · 可手写</span>
                     <button class="mini" :class="{ done: copiedId === sel.id + ':' + p[0] }"
                       :data-copy-prompt="sel.id + ':' + p[0]"
+                      :disabled="!p[2]"
                       @click="copyOne(sel.id, p[0])">{{ copiedId === sel.id + ":" + p[0] ? "✓ 已复制" : "复制" }}</button>
                   </div>
-                  <pre>{{ p[2] }}</pre>
+                  <textarea class="ap-prompt-ta" rows="4" spellcheck="false"
+                    :placeholder="p[0] === 'promptEn'
+                      ? '例：27-year-old Chinese woman, oval face, …'
+                      : '还没生成，点「AI 补形象」或直接手写'"
+                    :data-aprompt-key="p[0]" :data-asset-id="sel.id"
+                    @change="saveAssetPrompt(sel.id, p[0], $event.target.value)">{{ p[2] }}</textarea>
                 </div>
               </details>
 
@@ -1038,6 +1019,73 @@ watch(() => sel.value && sel.value.id, () => { closePreview(); ui.comfy.preview 
           @input="ui.propDraft = $event.target.value" @keyup.enter="addProp">
         <button class="btn sm" id="add-prop" @click="addProp">加入道具</button>
       </div>
+
+      <!-- 对资产的动作：同一张卡片的底栏，灰阶克制风 -->
+      <div v-if="engineOnline" class="ap-gen-ops apx-ops">
+        <div class="apx-ops-h">
+          <b class="text-11.5px fw6 text-[color:var(--apx-text)]">出图操作</b>
+          <span class="text-10.5px text-[color:var(--apx-text3)]">作用于上方清单</span>
+          <span v-if="sel" class="apx-target">当前 · {{ sel.name }}</span>
+        </div>
+        <div class="flex items-center gap-3.5 flex-wrap">
+          <div class="ap-gen-grp flex items-center gap-1.5">
+            <span class="apx-cap ap-gen-cap" title="决定给几个资产出图">范围</span>
+            <div class="ap-gen-seg seg-box" role="group">
+              <button v-for="s in SCOPES" :key="s.k" class="seg-btn"
+                :class="{ 'seg-on': ui.comfy.scope === s.k }"
+                :title="s.h" @click="comfySetScope(s.k)">{{ s.t }}</button>
+            </div>
+          </div>
+          <div class="ap-gen-grp flex items-center gap-1.5">
+            <span class="apx-cap ap-gen-cap" title="同一个资产出几种画幅，可多选">画幅</span>
+            <div class="ap-gen-seg seg-box vars" role="group">
+              <button v-for="v in genVariants" :key="v.key" class="seg-btn"
+                :class="{ 'seg-on': (ui.comfy.picked[S.assetTab] || []).includes(v.key) }"
+                :title="'画幅 ' + (v.w || '?') + '×' + (v.h || '?')"
+                @click="comfyToggleVariant(S.assetTab, v.key)">{{ v.label }}</button>
+            </div>
+          </div>
+          <div v-if="cloudEngine" class="ap-gen-grp flex items-center gap-1.5">
+            <span class="apx-cap ap-gen-cap" title="一次生成几张前后一致的组图">组图张数</span>
+            <div class="ap-gen-seg seg-box" role="group">
+              <button v-for="k in [1, 2, 3, 4]" :key="k" class="seg-btn"
+                :class="{ 'seg-on': ui.comfy.seqN === k }"
+                @click="comfySetSeqN(k)">{{ k }}</button>
+            </div>
+          </div>
+          <span class="ap-gen-sum" :class="{ warn: !genCount || archBlocked }">
+            {{ archBlocked ? "当前模型是视频模型，出不了静帧" : genSummary }}
+          </span>
+          <button class="btn sm primary apx-cta" id="comfy-generate"
+            :disabled="ui.comfy.busy || !genCount || archBlocked"
+            :title="archBlocked ? '到「系统设置 · 出图引擎」把 unet 换成 flux1-schnell-fp8 或 minimax_h3_image' : ''"
+            @click="doGenerate">
+            {{ ui.comfy.busy ? "生成中…" : "生成 " + genCount + " 张" }}
+          </button>
+        </div>
+      </div>
+
+      <!-- 进度 / 结果也留在同一张卡片里，点完生成不用往回翻 -->
+      <div v-if="ui.comfy.busy || ui.comfy.results.length || ui.comfy.errors.length" class="ap-gen-status">
+        <template v-if="ui.comfy.busy">
+          <div class="ap-gen-bar"><i :style="{ width: genPct + '%' }"></i></div>
+          <span>已出 {{ ui.comfy.done }} / {{ ui.comfy.total }} 张</span>
+          <span class="ap-gen-cur">{{ ui.comfy.current || "排队中…" }}</span>
+          <span class="ap-gen-hint">{{ cloudEngine ? '云端生图单批约 20–60 秒，别关页面' : localHint }}</span>
+        </template>
+        <template v-else>
+          <span class="ok">✓ 完成 {{ ui.comfy.results.length }} 张，已挂到对应资产</span>
+          <span v-if="ui.comfy.results.some((r) => r.fallbackEn)" class="warn">
+            部分资产缺英文关键词，出图用了中文兜底 → 建议先「AI 补形象」
+          </span>
+        </template>
+        <ul v-if="ui.comfy.errors.length" class="ap-gen-errs">
+          <li v-for="(e, i) in ui.comfy.errors" :key="i">{{ e.assetName }} · {{ e.variantLabel }}：{{ e.detail }}</li>
+        </ul>
+      </div>
+          </div><!-- /ap-work-card -->
+        </div><!-- /ap-work-main -->
+      </div><!-- /ap-workspace -->
     </div>
 
     <!-- 大图预览：Teleport 出 .ap-detail 的 overflow，否则弹层会被裁掉 -->

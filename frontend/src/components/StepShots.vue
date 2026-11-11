@@ -1,10 +1,10 @@
 <script setup>
-/* 制作阶段 · 第 1 步（工作区 3）：分镜表
-   资产定妆在下一步，这里只负责镜头本身：画面 / 景别 / 时长 / 台词 / 备注。 */
-import { computed } from "vue";
+/* 制作阶段 · 主流程最后一步（工作区 3）：分镜表
+   出片（参考图 / 首帧 / 整包导出）收在本页的可选折叠区，不再单开工作区。 */
+import { computed, ref } from "vue";
 import {
-  S, totalDuration, staleMsg, visibleShots, episodeTabs, shotsNeedRecalc,
-  shotGates, shotGateRunning, storyboardStep,
+  S, ui, totalDuration, staleMsg, visibleShots, episodeTabs, shotsNeedRecalc,
+  shotGates, shotGateRunning, storyboardStep, framesGate,
   allSelected, someSelected, aiRedo, setActiveEpisode, setView, selectAll,
   printPage, doGenerate, goStep, regenBatch,
   delSelected, insertShot
@@ -25,10 +25,16 @@ const assetStat = computed(() => {
 });
 const assetTip = computed(() => {
   const s = assetStat.value;
-  if (!s.total) return "本片还没有资产，去第 4 步定妆页从剧本分解";
-  if (s.ready === s.total) return "资产已全部定妆";
-  return "还有 " + (s.total - s.ready) + " 个资产没定妆，参考图槽位会空着";
+  if (!s.total) return "分镜表已可导出；要用参考图再打开出片区";
+  if (s.ready === s.total) return "参考图齐了";
+  return "缺 " + (s.total - s.ready) + " 张参考图，不影响分镜表导出";
 });
+
+/* 出片是可选动作：默认收起，别让它挤占分镜表的注意力。
+   闸门仍以第 4 步的完整工具页为准（framesGate 的 step 判定不改），
+   这里只展示状态 + 给入口，避免第 3 步偷偷发 /api/ai/frames。 */
+const outOpen = ref(false);
+function openExport() { ui.exportOpen = true; }
 
 /* S4：每集一个闸门，按钮三态；没有任何「剩余」批量入口。 */
 const SG_STATUS = { idle: "未生成", running: "生成中…", ready: "已生成", stale: "需重算", failed: "生成失败" };
@@ -57,9 +63,28 @@ function sgButton(s) {
 
   <div class="shot-asset-bar" :class="{ ready: assetStat.total && assetStat.ready === assetStat.total }">
     <span class="sab-dot" aria-hidden="true"></span>
-    <span class="sab-txt"><b>资产</b> {{ assetStat.ready }} / {{ assetStat.total }} 已定妆</span>
+    <span class="sab-txt"><b>出片</b> {{ assetStat.ready }} / {{ assetStat.total }} 已定妆 · {{ S.frames.length }} 镜首帧</span>
     <span class="sab-note">{{ assetTip }}</span>
-    <button class="btn sm quiet" id="to-assets" @click="goStep(4)">去定妆 / 改设定 →</button>
+    <button class="btn sm quiet" id="toggle-out" @click="outOpen = !outOpen">{{ outOpen ? "收起出片" : "出片 / 导出" }}</button>
+    <button class="btn sm quiet" id="to-assets" @click="goStep(4)">完整工具 →</button>
+  </div>
+
+  <div v-show="outOpen" id="shot-out" class="card pad" style="margin-bottom:14px">
+    <div class="so-head">
+      <div class="so-main">
+        <b>出片 · 可选</b>
+        <p class="so-note">分镜表本身就是完整交付物。要参考图、首帧或整包导出时再展开这一层；全剧视觉设定在「生成设置 · 视觉设定」，不在每一集里改。</p>
+        <div class="so-chips">
+          <span class="chip">{{ assetStat.ready }} / {{ assetStat.total }} 已定妆</span>
+          <span class="chip">{{ S.frames.length }} 镜首帧</span>
+          <span class="chip" :class="framesGate.ok ? 'ok' : 'warn'">{{ framesGate.ok ? "可生成" : framesGate.reason }}</span>
+        </div>
+      </div>
+      <div class="so-acts">
+        <button class="btn sm" @click="openExport">整包导出 →</button>
+        <button class="btn sm" @click="goStep(4)">打开完整出片工具 →</button>
+      </div>
+    </div>
   </div>
 
   <!-- S4：逐集闸门。一次点击只排一集，出完即停；失败只影响这一集 -->
@@ -173,7 +198,7 @@ function sgButton(s) {
   <div class="cta-row">
     <button class="btn" id="back-2" @click="goStep(2)">← 回分集方案</button>
     <button class="btn" id="back-1b" @click="goStep(1)">改剧本</button>
-    <button class="btn primary" id="go-assets" @click="goStep(4)">去资产定妆 →</button>
-    <span class="cta-note">Ctrl+Z 撤销 · Ctrl+Shift+Z 重做 · 数据只存在本机</span>
+    <button class="btn" id="go-assets" @click="goStep(4)">出片工具（可选）→</button>
+    <span class="cta-note">主流程到此为止 · Ctrl+Z 撤销 · 数据只存在本机</span>
   </div>
 </template>

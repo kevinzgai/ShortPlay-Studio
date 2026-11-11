@@ -596,11 +596,14 @@ export const STEPS = [
   { no: 1, stage: "script", stageName: "剧本阶段", label: "改剧本", hint: "上传稿子 → 规范成场次剧本" },
   { no: 2, stage: "script", stageName: "剧本阶段", label: "分集", hint: "确认分集方案 · 场次 · 体检" },
   { no: 3, stage: "production", stageName: "制作阶段", label: "分镜", hint: "按集生成 · 改字段 · 导出" },
-  { no: 4, stage: "production", stageName: "制作阶段", label: "定妆", hint: "按镜头给角色 / 场景 / 道具出图" }
+  // 主流程到这里就结束了。保留 no=4 只为兼容项目存档与回归锚点（data-step="4" / #view-4），
+  // 产品定位是「分镜页里的可选出片工具」，不再是平级工作区。
+  { no: 4, stage: "production", stageName: "制作阶段", label: "定妆", optional: true,
+    hint: "可选 · 参考图 / 首帧 / 整包导出" }
 ];
 export const STAGES = [
   { key: "script", name: "剧本阶段", note: "把文字整理成结构", steps: [1, 2] },
-  { key: "production", name: "制作阶段", note: "把结构做成片子", steps: [3, 4] }
+  { key: "production", name: "制作阶段", note: "主流程 3 步 · 出片可选", steps: [3, 4] }
 ];
 export const stageOf = (n) => (Number(n) <= 2 ? "script" : "production");
 

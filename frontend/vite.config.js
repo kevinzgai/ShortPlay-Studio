@@ -1,11 +1,12 @@
 import { fileURLToPath, URL } from "node:url";
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
+import UnoCSS from "unocss/vite";
 
 const resolve = (p) => fileURLToPath(new URL(p, import.meta.url));
 
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [vue(), UnoCSS()],
   // 与后端同源部署：构建产物落到 backend/dist/，backend/server.py 托管它（单端口 8177）
   build: {
     outDir: resolve("../backend/dist"),

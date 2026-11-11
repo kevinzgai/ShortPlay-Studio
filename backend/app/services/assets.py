@@ -7,11 +7,49 @@ import json
 import re
 
 from app.infra.coerce import _alist, _as, _ints, _priority
-from app.constants import (ASSET_KIND_CN, CONCEPT_TMPL, FACE_SHEET_TMPL, FRAME_TMPL,
+from app.constants import (CONCEPT_TMPL, FRAME_TMPL,
                             NEGATIVE_DEFAULT, SIZE_EN, STYLE_ANCHOR_DEFAULT,
-                            STYLE_ANCHOR_EN_DEFAULT, SYSTEM_ASSET_FILL, TURNAROUND_TMPL)
+                            STYLE_ANCHOR_EN_DEFAULT, SYSTEM_ASSET_FILL)
 from .llm_gateway import call_llm_json
 from .script_text import clean_placeholder
+
+
+def _char_main_prompt(item, style, negative):
+    """角色主提示词：一条 = 定妆半身（正面胸像），尾部带全身三视图的补充说明。
+
+    一个资产只有这一条出图提示词；三视图 / 面部四视图等其它视角按
+    「一个资产一组提示词」的规则另拆独立资产，不再往这里叠。
+    """
+    an = item.get("anchors") or {}
+    kw = item.get("keyword") or "，".join(
+        x for x in (item.get("age"), an.get("face"), an.get("flaw"),
+                    an.get("wardrobeHook"), item.get("wardrobe")) if x)
+    return (
+        "角色定妆图：正面胸像半身，视线平视镜头，表情中性，纯色干净背景，均匀柔光。\n"
+        "{kw}\n"
+        "面部特征：{face}；可辨识瑕疵：{flaw}。服装：{wardrobe}；"
+        "配饰与记忆点：{hook}。\n"
+        "{style}。写实电影质感，真实皮肤纹理，无磨皮；眼睛、鼻梁与唇形清晰。"
+        "负面词（仅豆包 / 即梦等支持负面提示词的引擎有效）：{negative}"
+    ).format(kw=kw, face=an.get("face") or "未指定", flaw=an.get("flaw") or "未指定",
+             wardrobe=item.get("wardrobe") or "未指定", hook=an.get("wardrobeHook") or "未指定",
+             style=style, negative=negative)
+
+
+def _char_main_prompt_en(item, style_en):
+    """角色主提示词英文版：给本地 Flux / MJ，与中文版同视角（胸像半身）。"""
+    an = item.get("anchors") or {}
+    kw = item.get("keywordEn") or "a Chinese film character"
+    bits = [
+        "cinematic character reference, medium chest-up portrait, facing camera, "
+        "neutral expression, clean plain background, soft even light",
+        kw,
+        an.get("flaw") and "distinctive flaw: " + an["flaw"],
+        an.get("wardrobeHook") and "signature accessory: " + an["wardrobeHook"],
+        "photorealistic film still, natural skin texture, sharp eyes",
+        style_en and "style: " + style_en,
+    ]
+    return ", ".join(x for x in bits if x)
 
 
 def build_asset_pack(data, scenes):
@@ -87,15 +125,13 @@ def build_asset_pack(data, scenes):
             "weight": 5 if _priority(raw.get("priority")) == "P0" else 3,
             "refImage": "", "refName": "", "locked": False, "touched": {},
         }
-        item["prompts"] = {
-            "turnaround": TURNAROUND_TMPL.format(
-                keyword=keyword, face=face, flaw=flaw, wardrobe=wardrobe,
-                wardrobeHook=hook, style=style, negative=negative),
-            "faceSheet": FACE_SHEET_TMPL.format(
-                keyword=keyword, face=face, flaw=flaw,
-                wardrobeHook=hook, style=style),
-            "lineart": "转彩铅素描",
-        }
+        # 【一资产一提示词】主资产只带一条出图提示词（prompts.main = 定妆半身视角）
+        # + 一条英文（promptEn，同视角成对）。旧版把三视图 / 面部四视图两段长提示词
+        # 都挂在同一个资产上，外部工具一次要吃两条不知道用哪条；现在多视角一律
+        # 拆成独立变体资产（每个变体各自一条提示词），主资产保留固定关键词串
+        # （keyword/keywordEn 是镜头一致性的真源，不占「提示词」名额）。
+        item["prompts"] = {"main": _char_main_prompt(item, style, negative)}
+        item["promptEn"] = _char_main_prompt_en(item, style_en)
         chars.append(item)
         seen_char[name] = item
 
@@ -122,18 +158,20 @@ def build_asset_pack(data, scenes):
             "code": "S%02d" % (len(scenes_out) + 1), "name": name,
             "priority": _priority(raw.get("priority")), "intExt": int_ext, "time": tm,
             "appearance": "；".join(props), "anchors": {"props": props, "light": light, "lens": lens},
-            "sceneEn": _as(raw.get("sceneEn"), "", 400),
+            # 英文提示词唯一出口是 promptEn（旧字段 sceneEn 不再写新数据；
+            # 读侧统一走 promptEn 兜底 sceneEn，老项目不受影响）
+            "promptEn": _as(raw.get("sceneEn"), "", 400),
             "source": src, "evidence": ev, "sceneNos": nos,
             "refImage": "", "refName": "", "locked": False, "starred": False,
         }
         tags = "".join("，" + x for x in (int_ext, tm) if x)
-        item["prompts"] = {
-            "concept": CONCEPT_TMPL.format(
-                name=name, tags=tags,
-                props="、".join(props) or "按剧本场次描述", light=light,
-                lens=lens, style=style, negative=negative),
-            "wide": "同一场景改 2.35:1 宽银幕构图，其余描述不变。",
-        }
+        # 【一资产一提示词】场景主资产只留概念图一条；英文与其成对（promptEn）。
+        # 旧版第二条「宽银幕版」提示词删除 —— 多视角按规则应拆成独立资产，
+        # 不在同一资产上叠加第二组提示词（需要时用户可复制主资产另建宽幕变体）。
+        item["prompts"] = {"main": CONCEPT_TMPL.format(
+            name=name, tags=tags,
+            props="、".join(props) or "按剧本场次描述", light=light,
+            lens=lens, style=style, negative=negative)}
         scenes_out.append(item)
 
     props_out = []

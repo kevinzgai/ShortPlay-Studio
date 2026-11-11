@@ -17,7 +17,7 @@ function gotoScript() {
   <div class="view-head row" style="align-items:flex-end">
     <div>
       <h1>剧本拆好了 · 确认分集方案</h1>
-      <p class="sub">先看分集怎么切、场次和角色有没有漏，体检问题在这里补。确认后到第 3 步排分镜，最后第 4 步定妆。</p>
+      <p class="sub">先看分集怎么切、场次和角色有没有漏，体检问题在这里补。确认后到第 3 步排分镜，分镜表就是交付物；出片是可选动作。</p>
     </div>
     <div class="spacer"></div>
     <ExportMenu />
@@ -76,7 +76,8 @@ function gotoScript() {
   </div>
 
   <div class="inline-note" style="margin-bottom:8px">
-    这一层的资产清单用来核对 AI 拆得全不全（漏人漏物在这里补）；真正出图定妆在制作阶段的「资产定妆」。
+    下面这张是<b>全剧共用的资产清单</b>，在这里只核对「拆全了没、漏了谁」（漏人漏物就补名单），不是按集调整的地方。
+    全剧视觉风格锚统一在「生成设置 · 视觉设定」里定；要用参考图出片，等主流程走完分镜表后展开页内的「出片」区。
   </div>
   <AssetPanel style="margin-bottom:18px" />
 
@@ -116,6 +117,6 @@ function gotoScript() {
   <div class="cta-row">
     <button class="btn" id="back-1" @click="goStep(1)">← 返回改剧本</button>
     <button class="btn primary lg" id="generate" @click="goStep(3)">去第 3 步逐集排分镜 →</button>
-    <span class="cta-note">确认分集后进第 3 步：每集一个闸门，点一次只生成一集，出完即停；失败可单独重试，再去第 4 步定妆</span>
+    <span class="cta-note">确认分集后进第 3 步：每集一个闸门，点一次只生成一集，出完即停；失败可单独重试。要参考图再展开页内「出片」区</span>
   </div>
 </template>

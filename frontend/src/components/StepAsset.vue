@@ -30,7 +30,7 @@ const allReady = computed(() => totalCount.value > 0 && readyCount.value === tot
   <div class="view-head row" style="align-items:flex-end">
     <div>
       <h1>资产定妆</h1>
-      <p class="sub">先把角色、场景、道具的参考图定下来。分镜的画面描述和参考图槽位都读这一层，改一次全片同步。资产清单以分镜引用为准，剧本只兜底。</p>
+      <p class="sub">可选出片工具 · 主流程在分镜表就结束了。这里统一挂角色 / 场景 / 道具的参考图、生成首帧提示词、整包导出；资产是全剧共享，改一次所有引用它的镜头同步生效。全剧风格锚在「生成设置 · 视觉设定」。</p>
     </div>
     <div class="spacer"></div>
     <span class="chip" :class="allReady ? 'ok' : ''">{{ readyCount }} / {{ totalCount }} 已定妆</span>

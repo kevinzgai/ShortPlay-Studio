@@ -66,7 +66,7 @@ const stale = computed(() => (shot.value ? shotAssetStale(shot.value) : false));
       <p class="prompt-text" id="pv-prompt">{{ prompt }}</p>
       <div class="inline-note" style="margin-top:0">导出「视频提示词」时就是这个版本，附带槽位表，可直接喂给视频生成工具。</div>
       <div class="inline-note" id="pv-frames-note" style="margin-top:6px">
-        只读预览：首帧提示词在第 4 步资产定妆后生成，这一页不发 frames 请求，也不会用空参考图算提示词。
+        只读预览：首帧提示词在可选的「出片」工具里生成，这一页不发 frames 请求，也不会用空参考图算提示词。
       </div>
     </div>
 
