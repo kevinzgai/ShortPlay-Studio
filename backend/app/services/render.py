@@ -6,7 +6,7 @@
 import datetime as _dt
 
 from app.constants import (ASSET_KIND_CN, NEGATIVE_DEFAULT, SOURCE_CN,
-                            STYLE_ANCHOR_DEFAULT, STYLE_ANCHOR_EN_DEFAULT)
+                            STYLE_ANCHOR_DEFAULT)
 
 
 def _md(v, limit=400):
@@ -78,11 +78,7 @@ def render_assets_md(pack, meta=None):
         main = p.get("main") or p.get("turnaround") or ""
         if main:
             L.append("\n**出图提示词**\n\n```\n%s\n```" % main)
-        en = x.get("promptEn") or x.get("keywordEn") or ""
-        if en:
-            L.append("\n**英文提示词（Flux / MJ）**\n\n```%s\n```\n" % en)
-        L.append("")
-
+            
     L.append("## 四、场景出图提示词\n")
     for x in scenes:
         p = x.get("prompts") or {}
@@ -92,9 +88,6 @@ def render_assets_md(pack, meta=None):
         main = p.get("main") or p.get("concept") or ""
         if main:
             L.append("\n```\n%s\n```" % main)
-        en = x.get("promptEn") or x.get("sceneEn") or ""
-        if en:
-            L.append("\n**英文场景描述（Flux / MJ）**\n\n```\n%s\n```\n" % en)
         L.append("")
 
     if props:
@@ -110,7 +103,6 @@ def render_assets_md(pack, meta=None):
 
     L.append("## 六、全局参数\n")
     L.append("- **风格锚**：%s" % (st.get("anchor") or STYLE_ANCHOR_DEFAULT))
-    L.append("- **风格锚（Flux 英文）**：%s" % (st.get("anchorEn") or STYLE_ANCHOR_EN_DEFAULT))
     L.append("- **负面词**：%s" % (st.get("negative") or NEGATIVE_DEFAULT))
     asp = st.get("aspect") or {}
     L.append("- **画幅**：三视图 %s ／ 面部四视图 %s ／ 立绘 %s ／ 概念图 %s ／ 核心宽幕 %s" % (
@@ -193,7 +185,6 @@ def asset_prompts_payload(pack, meta=None):
                 "aspect": "3:4",
                 "prompt": main,
                 "keyword": x.get("keyword") or "",
-                "promptEn": x.get("promptEn") or x.get("keywordEn") or "",
                 "refName": x.get("refName") or "",
             })
     for x in (a.get("scenes") or []):
@@ -202,12 +193,11 @@ def asset_prompts_payload(pack, meta=None):
             out.append({
                 "code": x.get("code"), "name": x.get("name"), "kind": "main",
                 "aspect": "16:9", "prompt": main,
-                "keyword": x.get("promptEn") or x.get("sceneEn") or "",
+                "keyword": x.get("keyword") or "",
                 "refName": x.get("refName") or "",
             })
     return {
         "style": {"anchor": st.get("anchor") or STYLE_ANCHOR_DEFAULT,
-                  "anchorEn": st.get("anchorEn") or STYLE_ANCHOR_EN_DEFAULT,
                   "negative": st.get("negative") or NEGATIVE_DEFAULT},
         "order": st.get("generationOrder") or [],
         "title": (meta or {}).get("title") or "",

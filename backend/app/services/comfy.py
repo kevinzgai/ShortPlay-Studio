@@ -24,7 +24,7 @@ import time
 
 from app.config.engine_store import (gw_url, h3_image_model, h3_image_status,
                                      qwen_image_model, qwen_image_status)
-from app.constants import STYLE_ANCHOR_EN_DEFAULT
+from app.constants import STYLE_ANCHOR_DEFAULT
 from app.infra.coerce import _as, s
 from app.paths import ROOT
 from app.services import gateway
@@ -32,19 +32,17 @@ from app.services.minimax_image import h3_image_generate
 from app.services.qwen_image import qwen_image_generate
 
 
-STYLE_ANCHOR_EN_OBJECT = ("photorealistic, 35mm film grain, "
-                          "cool desaturated color grade, no beautification filter")
+STYLE_ANCHOR_OBJECT_CN = "写实电影质感，35mm 胶片颗粒，冷调低饱和，无美颜滤镜"
 
 
-PERSON_ONLY_TERMS = ("skin", "face", "portrait", "beauty", "hair", "eye",
-                     "makeup", "hand", "finger", "body", "lip")
+# 人物向词：场景 / 道具图里出现会凭空长出人来，一律剥掉
+PERSON_ONLY_CN = ("皮肤", "肤质", "毛孔", "瑕疵", "人像", "肖像", "半身", "发丝", "美颜", "磨皮", "手指", "嘴唇")
 
 
 # 微距皮肤词只对「脸占画面大头」的变体有用。三视图是三个全身塞一张图，
 # 每张脸几十像素，这时候 "visible pores / natural skin texture" 不是加分项
 # 而是灾难：模型只能在指甲盖大的区域硬堆纹理，结果就是磨皮糊或者五官挤在一起。
-SKIN_DETAIL_TERMS = ("pore", "pores", "skin texture", "blemish", "wrinkle",
-                     "sweat", "micro detail", "subsurface")
+SKIN_DETAIL_CN = ("毛孔", "肤质", "皮肤纹理", "瑕疵", "皱纹", "汗珠", "微距细节")
 
 FACE_CLOSE_VARIANTS = ("portrait", "faceSheet")
 
@@ -76,12 +74,10 @@ IDENTITY_ANCHOR_ORDER = ("portrait", "faceSheet", "turnaround")
 # 服装要抄：三视图的意义就是「同一人同一套衣服的三个角度」，旧版把
 # clothing layout 也列进「别抄」清单，结果立领被画成翻领。改成服装显式照抄。
 IDENTITY_REF_PREFIX = (
-    "<Picture 1> is an identity reference of the same person. "
-    "Reproduce that person exactly: same face (same bone structure, same eyes, nose, "
-    "lips and jawline), same hairstyle and hairline, same age and body type, and the "
-    "same outfit (same garment types, colors, collar style and fabric). Do not copy "
-    "<Picture 1>'s framing, pose, camera angle or background — the person and the "
-    "outfit carry over, the composition does not.\n"
+    "参考图 <Picture 1> 是同一个人的身份基准，人物必须完全照抄参考图："
+    "同一张脸（脸型、眼睛、鼻子、嘴唇、下颌线一致），同一发型与发际线，"
+    "相同年龄与体型，同一套服装（款式、颜色、领型、面料一致）。"
+    "不要照抄 <Picture 1> 的构图、姿势、机位和背景——只带走人物和服装，不带走构图。\n"
 )
 
 
@@ -93,63 +89,50 @@ ASSET_IMG_NAME = re.compile(r"^[A-Za-z0-9_.\-]+\.png$")
 
 COMFY_VARIANTS = {
     "character": [
-        # 【画幅 3:2 → 1:1 是脸崩的主因，不是措辞】
-        # 1024×672 横版塞三个全身时，每格只有 341px 宽，头高约 40–50px。
-        # 那个尺度上「眼尾微垂 / 唇薄 / 左颊一颗小痣」根本没有落脚像素，
-        # 模型只有两条路：要么偷偷画成半身（实测确实如此，构图直接错），
-        # 要么强制全身但把脸糊成一团。1152² 方形把每格做到 384×1152、
-        # 头高约 100px，同 seed 下痣能画出来、正面与侧脸能认出是同一人。
+        # 【画幅 3:2 → 1:1 是脸崩的主因，不是措辞】1152² 方形把三视图每格做到
+        # 384×1152、头高约 100px，同 seed 下痣能画出来、正面与侧脸认得出是同一人。
         {"key": "turnaround", "label": "三视图", "w": 1152, "h": 1152,
-         "tpl": "character turnaround reference sheet, three full-body views of the same "
-                "woman side by side: front view, side view, back view. Standing straight, "
-                "feet aligned on one baseline, equal scale, head to toe fully visible. "
-                "Plain white seamless studio background, flat even light, no shadow, "
-                "no props, no scenery.\n"
-                "Consistent identity: the same one woman in all three views, identical "
-                "face, identical hairstyle, identical outfit.\n"
+         "tpl": "角色三视图设定表，同一位人物并排三个全身视角：正面、侧面、背面。"
+                "站姿笔直，双脚踩同一条基准线，比例一致，头顶到脚完整入画。"
+                "纯白色无缝影棚背景，均匀平光，无投影，无道具，无场景。\n"
+                "身份一致：三个视角是同一个人，脸、发型、服装完全相同。\n"
                 "{kw}\n"
-                "face clearly in focus in the front and side views, correct facial "
-                "proportions, sharp eyes, nose and mouth"},
-        # 面部四视图 = 四张脸，不是「一张大脸 + 三个全身」。后者把特写和全身
-        # 摆在同一张图上，两个尺度互相打架，模型只能把脸画糊；而它的职责本来
-        # 就只有「把脸定准」，体型服装交给三视图。
+                "正面与侧面的脸要清晰可辨（眼睛、鼻子、唇形看得清），面部比例正确"},
+        # 面部四视图 = 四张脸，不是「一张大脸 + 三个全身」——后者把特写和全身
+        # 摆在同一张图上，两个尺度互相打架，模型只能把脸画糊。
         {"key": "faceSheet", "label": "面部四视图", "w": 1152, "h": 768,
-         "tpl": "character face reference sheet, four head close-ups of the same woman in "
-                "one row: front view, three-quarter view, side profile, slightly low angle. "
-                "Head and shoulders only, bust framing, no full body.\n"
-                "Consistent identity: identical face in all four, same hairstyle.\n"
+         "tpl": "角色面部四视图设定表，同一位人物横向并排四个头部特写：正面、"
+                "四分之三侧、正侧、微仰角。只画头部与肩部（胸像构图），不画全身。\n"
+                "身份一致：四张是同一个人，脸型与发型完全相同。\n"
                 "{kw}\n"
-                "plain white background, even soft light, sharp focus on eyes and mouth, "
-                "natural skin texture, realistic film photography"},
+                "纯白背景，柔和均匀光，眼睛与嘴唇清晰锐利，皮肤有真实毛孔与肤色过渡，"
+                "写实电影质感"},
         {"key": "portrait", "label": "定妆半身", "w": 768, "h": 1024,
-         "tpl": "cinematic medium portrait of one Chinese character, {kw}, "
-                "shallow depth of field, film still, natural skin texture, muted color grade"},
+         "tpl": "电影感中景半身像，一位中文剧本里的角色，{kw}，浅景深，"
+                "电影剧照质感，自然皮肤纹理，低饱和调色"},
     ],
     "scene": [
         {"key": "concept", "label": "场景概念图", "w": 1152, "h": 640,
-         "tpl": "environment concept art, {kw}, matte painting, cinematic composition, "
-                "detailed architecture, atmospheric depth, no people, no text"},
+         "tpl": "场景概念图，{kw}，电影级绘景质感，构图有从近到远的层次，"
+                "建筑与陈设细节丰富，大气透视，画面中无人，无文字"},
         {"key": "wide", "label": "宽幕建立镜", "w": 1216, "h": 512,
-         "tpl": "wide establishing shot, {kw}, anamorphic lens, cinematic lighting, "
-                "film still, no people, no text"},
+         "tpl": "宽幅建立镜头，{kw}，变形宽银幕镜头感，电影布光，剧照质感，"
+                "画面中无人，无文字"},
     ],
     "prop": [
-        # 道具必须是「静物」语域：单写 product photography 会带上商品广告味，
-        # 更关键的是原来没写 no people —— Flux 干脆自己塞一只手进来拿着它。
+        # 道具必须是「静物」语域，且必须写「无人」——不写模型会自己塞一只手进来拿它。
         {"key": "prop", "label": "道具静物", "w": 896, "h": 896,
-         "tpl": "still life of a single {kw}, centered on a plain neutral gray backdrop, "
-                "tabletop, soft directional studio light, macro detail, "
-                "shallow depth of field, photorealistic product photography, "
-                "no people, no human figure, no hands, no face, no text"},
+         "tpl": "单个静物特写：{kw}。居中放在素净的灰色背景上，桌面摆拍，"
+                "柔和方向性影棚光，微距细节，浅景深，写实产品摄影质感，"
+                "画面中不能出现人、人形、手、脸，无文字"},
     ],
 }
 
 
-COMFY_SUFFIX = "highly detailed, sharp focus, no text, no watermark"
+COMFY_SUFFIX = "细节丰富，对焦清晰，画面中无文字，无水印"
 
 
-COMFY_SUFFIX_OBJECT = ("highly detailed, sharp focus, no text, no watermark, "
-                       "no people, no human figure, no hands")
+COMFY_SUFFIX_OBJECT = "细节丰富，对焦清晰，画面中无文字，无水印，无人，无手，无人脸"
 
 
 # --------------------------------------------------------------------------
@@ -247,50 +230,38 @@ def comfy_status():
                 "qwen": qwen_image_status(), "h3": h3_image_status()}
 
 
-def _en_subject(text):
-    """英文主体去掉多余冠词、首字母小写。
-
-    模型常回 "A string of yellow paper coins"，模板是 "still life of a single {kw}"，
-    直接拼就成 "a single A string of..." 的病句，Flux 对病句的解读会跑偏。
-    """
-    t = re.sub(r"^(a|an|the)\s+", "", (text or "").strip(), flags=re.I)
-    return (t[:1].lower() + t[1:]) if t else t
-
-
 def _strip_style_terms(src, terms, fallback):
-    """按逗号分段剔除命中 terms 的段；以 no 开头的负向约束一律保留。"""
+    """按逗号/顿号分段剔除命中 terms 的段；「无/不」开头的负向约束一律保留。"""
     kept = []
-    for part in src.split(","):
+    for part in re.split(r"[,，]", src or ""):
         p = part.strip()
         if not p:
             continue
-        low = p.lower()
-        if low.startswith("no ") or not any(t in low for t in terms):
+        if p.startswith("无") or p.startswith("不") or not any(t in p for t in terms):
             kept.append(p)
-    return ", ".join(kept) or fallback
+    return "，".join(kept) or fallback
 
 
-def style_for_kind(style_en, kind, variant=""):
-    """按资产类型 + 出图变体收风格锚：尺度越小的画面越要剥掉微距词。
+def style_for_kind(style_cn, kind, variant=""):
+    """按资产类型 + 出图变体收风格锚：尺度越小的画面越要剥掉人物向词。
 
-    道具图里出现人手，根因之一就是通用风格锚里的 "natural skin texture"
-    被无条件拼到了道具上 —— Flux 见到 skin 就画皮肤。
+    道具图里出现人手，根因之一就是通用风格锚里的人物向词被无条件拼了进去；
     三视图同理：脸只占几十像素时，皮肤纹理词会把原本就稀缺的像素预算
     全吃掉，逼得模型把小脸画成一团。
     """
-    src = (style_en or "").strip() or STYLE_ANCHOR_EN_DEFAULT
+    src = (style_cn or "").strip() or STYLE_ANCHOR_DEFAULT
     if kind == "character":
         if variant in FACE_CLOSE_VARIANTS:
             return src
-        return _strip_style_terms(src, SKIN_DETAIL_TERMS, STYLE_ANCHOR_EN_DEFAULT)
-    return _strip_style_terms(src, PERSON_ONLY_TERMS, STYLE_ANCHOR_EN_OBJECT)
+        return _strip_style_terms(src, SKIN_DETAIL_CN, STYLE_ANCHOR_DEFAULT)
+    return _strip_style_terms(src, PERSON_ONLY_CN, STYLE_ANCHOR_OBJECT_CN)
 
 
-def build_comfy_prompt(asset, variant_key, style_en="", with_ref=False):
-    """资产字段 → 英文 Flux 提示词。缺英文关键词时明确标记，不让用户以为设定生效了。
+def build_comfy_prompt(asset, variant_key, style_cn="", with_ref=False):
+    """资产字段 → 中文提示词（全系统只此一套，喂本地网关 H3-Image）。
 
-    with_ref=True 表示这一张会接参考图，要在最前面声明「脸照 Picture 1 抄、
-    构图别照抄」。身份声明必须放开头：H3 对长提示词的注意力是前重后轻，
+    with_ref=True 表示这一张会接参考图，要在最前面声明「人物照 Picture 1
+    抄、构图别照抄」。身份声明必须放开头：H3 对长提示词的注意力是前重后轻，
     把它塞在末尾那一长串技术收尾词后面等于没说。
     """
     kind = _as(asset.get("kind"), "character", 16)
@@ -298,41 +269,31 @@ def build_comfy_prompt(asset, variant_key, style_en="", with_ref=False):
     v = next((x for x in vs if x["key"] == variant_key), None)
     if not v:
         raise ValueError("未知出图类型：" + str(variant_key)[:40])
+    # 主体词统一取中文字段：角色=keyword（age/脸/瑕疵/服装连成的串），
+    # 场景=appearance（环境一句话），道具=appearance 或名字。
+    # 旧项目里的 *En 字段不再读取——那套双轨已随 Flux 下线。
     if kind == "character":
-        kw = _as(asset.get("keywordEn"), "", 400).strip()
+        kw = _as(asset.get("keyword"), "", 400).strip()
         fallback = not kw
         if fallback:
-            kw = _as(asset.get("keyword"), "", 200).strip() or \
-                 ("a Chinese film character named " + _as(asset.get("name"), "unknown", 40))
-    elif kind == "scene":
-        kw = _as(asset.get("sceneEn"), "", 400).strip()
-        fallback = not kw
-        if fallback:
-            kw = _as(asset.get("appearance"), "", 200).strip() or \
-                 "an interior film set, cinematic lighting"
+            kw = _as(asset.get("name"), "", 40).strip() or "一位中文剧本里的角色"
     else:
-        # 道具的英文名单独存 propEn。以前拿 appearance 兜底，而 appearance 就等于中文名，
-        # Flux 的 T5 几乎读不懂中文 —— 主体词等于没写，剩下全是人像风格词。
-        kw = _as(asset.get("propEn"), "", 300).strip()
+        kw = _as(asset.get("appearance"), "", 400).strip()
         fallback = not kw
-        if kw:
-            kw = _en_subject(kw)
-        else:
-            cn = _as(asset.get("appearance"), "", 200).strip() or _as(asset.get("name"), "", 40)
-            # 中文反正读不懂，但「一个静物」这个英文语域必须给，至少不会画成人物
-            kw = "inanimate prop object" + ((", " + cn) if cn else "")
+        if not kw:
+            kw = _as(asset.get("name"), "", 40).strip() or \
+                ("一处电影场景" if kind == "scene" else "一件电影道具")
     # 风格紧跟主体描述（权重高），技术收尾词放最后；没设风格时退到中性默认。
-    # 逗号不能省：Flux 会把 "eyebrow photorealistic" 连读成一个怪词。
-    style = style_for_kind(style_en, kind, variant_key)
-    style_part = (", " + style) if len(style) < 240 else ""
+    style = style_for_kind(style_cn, kind, variant_key)
+    style_part = ("，" + style) if len(style) < 240 else ""
     suffix = COMFY_SUFFIX_OBJECT if kind == "prop" else COMFY_SUFFIX
     w, h = comfy_variant_size(v)
-    text = v["tpl"].format(kw=kw) + style_part + ", " + suffix
+    text = v["tpl"].format(kw=kw) + style_part + "，" + suffix
     return {"prompt": (IDENTITY_REF_PREFIX + text) if with_ref else text,
             # 无前缀版一直留着：万一批次里锚图读不出来，要能退回纯文生图，
             # 而不是带着「Picture 1」这句话去生成一张根本没有参考图的图。
             "promptBase": text,
-            "w": w, "h": h, "label": v["label"], "fallbackEn": fallback}
+            "w": w, "h": h, "label": v["label"], "fallback": fallback}
 
 
 def _identity_refs(kind, keys):
@@ -359,7 +320,7 @@ def _identity_refs(kind, keys):
     return ordered, refs
 
 
-def comfy_prompt_rows(assets, variants, style_en=""):
+def comfy_prompt_rows(assets, variants, style_cn=""):
     """只跑拼装、不排队出图：界面拿它核对「本地实际会发什么」。
 
     以前资产面板展示的是 AI 写的中文提示词，而本地 Flux 吃的是这里另拼的英文串，
@@ -377,7 +338,7 @@ def comfy_prompt_rows(assets, variants, style_en=""):
         for vk in ordered[:4]:
             ref_of = ("own" if has_own else refs.get(vk, "")) if ref_ok else ""
             try:
-                built = build_comfy_prompt(a, vk, style_en, bool(ref_of))
+                built = build_comfy_prompt(a, vk, style_cn, bool(ref_of))
             except ValueError:
                 continue
             rows.append({
@@ -385,11 +346,11 @@ def comfy_prompt_rows(assets, variants, style_en=""):
                 "assetName": _as(a.get("name"), "", 40),
                 "variant": vk, "label": built["label"],
                 "prompt": built["prompt"], "w": built["w"], "h": built["h"],
-                "fallbackEn": built["fallbackEn"], "refOf": ref_of,
+                "fallback": built["fallback"], "refOf": ref_of,
             })
     if not rows:
         raise ValueError("没有可预览的提示词：先选资产，再勾选至少一种素材类型")
-    return {"rows": rows, "styleEn": _as(style_en, "", 240) or STYLE_ANCHOR_EN_DEFAULT}
+    return {"rows": rows, "styleAnchor": _as(style_cn, "", 240) or STYLE_ANCHOR_DEFAULT}
 
 
 _URI_CACHE = {}
@@ -470,7 +431,7 @@ COMFY_LOCK = threading.Lock()
 COMFY_SEQ = [0]
 
 
-def comfy_job_start(assets, variants, style_en="", fixed_seed=0, engine="comfy", seq_n=1):
+def comfy_job_start(assets, variants, style_cn="", fixed_seed=0, engine="comfy", seq_n=1):
     """把「资产 × 变体」展开成串行任务，立即返回 jobId。
 
     engine=comfy 走本机 Flux；engine=qwen 走通义万相、engine=h3 走 MiniMax H3-Image，
@@ -498,7 +459,7 @@ def comfy_job_start(assets, variants, style_en="", fixed_seed=0, engine="comfy",
         for vk in ordered[:4]:
             ref_of = "" if own else refs.get(vk, "")
             try:
-                built = build_comfy_prompt(a, vk, style_en, bool(ref_ok and (own or ref_of)))
+                built = build_comfy_prompt(a, vk, style_cn, bool(ref_ok and (own or ref_of)))
             except ValueError:
                 continue
             plan.append({
@@ -507,7 +468,7 @@ def comfy_job_start(assets, variants, style_en="", fixed_seed=0, engine="comfy",
                 "variant": vk, "variantLabel": built["label"],
                 "prompt": built["prompt"], "promptBase": built["promptBase"],
                 "w": built["w"], "h": built["h"],
-                "fallbackEn": built["fallbackEn"], "n": seq_n,
+                "fallback": built["fallback"], "n": seq_n,
                 # 锚图来源：自有参考图 > 本批先出的变体。空串表示这一张纯文生图。
                 "refFile": own, "refVariant": ref_of,
                 "seed": int(fixed_seed) or random.randint(1, 2 ** 31 - 1),
@@ -645,7 +606,7 @@ def comfy_worker(jid, plan, engine="comfy"):
                     "assetName": t["assetName"], "kind": t["kind"],
                     "variant": variant, "variantLabel": label,
                     "prompt": prompt, "w": t["w"], "h": t["h"], "seed": t["seed"] + i,
-                    "fallbackEn": t["fallbackEn"], "uncompressed": uncompressed,
+                    "fallback": t["fallback"], "uncompressed": uncompressed,
                     "file": "examples/assets/" + name, "dataUri": datauri,
                     "bytes": len(png), "seconds": round(time.time() - t0, 1),
                     "engine": engine, "refOf": ref_label,

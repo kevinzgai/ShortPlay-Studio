@@ -8,8 +8,8 @@ import re
 
 from app.infra.coerce import _alist, _as, _ints, _priority
 from app.constants import (CONCEPT_TMPL, FRAME_TMPL,
-                            NEGATIVE_DEFAULT, SIZE_EN, STYLE_ANCHOR_DEFAULT,
-                            STYLE_ANCHOR_EN_DEFAULT, SYSTEM_ASSET_FILL)
+                            NEGATIVE_DEFAULT, STYLE_ANCHOR_DEFAULT,
+                            SYSTEM_ASSET_FILL)
 from .llm_gateway import call_llm_json
 from .script_text import clean_placeholder
 
@@ -36,22 +36,6 @@ def _char_main_prompt(item, style, negative):
              style=style, negative=negative)
 
 
-def _char_main_prompt_en(item, style_en):
-    """角色主提示词英文版：给本地 Flux / MJ，与中文版同视角（胸像半身）。"""
-    an = item.get("anchors") or {}
-    kw = item.get("keywordEn") or "a Chinese film character"
-    bits = [
-        "cinematic character reference, medium chest-up portrait, facing camera, "
-        "neutral expression, clean plain background, soft even light",
-        kw,
-        an.get("flaw") and "distinctive flaw: " + an["flaw"],
-        an.get("wardrobeHook") and "signature accessory: " + an["wardrobeHook"],
-        "photorealistic film still, natural skin texture, sharp eyes",
-        style_en and "style: " + style_en,
-    ]
-    return ", ".join(x for x in bits if x)
-
-
 def build_asset_pack(data, scenes):
     """模型结构 JSON → 完整资产包（含三视图 / 概念图提示词） + 覆盖与锚点校验。"""
     valid_nos, cast_names = set(), set()
@@ -72,7 +56,6 @@ def build_asset_pack(data, scenes):
 
     style_raw = data.get("style") if isinstance(data.get("style"), dict) else {}
     style = _as(style_raw.get("anchor"), STYLE_ANCHOR_DEFAULT, 160)
-    style_en = _as(style_raw.get("anchorEn"), STYLE_ANCHOR_EN_DEFAULT, 200)
     negative = _as(style_raw.get("negative"), NEGATIVE_DEFAULT, 500)
     warnings = []
 
@@ -120,18 +103,14 @@ def build_asset_pack(data, scenes):
             "age": age, "role": role, "wardrobe": wardrobe, "appearance": face,
             "anchors": {"face": face, "flaw": flaw, "wardrobeHook": hook},
             "keyword": keyword,
-            "keywordEn": _as(raw.get("keywordEn"), "", 400),
             "source": src, "evidence": ev, "sceneNos": nos,
             "weight": 5 if _priority(raw.get("priority")) == "P0" else 3,
             "refImage": "", "refName": "", "locked": False, "touched": {},
         }
-        # 【一资产一提示词】主资产只带一条出图提示词（prompts.main = 定妆半身视角）
-        # + 一条英文（promptEn，同视角成对）。旧版把三视图 / 面部四视图两段长提示词
-        # 都挂在同一个资产上，外部工具一次要吃两条不知道用哪条；现在多视角一律
-        # 拆成独立变体资产（每个变体各自一条提示词），主资产保留固定关键词串
-        # （keyword/keywordEn 是镜头一致性的真源，不占「提示词」名额）。
+        # 【一资产一提示词】主资产只带一条出图提示词（prompts.main = 定妆半身视角）。
+        # 多视角一律拆成独立变体资产；主资产的 keyword 串是镜头一致性的真源。
+        # 2026-11-12 起 Flux 双轨下线：全系统只剩中文一套提示词，*En/promptEn 删除。
         item["prompts"] = {"main": _char_main_prompt(item, style, negative)}
-        item["promptEn"] = _char_main_prompt_en(item, style_en)
         chars.append(item)
         seen_char[name] = item
 
@@ -158,15 +137,11 @@ def build_asset_pack(data, scenes):
             "code": "S%02d" % (len(scenes_out) + 1), "name": name,
             "priority": _priority(raw.get("priority")), "intExt": int_ext, "time": tm,
             "appearance": "；".join(props), "anchors": {"props": props, "light": light, "lens": lens},
-            # 英文提示词唯一出口是 promptEn（旧字段 sceneEn 不再写新数据；
-            # 读侧统一走 promptEn 兜底 sceneEn，老项目不受影响）
-            "promptEn": _as(raw.get("sceneEn"), "", 400),
             "source": src, "evidence": ev, "sceneNos": nos,
             "refImage": "", "refName": "", "locked": False, "starred": False,
         }
         tags = "".join("，" + x for x in (int_ext, tm) if x)
-        # 【一资产一提示词】场景主资产只留概念图一条；英文与其成对（promptEn）。
-        # 旧版第二条「宽银幕版」提示词删除 —— 多视角按规则应拆成独立资产，
+        # 【一资产一提示词】场景主资产只留概念图一条。多视角按规则应拆成独立资产，
         # 不在同一资产上叠加第二组提示词（需要时用户可复制主资产另建宽幕变体）。
         item["prompts"] = {"main": CONCEPT_TMPL.format(
             name=name, tags=tags,
@@ -186,7 +161,6 @@ def build_asset_pack(data, scenes):
             "id": "p:" + name, "kind": "prop", "code": "P%02d" % (len(props_out) + 1),
             "name": name, "boundTo": _alist(raw.get("boundTo")),
             "appearance": _as(raw.get("appearance"), "", 200) or name,
-            "propEn": _as(raw.get("propEn"), "", 300),
             "source": src, "evidence": ev, "refImage": "", "refName": "",
         })
 
@@ -215,7 +189,7 @@ def build_asset_pack(data, scenes):
 
     return {
         "style": {
-            "anchor": style, "anchorEn": style_en, "negative": negative,
+            "anchor": style, "negative": negative,
             # 三视图改 1:1：3:2 横版里三个全身的头只有 40–50px，脸必崩
             "aspect": {"turnaround": "1:1", "faceSheet": "3:2", "portrait": "3:4",
                        "concept": "16:9", "coreWide": "2.35:1"},
@@ -279,26 +253,24 @@ def fill_asset_with_ai(payload):
             "剧本 / 原文片段：\n%s" % (kind, name, cur_txt, script[:12000] or "（原文不可用，请只做保守补全）"))
     # 这里模型返回的是单个对象（不是数组），expect_list 必须显式关掉
     if kind == "prop":
-        # 道具两个字段模型可能只给一个：先要 propEn（出图关键），缺了再按 appearance 收
+        # 出图主体字段是中文（道具=appearance），直接以它为首选期望字段
         try:
-            data, model = call_llm_json(SYSTEM_ASSET_FILL, user, "propEn",
+            data, model = call_llm_json(SYSTEM_ASSET_FILL, user, "appearance",
                                         120, expect_list=False)
         except ValueError:
             data, model = call_llm_json(SYSTEM_ASSET_FILL, user, "appearance",
                                         120, expect_list=False)
     else:
         data, model = call_llm_json(SYSTEM_ASSET_FILL, user,
-                                    "keyword" if kind == "character" else "sceneEn",
+                                    "keyword" if kind == "character" else "appearance",
                                     120, expect_list=False)
     out = {}
     if kind == "character":
-        for k in ("age", "role", "face", "flaw", "wardrobeHook", "wardrobe", "keyword", "keywordEn"):
+        for k in ("age", "role", "face", "flaw", "wardrobeHook", "wardrobe", "keyword"):
             out[k] = _as(data.get(k), "", 300)
     elif kind == "prop":
         out["appearance"] = _as(data.get("appearance"), "", 200)
-        out["propEn"] = _as(data.get("propEn"), "", 300)
     else:
-        out["sceneEn"] = _as(data.get("sceneEn"), "", 300)
         out["light"] = _as(data.get("light"), "", 80)
         out["lens"] = _as(data.get("lens"), "", 40)
         out["appearance"] = _as(data.get("appearance"), "", 200)
@@ -365,18 +337,9 @@ def build_frame_prompts(shots, pack, aspect="16:9"):
             size=size, camera=camera, light=light, mood=mood,
             lens=sc_anchor["lens"], negative=negative,
         )
-        en_bits = [
-            "cinematic film still, single frame, opening frame of the shot, %s" % aspect,
-            ", ".join(c["keywordEn"] for c in chs if c.get("keywordEn")),
-            (sc and sc.get("sceneEn")) or "",
-            SIZE_EN.get(size, "medium shot"),
-            "35mm film grain, high dynamic range, deep shadows, real skin texture, "
-            "photorealistic, 8k, no illustration, no 3d render, no text, no collage",
-        ]
         frames.append({
             "code": code, "sceneNo": no, "size": size,
             "aspect": aspect, "prompt": prompt_cn,
-            "promptEn": ", ".join(x for x in en_bits if x),
             "negative": negative,
             "keywords": [c["keyword"] for c in chs],
             "refAssets": [c["code"] for c in chs] + ([sc["code"]] if sc else []),

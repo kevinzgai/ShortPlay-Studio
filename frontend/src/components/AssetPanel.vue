@@ -243,7 +243,7 @@ function anchorValue(a, key) {
   return Array.isArray(v) ? v.join("、") : (v || "");
 }
 /* 【一资产一组提示词】中文出图提示词一条（main，旧包从 turnaround/faceSheet/concept 收敛）
-   + 英文一条（promptEn，老数据读 keywordEn / sceneEn）+ 角色的固定关键词串。
+   + 角色的固定关键词串。Flux 英文双轨已下线（2026-11-12），全系统只有中文一套。
    多视角（三视图 / 四视图 / 宽幕）按规则拆独立资产，不再在同一资产上叠多组。 */
 const PROMPTS = {
   character: [["main", "出图提示词"]],
@@ -257,12 +257,6 @@ function promptsOf(a) {
   (PROMPTS[a.kind] || []).forEach(([k, label]) => {
     list.push([k, label, k === "main" ? main : (p[k] || "")]);
   });
-  // 英文串是本地出图 / Flux / MJ 真正吃的：没填也给空槽，可手写，不用等 AI
-  const enKey = a.kind === "character" || a.kind === "scene" ? "promptEn" : "";
-  if (enKey) {
-    const en = String(a.promptEn || a.keywordEn || a.sceneEn || "").trim();
-    list.push([enKey, "英文关键词（Flux / MJ / 本地出图）", en]);
-  }
   // 道具没有预生成提示词，但「名称 + 描述」这一句本身就能直接塞进镜头，照样给出来可复制
   if (a.kind === "prop") {
     const blk = assetPromptBlocks(a).find((b) => b.key === "prop");
@@ -292,11 +286,10 @@ function copyOne(id, mode) {
   copyAssetPrompt(id, mode || "all");
   flashCopied(id + ":" + (mode || "all"));
 }
-function hasEn(a) { return assetPromptBlocks(a).some((b) => b.lang === "en"); }
 
 /* ------------------------ 剧本视觉风格定义 ------------------------ */
 const styleOpen = ref(false);
-const styleDraft = ref({ key: "", anchor: "", anchorEn: "" });
+const styleDraft = ref({ key: "", anchor: "" });
 const curStyle = computed(() => currentStyle());
 const styleShort = computed(() => {
   const p = STYLE_PRESETS.find((x) => x.key === curStyle.value.key);
@@ -306,12 +299,12 @@ function toggleStyleEditor() {
   if (styleOpen.value) { styleOpen.value = false; return; }
   styleDraft.value = {
     key: (S.styleConfig && S.styleConfig.key) || "",
-    anchor: curStyle.value.anchor, anchorEn: curStyle.value.anchorEn
+    anchor: curStyle.value.anchor
   };
   styleOpen.value = true;
 }
 function pickStylePreset(p) {
-  styleDraft.value = { key: p.key, anchor: p.anchor, anchorEn: p.anchorEn };
+  styleDraft.value = { key: p.key, anchor: p.anchor };
 }
 function applyStyle() { saveStyleConfig(styleDraft.value); styleOpen.value = false; }
 function clearStyle() { resetStyleConfig(); styleOpen.value = false; }
@@ -553,11 +546,6 @@ watch(() => sel.value && sel.value.id, () => { closePreview(); ui.comfy.preview 
           <input class="ap-input" v-model="styleDraft.anchor"
             placeholder="写实电影质感 · 35mm 胶片颗粒 · 冷调">
         </label>
-        <label class="ap-style-f">
-          <span>Flux 英文锚 <i>本地出图真正吃的是这一串，只写画种 / 材质 / 光线 / 色调</i></span>
-          <input class="ap-input" v-model="styleDraft.anchorEn"
-            placeholder="photorealistic cinematic film still, 35mm film grain...">
-        </label>
         <div class="ap-style-actions">
           <span class="ap-style-note">「跟随剧本」＝ 用 AI 分解推断的风格，没分解用中性默认；保存后起始帧提示词自动重算</span>
           <button class="btn sm quiet" @click="clearStyle">跟随剧本</button>
@@ -607,7 +595,7 @@ watch(() => sel.value && sel.value.id, () => { closePreview(); ui.comfy.preview 
               </span>
             </template>
             <span v-else class="ap-gen-info off">{{ ui.comfy.detail }} · 执行网关 start_all.ps1 后重试</span>
-            <span class="ap-gen-style" :title="'出图风格锚：' + curStyle.anchorEn">风格 · {{ styleShort }}</span>
+            <span class="ap-gen-style" :title="'出图风格锚：' + curStyle.anchor">风格 · {{ styleShort }}</span>
           </div>
           <p class="apx-rail-tip">换 unet / 配 Key 在「系统设置 · 出图引擎」</p>
         </aside>
@@ -837,9 +825,6 @@ watch(() => sel.value && sel.value.id, () => { closePreview(); ui.comfy.preview 
                 @click="copyOne(sel.id, 'all')">
                 {{ copiedId === sel.id + ":all" ? "✓ 已复制" : "⧉ 复制提示词" }}
               </button>
-              <button v-if="hasEn(sel)" class="mini ap-cp-en" :data-copy-en="sel.id"
-                :title="'只复制英文串，直接贴进 Flux / Midjourney / 即梦'"
-                @click="copyOne(sel.id, 'en')">{{ copiedId === sel.id + ":en" ? "✓" : "EN" }}</button>
             </span>
             <button class="btn sm quiet ap-fill"
               :disabled="!!ui.comfy.filling || !aiReady"
@@ -941,9 +926,7 @@ watch(() => sel.value && sel.value.id, () => { closePreview(); ui.comfy.preview 
                       @click="copyOne(sel.id, p[0])">{{ copiedId === sel.id + ":" + p[0] ? "✓ 已复制" : "复制" }}</button>
                   </div>
                   <textarea class="ap-prompt-ta" rows="4" spellcheck="false"
-                    :placeholder="p[0] === 'promptEn'
-                      ? '例：27-year-old Chinese woman, oval face, …'
-                      : '还没生成，点「AI 补形象」或直接手写'"
+      placeholder="还没生成，点「AI 补形象」或直接手写"
                     :data-aprompt-key="p[0]" :data-asset-id="sel.id"
                     @change="saveAssetPrompt(sel.id, p[0], $event.target.value)">{{ p[2] }}</textarea>
                 </div>
@@ -963,7 +946,7 @@ watch(() => sel.value && sel.value.id, () => { closePreview(); ui.comfy.preview 
                   <div v-for="(r, i) in flux" :key="i" class="ap-flux-row">
                     <b>{{ r.assetName }} · {{ r.label }}</b>
                     <em>{{ r.w }}×{{ r.h }}</em>
-                    <span v-if="r.fallbackEn" class="warn">缺英文关键词</span>
+                    <span v-if="r.fallback" class="warn">缺关键词</span>
                     <pre>{{ r.prompt }}</pre>
                   </div>
                 </div>
@@ -987,7 +970,7 @@ watch(() => sel.value && sel.value.id, () => { closePreview(); ui.comfy.preview 
                       <span class="ap-genimgs-zoom">⤢ 放大预览</span>
                     </button>
                     <figcaption>
-                      <span>{{ g.label }}<i v-if="g.fallbackEn" title="缺英文关键词，效果会打折">!</i></span>
+                      <span>{{ g.label }}<i v-if="g.fallback" title="缺关键词，效果会打折">!</i></span>
                       <a v-if="g.file" :href="'/api/comfy/image?f=' + g.file.split('/').pop()"
                         target="_blank" rel="noopener" title="新标签打开原图">↗</a>
                     </figcaption>
@@ -1074,8 +1057,8 @@ watch(() => sel.value && sel.value.id, () => { closePreview(); ui.comfy.preview 
         </template>
         <template v-else>
           <span class="ok">✓ 完成 {{ ui.comfy.results.length }} 张，已挂到对应资产</span>
-          <span v-if="ui.comfy.results.some((r) => r.fallbackEn)" class="warn">
-            部分资产缺英文关键词，出图用了中文兜底 → 建议先「AI 补形象」
+          <span v-if="ui.comfy.results.some((r) => r.fallback)" class="warn">
+            部分资产缺关键词，出图用了中文兜底 → 建议先「AI 补形象」
           </span>
         </template>
         <ul v-if="ui.comfy.errors.length" class="ap-gen-errs">
@@ -1123,7 +1106,7 @@ watch(() => sel.value && sel.value.id, () => { closePreview(); ui.comfy.preview 
               <span>{{ previewRow.w }}×{{ previewRow.h }}</span>
               <span>{{ previewRow.seconds }}s</span>
               <span>seed {{ previewRow.seed }}</span>
-              <span v-if="previewRow.fallbackEn" class="warn">缺英文关键词，效果会打折</span>
+              <span v-if="previewRow.fallback" class="warn">缺关键词，效果会打折</span>
               <span v-if="previewFailed" class="warn">原图读不到，已回退缩略图</span>
             </template>
             <template v-else>

@@ -26,17 +26,12 @@ GENERIC_RE = re.compile(
 STYLE_ANCHOR_DEFAULT = "写实电影质感 · 35mm 胶片颗粒 · 冷调 · 无滤镜磨皮"
 
 
-STYLE_ANCHOR_EN_DEFAULT = ("photorealistic cinematic film still, 35mm film grain, "
-                           "cool desaturated color grade, natural skin texture, "
-                           "no beautification filter")
 
 
 NEGATIVE_DEFAULT = ("模糊，低清晰度，多余的手指，畸形的四肢，现代感强的插画风，3D渲染，"
                     "动漫感，塑料皮肤，过度磨皮，脸部对称过度，英文字幕，水印，logo，鲜艳高饱和，暖色调")
 
 
-SIZE_EN = {"远景": "extreme wide shot", "全景": "wide shot", "中景": "medium shot",
-           "近景": "medium close-up", "特写": "close-up"}
 
 
 TURNAROUND_TMPL = (
@@ -111,31 +106,21 @@ SYSTEM_ASSET_FILL = """你是短剧美术设定总监。只输出严格 JSON，�
 角色输出：
 {"age":"18岁","role":"主角","face":"脸型与五官，15字内","flaw":"一处可辨识瑕疵，12字内",
  "wardrobeHook":"服装或配饰记忆点，12字内","wardrobe":"服装一句话，20字内",
- "keyword":"把 age、face、flaw、wardrobeHook、wardrobe 用中文逗号连成一句，40字内",
- "keywordEn":"同一串的英文版，给本地 Flux 用，一句，55词内；年龄写区间（in his late sixties）"
- "不给精确值；体态一句（lean build, straight back）；主服装带颜色+版型+材质；"
- "贴身携带物写呈现方式（talisman corner visible in pocket）而不是只报名字"}
+ "keyword":"把 age、face、flaw、wardrobeHook、wardrobe 用中文逗号连成一句，40字内，
+ 带颜色+版型+材质，贴身携带物写呈现方式而不是只报名字"}
 
 场景输出：
 {"appearance":"环境一句话，30字内","light":"用时间与天气写光质，如「晴日午后斜阳，暖黄从门口切入」，20字内","lens":"镜头焦段，如 24mm广角",
- "props":["陈设A（状态，如：半旧的八仙桌）","陈设B"],"sceneEn":"一句英文场景描述，给本地 Flux 用，55词内；"
- "空间分层：主体环境与材质 → 中近景陈设（物件+状态）→ 远景虚化轮廓；声明 no people；光线由时间天气推出"}
+ "props":["陈设A（状态，如：半旧的八仙桌）","陈设B"]}
 
 道具输出：
 {"appearance":"材质、颜色、尺寸、年代感或磨损，25字内（只写物体本身，不写属于谁）",
- "propEn":"一句英文静物描述，给本地 Flux 用，含材质与颜色，20词内"}
+}
 
 硬性规则：
 - 剧本原文里写明的细节必须原样保留，不许改写；推断出的细节不要写成确定事实。
 - 已经填好的非空字段，除非明显与剧本冲突，否则保持不变。
 - 严禁新增剧本里没有的情节、身世、结局；严禁输出长段描述文字。
 - 三个一致性锚点（face / flaw / wardrobeHook）必须给，且要具体到能画出区别。
-- keyword 各段必须用中文逗号「，」分隔。keywordEn / sceneEn / propEn 必须是英文。
-- keywordEn 必须含四要素：年龄区间、一句体态、主服装（颜色+版型+材质）、
-  贴身携带物的呈现方式（怎么露出，而不是只报名字）。
-- sceneEn 必须含四要素：主体环境与材质、中近景陈设（物件+状态）、
-  远景虚化轮廓、no people 声明；光线用时间/天气解释，不裸写「暖光」。
 - props 里的陈设尽量带状态或痕迹（半旧、微敞、有茶渍），比光秃秃的物件名更能定住场景气质。
-- 道具只描述物体本身：appearance 不写持有者、不写人物；propEn 必须是英文静物短语，
-  不许出现 a man / woman / someone holding / hand / person 一类词。
 - 只输出一个 JSON 对象。"""

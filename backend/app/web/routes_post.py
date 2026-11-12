@@ -164,7 +164,7 @@ def _comfy_prompt(h, payload):
         return json_response(h, comfy_prompt_rows(
             [a for a in assets[:24] if isinstance(a, dict)],
             payload.get("variants") if isinstance(payload.get("variants"), dict) else {},
-            _as(payload.get("styleEn"), "", 240)))
+            _as(payload.get("styleAnchor") or payload.get("styleEn"), "", 240)))
     except (ValueError, TypeError) as exc:
         return json_response(h, {"detail": str(exc)[:220]}, 400)
 
@@ -203,7 +203,7 @@ def _comfy_generate(h, payload):
         return json_response(h, comfy_job_start(
             [a for a in assets[:24] if isinstance(a, dict)],
             payload.get("variants") if isinstance(payload.get("variants"), dict) else {},
-            _as(payload.get("styleEn"), "", 200),
+            _as(payload.get("styleAnchor") or payload.get("styleEn"), "", 200),
             payload.get("seed") if isinstance(payload.get("seed"), int) else 0,
             engine, seq_n))
     except (ValueError, TypeError) as exc:

@@ -145,7 +145,7 @@ def call_llm_json(system: str, user: str, key: str, timeout: int = 120,
     """取 JSON：本地修复 → 仍失败则追加一次「只要合法 JSON」的重试。
 
     与 llm_json.call_llm_json 的流程与文案**逐字一致**（铁律），唯一区别是底层
-    走 ChatOpenAI。key 参数保留占位（旧签名是传入 JSON 根键名，如 "propEn"）。
+    走 ChatOpenAI。key 参数保留占位（旧签名是传入 JSON 根键名）。
     """
     content, model = call_llm(system, user, timeout)
     try:

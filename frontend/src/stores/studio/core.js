@@ -22,28 +22,26 @@ const clone = (o) => JSON.parse(JSON.stringify(o));
 /* 英文锚给本地 Flux 用，只写画种 / 材质 / 光线 / 色调，绝不写人物与剧情。
    中文锚给起始帧长提示词与导出文档用。两端默认值必须和 server.py 保持一致。 */
 export const STYLE_FALLBACK_CN = "写实电影质感 · 35mm 胶片颗粒 · 冷调 · 无滤镜磨皮";
-export const STYLE_FALLBACK_EN = ("photorealistic cinematic film still, 35mm film grain, "
-  + "cool desaturated color grade, natural skin texture, no beautification filter");
 export const STYLE_PRESETS = [
-  { key: "film", label: "写实电影", anchor: STYLE_FALLBACK_CN, anchorEn: STYLE_FALLBACK_EN },
+  { key: "film", label: "写实电影", anchor: STYLE_FALLBACK_CN, },
   { key: "folk", label: "中式民俗恐怖",
     anchor: "中式民俗恐怖 · 写实电影质感 · 35mm 胶片颗粒 · 冷调 · 无滤镜磨皮",
-    anchorEn: "Chinese folk horror, photorealistic cinematic film still, 35mm film grain, dim cold light, desaturated earthy palette, natural skin texture" },
+ },
   { key: "neon", label: "赛博霓虹",
     anchor: "赛博霓虹夜景 · 高对比冷暖撞色 · 湿地面反光 · 电影质感",
-    anchorEn: "cyberpunk neon night, high contrast teal and magenta lighting, wet reflective surfaces, cinematic film still" },
+ },
   { key: "ink", label: "水墨国风",
     anchor: "水墨国风 · 留白构图 · 淡彩晕染 · 宣纸质地",
-    anchorEn: "traditional Chinese ink wash painting, minimalist negative space, soft watercolor washes, rice paper texture" },
+ },
   { key: "anime", label: "日系动画",
     anchor: "日系动画赛璐璐 · 平涂色块 · 干净线稿 · 柔和光影",
-    anchorEn: "Japanese anime cel shading, flat color blocks, clean line art, soft ambient lighting" },
+ },
   { key: "bw", label: "黑白胶片",
     anchor: "黑白胶片 · 高反差硬光 · 粗颗粒 · 纪实感",
-    anchorEn: "black and white analog film photography, high contrast hard lighting, heavy grain, documentary realism" },
+ },
   { key: "3d", label: "3D 渲染",
     anchor: "3D 渲染 · 全局光照 · 干净材质 · 柔和影棚光",
-    anchorEn: "high end 3D render, global illumination, clean PBR materials, soft studio lighting" }
+ }
 ];
 
 /* ------------------------------ 状态 ------------------------------ */
@@ -72,8 +70,8 @@ function defaultState() {
     // 资产包（AI 分解产物）：编号 / 优先级 / 三锚点 / 固定关键词串 / 提示词 / 溯源
     assetPack: null, assetWarnings: [], assetBusy: false, assetModel: "",
     frames: [], frameStats: null,     // 每镜起始帧提示词（资产包 + 分镜表 → 出片首帧）
-    // 剧本级视觉风格：独立于 assetPack，没跑 AI 分解也能定义；key/anchor/anchorEn 为空 = 跟随 AI 或内置默认
-    styleConfig: { key: "", anchor: "", anchorEn: "" },
+    // 剧本级视觉风格：独立于 assetPack，没跑 AI 分解也能定义；key/anchor 为空 = 跟随 AI 或内置默认
+    styleConfig: { key: "", anchor: "", },
     // 第一步「改剧本」：导入时的原文 / 稿件类型 / 最近一次规范化报告
     rawSource: "", sourceKind: "", normReport: null,
     // 当前项目（Studio 式）：id 对应服务端 projects/<id>/，name 显示在顶栏
@@ -326,7 +324,7 @@ export function hydrate(data, info) {
   const d = (data && typeof data === "object") ? data : {};
   PERSIST_KEYS.forEach((k) => { if (d[k] !== undefined) S[k] = d[k]; });
   if (d.config) S.config = Object.assign(clone(E.DEFAULT_CONFIG), d.config);
-  if (d.styleConfig) S.styleConfig = Object.assign({ key: "", anchor: "", anchorEn: "" }, d.styleConfig);
+  if (d.styleConfig) S.styleConfig = Object.assign({ key: "", anchor: "", }, d.styleConfig);
   if (d.assets) {
     S.assets = Object.assign({ characters: [], scenes: [], props: [] }, d.assets);
     bankLoad(S.assets, S.projectId);

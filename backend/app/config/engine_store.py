@@ -23,7 +23,7 @@ _ENGINE_CACHE = {"mtime": None, "doc": None}
 ENGINE_DEFAULTS = {
     "gwUrl": "http://127.0.0.1:8000",
     "comfyHost": "http://127.0.0.1:8188",
-    "comfyModel": "flux1-schnell-fp8.safetensors",
+    "comfyModel": "",  # 模型由网关管理，此字段已废弃（兼容保留）
     "qwenUrl": ("https://cn-beijing.maas.qianwenaiapi.com/api/v1/"
                 "services/aigc/multimodal-generation/generation"),
     "qwenModel": "wan2.7-image-pro",
@@ -201,7 +201,7 @@ def h3_image_status():
 
 
 def comfy_unet_names():
-    """从 /object_info 拉可用 unet 列表：换 Flux 版本时让用户直接选，不猜文件名。"""
+    """兼容保留：模型由网关管理，恒返回空列表。"""
     try:
         with urllib.request.urlopen(comfy_host() + "/object_info/UNETLoader", timeout=6) as r:
             info = json.loads(r.read().decode("utf-8"))

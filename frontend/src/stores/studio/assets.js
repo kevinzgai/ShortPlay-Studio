@@ -7,7 +7,7 @@ import { computed } from "vue";
 import {
   S, ui, E, AI, PROJECT, toast, begin, undo, save, busy, reparse,
   findAnyAsset, bankNote, bankForget, pushBaseline, copyText,
-  STYLE_FALLBACK_CN, STYLE_FALLBACK_EN, STYLE_PRESETS
+  STYLE_FALLBACK_CN, STYLE_PRESETS
 } from "./core.js";
 
 /* ------------------------------ 资产 ------------------------------ */
@@ -207,8 +207,7 @@ export function currentStyle() {
   return {
     key: c.key || "",
     anchor: (c.anchor || (preset && preset.anchor) || p.anchor || STYLE_FALLBACK_CN).trim(),
-    anchorEn: (c.anchorEn || (preset && preset.anchorEn) || p.anchorEn || STYLE_FALLBACK_EN).trim(),
-    source: (c.anchor || c.anchorEn) ? "手动定义" :
+    source: c.anchor ? "手动定义" :
       (c.key ? "预设 · " + (preset ? preset.label : c.key) :
         (p.anchor ? "AI 分解推断" : "内置默认"))
   };
@@ -218,15 +217,14 @@ export function packWithStyle() {
   const st = currentStyle();
   const base = S.assetPack || {};
   return Object.assign({}, base, {
-    style: Object.assign({}, base.style || {}, { anchor: st.anchor, anchorEn: st.anchorEn })
+    style: Object.assign({}, base.style || {}, { anchor: st.anchor })
   });
 }
 export function saveStyleConfig(cfg) {
   begin();
   S.styleConfig = {
     key: cfg.key || "",
-    anchor: (cfg.anchor || "").trim(),
-    anchorEn: (cfg.anchorEn || "").trim()
+    anchor: (cfg.anchor || "").trim()
   };
   save();
   regenFrames(true);   // 已有起始帧提示词立刻按新风格重算（缺资产包 / 分镜时自动跳过）
@@ -234,7 +232,7 @@ export function saveStyleConfig(cfg) {
 }
 export function resetStyleConfig() {
   begin();
-  S.styleConfig = { key: "", anchor: "", anchorEn: "" };
+  S.styleConfig = { key: "", anchor: "" };
   save();
   regenFrames(true);
   toast("已恢复跟随 AI 分解 / 内置默认风格", "ok", "撤销", undo);
@@ -405,9 +403,6 @@ export function assetPromptBlocks(a) {
   if (a.kind !== "prop" && String(a.keyword || "").trim()) {
     out.push({ key: "keyword", label: "固定关键词串", lang: "cn", text: String(a.keyword).trim() });
   }
-  const en = String(a.kind === "character" ? (a.keywordEn || a.promptEn || "")
-    : (a.kind === "scene" ? (a.promptEn || a.sceneEn || "") : "")).trim();
-  if (en) out.push({ key: "en", label: a.kind === "character" ? "英文关键词（Flux / MJ）" : "英文场景描述（Flux / MJ）", lang: "en", text: en });
   return out;
 }
 
@@ -779,7 +774,7 @@ export function comfyPreviewPrompts(currentId) {
   const variants = {};
   ["character", "scene", "prop"].forEach((k) => { variants[k] = (ui.comfy.picked[k] || []).slice(); });
   ui.comfy.previewBusy = true;
-  AI.comfyPrompt({ assets: comfyPayload(list.slice(0, 12)), variants: variants, styleEn: currentStyle().anchorEn })
+  AI.comfyPrompt({ assets: comfyPayload(list.slice(0, 12)), variants: variants, styleAnchor: currentStyle().anchor })
     .then((r) => { ui.comfy.preview = r.rows || []; })
     .catch((e) => toast("读提示词失败：" + e.message, "err"))
     .then(() => { ui.comfy.previewBusy = false; });
@@ -827,7 +822,7 @@ export function comfyGenerateImages(currentId, shotIds) {
   ui.comfy.busy = true; ui.comfy.done = 0; ui.comfy.total = count;
   ui.comfy.current = "正在提交任务…";
   ui.comfy.errors = []; ui.comfy.results = [];
-  AI.comfyGenerate({ assets, variants, styleEn: currentStyle().anchorEn, engine, n: seqN })
+  AI.comfyGenerate({ assets, variants, styleAnchor: currentStyle().anchor, engine, n: seqN })
     .then((r) => { ui.comfy.jobId = r.jobId; ui.comfy.total = r.total; comfyPollStart(); })
     .catch((e) => {
       ui.comfy.busy = false; ui.comfy.current = "";
