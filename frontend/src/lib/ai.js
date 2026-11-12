@@ -124,6 +124,12 @@ import E from "./engine.js";
   function uploadProjectRef(body) {
     return post("projects/upload-ref", body, 120000);
   }
+  // 通用图片上传：任意图片 → 服务端 examples/assets/ 的 PNG。
+  // 返回 path（examples/assets/xx.png）可直接当分镜首帧 frameFile，或 sync 出图的 refs。
+  function uploadImage(body) {
+    return post("upload/image", body, 120000);
+  }
+
   // ---- 视频（本地网关 /v1/videos）：分镜镜头逐镜生成，首帧可缺省 ----
   function videoStart(body) {
     return post("video/start", body, 60000);
@@ -435,7 +441,7 @@ export const AIStudio = {
   storyboard: storyboard, toShots: toShots, run: run,
   assets: assets, frames: frames, exportZip: exportZip,
   fillAsset: fillAsset, comfyStatus: comfyStatus,
-  comfyGenerate: comfyGenerate, comfyJob: comfyJob, comfyPrompt: comfyPrompt,
+  comfyGenerate: comfyGenerate, comfyJob: comfyJob, comfyPrompt: comfyPrompt, uploadImage: uploadImage,
   videoStart: videoStart, videoJob: videoJob,
   uploadProjectRef: uploadProjectRef,
   adaptNovel: adaptNovel, isNovelScript: isNovelScript, importDocx: importDocx,

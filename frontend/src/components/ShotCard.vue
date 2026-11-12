@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from "vue";
-import { S, E, toggleCheck, setActiveShot, handleShotOp, castOf, sceneAssetOf, shotAssetStale, refreshOneShot, toggleShotLock, startShotVideo } from "../stores/studio.js";
+import { S, E, toggleCheck, setActiveShot, handleShotOp, castOf, sceneAssetOf, shotAssetStale, refreshOneShot, toggleShotLock, startShotVideo, setShotFrame } from "../stores/studio.js";
 
 const props = defineProps({ shot: { type: Object, required: true } });
 const open = ref(false);
@@ -16,6 +16,14 @@ function onCardClick(e) {
 }
 const edited = () => Object.keys(props.shot.edited || {}).length;
 /* 视频任务状态：queued / running 显示进度条，done 显示播放器，failed 显示原因 */
+const frameInput = ref(null);
+const frameSet = computed(() => !!props.shot.frameImage);
+function pickFrame() { frameInput.value && frameInput.value.click(); }
+function onFrameFile(ev) {
+  const f = (ev.target.files || [])[0];
+  if (f) setShotFrame(props.shot.id, f);
+  ev.target.value = "";  // 允许重复选同一张
+}
 const videoJob = computed(() => props.shot.videoJob || null);
 const videoBusy = computed(() => !!videoJob.value
   && (videoJob.value.status === "running" || videoJob.value.status === "queued"));
@@ -86,6 +94,10 @@ const videoLabel = computed(() => videoBusy.value
       <button class="mini" data-op="up" :data-id="shot.id" title="上移" @click.stop="handleShotOp('up', shot.id)">↑</button>
       <button class="mini" data-op="down" :data-id="shot.id" title="下移" @click.stop="handleShotOp('down', shot.id)">↓</button>
       <button class="mini" data-op="regen" :data-id="shot.id" title="重生成这一镜" @click.stop="handleShotOp('regen', shot.id)">↻</button>
+      <input ref="frameInput" type="file" accept="image/*" hidden @change="onFrameFile" />
+      <button class="mini" data-op="frame" :data-id="shot.id" :class="{ on: frameSet }"
+        :title="frameSet ? ('首帧：' + shot.frameImage) : '设首帧：上传一张图，▶ 直接用它生成视频'"
+        @click.stop="pickFrame()">🖼</button>
       <button class="mini" data-op="video" :data-id="shot.id" :disabled="videoBusy"
         :title="shot.video ? '重新生成视频（首帧 → i2v）' : '生成视频（缺首帧自动先文生一张，再图生视频）'"
         @click.stop="startShotVideo(shot.id)">▶</button>

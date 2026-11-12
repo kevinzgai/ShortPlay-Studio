@@ -88,6 +88,7 @@ def _worker(jid, frame_prompt, motion, quality, duration, seed, frame):
         if not ASSET_IMG_NAME.match(name):
             raise ValueError("首帧文件名不合法：%s" % name[:60])
         path = ASSET_IMG_DIR / name
+        job["frameFile"] = "examples/assets/" + name  # 手动指定的首帧也回填快照
         if not path.is_file():
             raise ValueError("首帧不在本地：%s" % name[:60])
 

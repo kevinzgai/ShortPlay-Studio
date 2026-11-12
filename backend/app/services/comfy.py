@@ -13,6 +13,8 @@
 """
 
 import base64
+import hashlib
+import os
 import io
 import random
 import re
@@ -537,6 +539,42 @@ def _variant_label(kind, vk):
         if v["key"] == vk:
             return v["label"]
     return vk
+
+
+def upload_image(body):
+    """上传任意图片进本地图库（examples/assets/），统一转成 PNG 落盘。
+
+    返回 filename 可直接当：
+      - 分镜视频 frameFile（手动指定首帧，前端「设首帧」入口）
+      - sync_image 的 refs（参考图 i2i，同一次出图的身份/风格锚）
+    同一张图重复上传只留一份（内容哈希命名）。
+    """
+    from app.infra.image import _decode_data_url, _pil_image
+    data = body.get("data") if isinstance(body, dict) else None
+    raw, ext = _decode_data_url(data)
+    if not raw:
+        raise ValueError("这不是一张能识别的图片（支持 png / jpg / webp / gif / bmp / avif）")
+    if len(raw) > 24 * 1024 * 1024:
+        raise ValueError("图片超过 24MB，换一张小一点的")
+    Image = _pil_image()
+    if Image is not None:
+        buf = io.BytesIO()
+        img = Image.open(io.BytesIO(raw))
+        if img.mode in ("RGBA", "LA", "P"):
+            img.convert("RGBA").save(buf, "PNG")
+        else:
+            img.convert("RGB").save(buf, "PNG")
+        raw = buf.getvalue()
+    elif ext != "png":
+        raise ValueError("服务器缺 Pillow，暂时只收 png（其他格式请先转 png）")
+    ASSET_IMG_DIR.mkdir(parents=True, exist_ok=True)
+    name = "up_" + hashlib.sha1(raw).hexdigest()[:12] + ".png"
+    f = ASSET_IMG_DIR / name
+    if not f.is_file():
+        tmp = f.with_suffix(".tmp")
+        tmp.write_bytes(raw)
+        os.replace(tmp, f)
+    return {"ok": True, "filename": name, "bytes": len(raw), "path": "examples/assets/" + name}
 
 
 def comfy_worker(jid, plan, engine="comfy"):

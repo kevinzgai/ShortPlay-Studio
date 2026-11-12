@@ -20,6 +20,7 @@ from app.config.engine_store import (comfy_host, engine_config_save,
 from app.services.agents import AgentDisabledError, agent_system
 from app.services.assets import build_asset_pack, build_frame_prompts, fill_asset_with_ai
 from app.services.comfy import (comfy_job_start, comfy_prompt_rows, comfy_status,
+                            upload_image,
                                 sync_image)
 from app.services.shot_video import video_start
 from app.services.diagnostics import engine_probe, llm_test
@@ -333,10 +334,22 @@ def _v1_images(h, payload):
 
 
 # --------------------------------------------------------------------------
+def _upload_image(h, payload):
+    """通用图片上传：任意图片 → examples/assets/ 的 PNG，
+    返回 filename 给分镜首帧（frameFile）或参考图（refs）用。"""
+    try:
+        return json_response(h, upload_image(payload))
+    except ValueError as exc:
+        return json_response(h, {"detail": str(exc)[:300]}, 400)
+    except Exception as exc:
+        return json_response(h, {"detail": "上传失败：" + str(exc)[:200]}, 500)
+
+
 # 路由表：path → 处理函数（签名统一 fn(h, payload)）
 # --------------------------------------------------------------------------
 POST_ROUTES = {
     "/v1/images": _v1_images,
+    "/api/upload/image": _upload_image,
     "/api/import/docx": _import_docx,
     "/api/parse/start": _parse_start,
     "/api/parse/cancel": _parse_cancel,

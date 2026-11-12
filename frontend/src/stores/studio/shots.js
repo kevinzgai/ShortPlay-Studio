@@ -343,6 +343,25 @@ export function exportZip() {
  * ========================================================================= */
 const VIDEO_POLLS = {};
 
+/** 手动指定首帧：上传任意图片进服务端图库（examples/assets/），
+ *  写 shot.frameImage，点 ▶ 时后端直接拿它做 i2v，不再自动出首帧。 */
+export function setShotFrame(shotId, file) {
+  const shot = S.shots.find((x) => x.id === shotId);
+  if (!shot) { toast("找不到这个镜头", "warn"); return; }
+  if (!file || !/^image\//.test(file.type)) { toast("选一张图片文件", "warn"); return; }
+  const rd = new FileReader();
+  rd.onload = () => {
+    AI.uploadImage({ name: file.name, data: rd.result }).then((r) => {
+      shot.frameImage = r.path;
+      save();
+      toast("首帧已设，点 ▶ 直接用这张图生成视频", "ok");
+    }).catch((e) => {
+      toast(String(e.message || e).slice(0, 160), "warn");
+    });
+  };
+  rd.readAsDataURL(file);
+}
+
 export function startShotVideo(shotId, opts) {
   const shot = S.shots.find((x) => x.id === shotId);
   if (!shot) { toast("找不到这个镜头", "warn"); return; }
