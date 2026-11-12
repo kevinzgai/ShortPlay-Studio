@@ -598,16 +598,15 @@ watch(() => sel.value && sel.value.id, () => { closePreview(); ui.comfy.preview 
               {{ ui.comfy.h3.online ? (ui.comfy.h3.model + ' · ' + ui.comfy.h3.size + ' · 云端生图') : ui.comfy.h3.detail }}
             </span>
             <template v-else-if="ui.comfy.online">
-              <span class="ap-gen-info" :class="{ off: archBlocked }">
-                ComfyUI {{ ui.comfy.version }} · 显存空闲 {{ vramText(ui.comfy.vramFreeMB) }}
+              <span class="ap-gen-info">
+                本地网关 · 显存空闲 {{ vramText(ui.comfy.vramFreeMB) }} · 队列 {{ ui.comfy.queue || 0 }}
               </span>
-              <span class="ap-gen-model" :class="{ off: archBlocked }" :title="ui.comfy.model">{{ ui.comfy.model }}</span>
               <span v-if="ui.comfy.arch && ui.comfy.arch.label" class="ap-gen-arch"
-                :title="archBlocked ? '这个模型走视频链路，出不了定妆 / 道具图' : '当前出图架构与默认步数'">
+                title="当前出图架构与默认步数">
                 {{ ui.comfy.arch.label }} · {{ ui.comfy.arch.steps }} 步
               </span>
             </template>
-            <span v-else class="ap-gen-info off">{{ ui.comfy.detail }} · 启动 8188 后重试</span>
+            <span v-else class="ap-gen-info off">{{ ui.comfy.detail }} · 执行网关 start_all.ps1 后重试</span>
             <span class="ap-gen-style" :title="'出图风格锚：' + curStyle.anchorEn">风格 · {{ styleShort }}</span>
           </div>
           <p class="apx-rail-tip">换 unet / 配 Key 在「系统设置 · 出图引擎」</p>

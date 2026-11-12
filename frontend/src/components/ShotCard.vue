@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from "vue";
-import { S, E, toggleCheck, setActiveShot, handleShotOp, castOf, sceneAssetOf, shotAssetStale, refreshOneShot, toggleShotLock } from "../stores/studio.js";
+import { S, E, toggleCheck, setActiveShot, handleShotOp, castOf, sceneAssetOf, shotAssetStale, refreshOneShot, toggleShotLock, startShotVideo } from "../stores/studio.js";
 
 const props = defineProps({ shot: { type: Object, required: true } });
 const open = ref(false);
@@ -15,6 +15,13 @@ function onCardClick(e) {
   setActiveShot(props.shot.id);
 }
 const edited = () => Object.keys(props.shot.edited || {}).length;
+/* 视频任务状态：queued / running 显示进度条，done 显示播放器，failed 显示原因 */
+const videoJob = computed(() => props.shot.videoJob || null);
+const videoBusy = computed(() => !!videoJob.value
+  && (videoJob.value.status === "running" || videoJob.value.status === "queued"));
+const videoLabel = computed(() => videoBusy.value
+  ? ((videoJob.value.stage || "生成中") + (videoJob.value.progress ? " " + videoJob.value.progress + "%" : ""))
+  : "");
 </script>
 
 <template>
@@ -55,6 +62,9 @@ const edited = () => Object.keys(props.shot.edited || {}).length;
       </div>
       <textarea class="cell visual" rows="2" data-field="visual" :data-id="shot.id"
         :value="shot.visual" placeholder="画面描述"></textarea>
+      <div v-if="videoBusy" class="video-job" data-video-job>▶ {{ videoLabel }}</div>
+      <video v-else-if="shot.video" class="video-prev" data-video-prev
+        :src="shot.video" controls preload="metadata"></video>
       <span class="cell-label">台词</span>
       <input class="cell dialogue" data-field="dialogue" :data-id="shot.id" :value="shot.dialogue" placeholder="这一镜的台词（可留空）">
       <span class="cell-label">备注</span>
@@ -76,6 +86,9 @@ const edited = () => Object.keys(props.shot.edited || {}).length;
       <button class="mini" data-op="up" :data-id="shot.id" title="上移" @click.stop="handleShotOp('up', shot.id)">↑</button>
       <button class="mini" data-op="down" :data-id="shot.id" title="下移" @click.stop="handleShotOp('down', shot.id)">↓</button>
       <button class="mini" data-op="regen" :data-id="shot.id" title="重生成这一镜" @click.stop="handleShotOp('regen', shot.id)">↻</button>
+      <button class="mini" data-op="video" :data-id="shot.id" :disabled="videoBusy"
+        :title="shot.video ? '重新生成视频（首帧 → i2v）' : '生成视频（缺首帧自动先文生一张，再图生视频）'"
+        @click.stop="startShotVideo(shot.id)">▶</button>
       <button class="mini del" data-op="delete" :data-id="shot.id" title="删除" @click.stop="handleShotOp('delete', shot.id)">×</button>
     </div>
   </div>

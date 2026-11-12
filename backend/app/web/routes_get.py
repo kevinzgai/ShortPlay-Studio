@@ -9,11 +9,13 @@
 
 import json
 
-from app.config.engine_store import engine_config_public, comfy_host, comfy_unet_names
+from app.config.engine_store import engine_config_public, gw_url
 from app.config.llm_store import (_llm_doc, llm_active_provider, llm_providers_public,
                                   llm_settings)
 from app.services.comfy import (ASSET_IMG_DIR, ASSET_IMG_NAME, COMFY_JOBS,
                                 COMFY_LOCK, comfy_arch_info, comfy_status)
+from app.services import gateway
+from app.services.shot_video import VIDEO_DIR, VIDEO_NAME, video_job
 from app.services.parse_task import PARSE_TASKS, parse_task_latest, parse_task_snapshot
 from app.services.projects import (PROJECTS_DIR, project_get, project_list,
                                    project_ref_read, project_ref_thumb)
@@ -45,14 +47,24 @@ def _engine_config(h):
 
 
 def _comfy_models(h):
-    names = comfy_unet_names()
-    return json_response(h, {
-        "models": names, "host": comfy_host(),
-        # 同一个 models/unet/ 目录里混着三种架构，光给文件名用户没法选：
-        # archs 让界面能直接标出「哪个能出定妆 / 道具图」，不用试一次才知道
-        "archs": {n: comfy_arch_info(n) for n in names},
-        "current": comfy_arch_info(),
-    })
+    """网关版：模型/工作流由网关管理，这里回网关健康与 arch 说明，不再列 unet。"""
+    try:
+        gw = gateway.gw_health()
+        comfy = gw.get("comfyui") or {}
+        return json_response(h, {
+            "gateway": True, "host": gw_url(),
+            "models": [], "archs": {},
+            "current": comfy_arch_info(),
+            "online": bool(gw.get("gateway")) and comfy.get("reachable", False),
+            "device": comfy.get("device", ""),
+            "vramFreeMB": int(comfy.get("vram_free_mb") or 0),
+            "queue": int(gw.get("queue") or 0),
+            "detail": "",
+        })
+    except Exception as exc:
+        return json_response(h, {"gateway": True, "host": gw_url(), "models": [],
+                                 "archs": {}, "current": comfy_arch_info(),
+                                 "online": False, "detail": str(exc)[:160]})
 
 
 def _comfy_status(h):
@@ -95,6 +107,26 @@ def v1_image_file(h, name):
     if not f.is_file():
         return json_response(h, {"detail": "图片不存在"}, 404)
     return bytes_response(h, f.read_bytes(), name, "image/png", inline=True)
+
+
+def _video_job(h):
+    snap = video_job(query_dict(h).get("id", ""))
+    if not snap:
+        return json_response(h, {"detail": "视频任务不存在或已过期"}, 404)
+    return json_response(h, snap)
+
+
+def _video_file(h, name):
+    """GET /v1/videos/file/{filename}：视频产物由 studio 自托管。"""
+    if not VIDEO_NAME.match(name or ""):
+        return json_response(h, {"detail": "非法文件名"}, 400)
+    f = VIDEO_DIR / name
+    if not f.is_file():
+        return json_response(h, {"detail": "视频不存在"}, 404)
+    ctype = "video/mp4" if name.endswith(".mp4") else "video/webm"
+    return bytes_response(h, f.read_bytes(), name, ctype, inline=True)
+
+v1_video_file = _video_file  # asgi 层用公开名导入
 
 
 def _parse_state(h):
@@ -146,6 +178,7 @@ GET_ROUTES = {
     "/api/projects": _projects,
     "/api/projects/ref": _project_ref,
     "/api/projects/get": _project_get,
+    "/api/video/job": _video_job,
 }
 
 # 这几个路径由 Handler 的专用方法处理（SSE 要长连接、Agent 要多次分支），

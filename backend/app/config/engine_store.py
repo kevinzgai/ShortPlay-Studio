@@ -21,6 +21,7 @@ _ENGINE_CACHE = {"mtime": None, "doc": None}
 
 
 ENGINE_DEFAULTS = {
+    "gwUrl": "http://127.0.0.1:8000",
     "comfyHost": "http://127.0.0.1:8188",
     "comfyModel": "flux1-schnell-fp8.safetensors",
     "qwenUrl": ("https://cn-beijing.maas.qianwenaiapi.com/api/v1/"
@@ -34,6 +35,7 @@ ENGINE_DEFAULTS = {
 
 
 ENGINE_ENV = {
+    "gwUrl": "SHORTPLAY_GW_URL",
     "comfyHost": "SHORTPLAY_COMFY",
     "comfyModel": "SHORTPLAY_COMFY_MODEL",
     "qwenUrl": "SHORTPLAY_QWEN_IMAGE_URL",
@@ -61,7 +63,7 @@ def _engine_doc():
         raw = {}
     raw = raw if isinstance(raw, dict) else {}
     doc = {}
-    for k, limit in (("comfyHost", 300), ("comfyModel", 160), ("qwenUrl", 300),
+    for k, limit in (("gwUrl", 300), ("comfyHost", 300), ("comfyModel", 160), ("qwenUrl", 300),
                      ("qwenModel", 120), ("qwenSize", 20), ("qwenKey", 200),
                      ("h3Url", 300), ("h3Model", 120), ("h3Size", 24), ("h3Key", 200)):
         doc[k] = str(raw.get(k) or "").strip()[:limit]
@@ -85,6 +87,11 @@ def _engine_get(key):
     if env:
         return env, "env"
     return ENGINE_DEFAULTS.get(key, ""), "default"
+
+
+def gw_url():
+    """H3 + SeedVR2 本地网关地址：出图 / 视频 / 修复都从这走。"""
+    return _engine_get("gwUrl")[0].rstrip("/")
 
 
 def comfy_host():
@@ -127,7 +134,7 @@ def h3_image_key():
 def engine_config_public():
     """给前端看：只回打码后的 Key 与每项来源，绝不回传明文。"""
     out = {}
-    for k in ("comfyHost", "comfyModel", "qwenUrl", "qwenModel", "qwenSize",
+    for k in ("gwUrl", "comfyHost", "comfyModel", "qwenUrl", "qwenModel", "qwenSize",
               "h3Url", "h3Model", "h3Size"):
         v, src = _engine_get(k)
         out[k] = {"value": v, "source": src}
@@ -160,6 +167,25 @@ def qwen_image_status():
         "host": qwen_image_url().split("/api/")[0],
         "detail": "" if key else "没配置通义万相 API Key：到「系统设置 · 出图引擎」填一条即可",
     }
+
+
+def gw_status():
+    """本地网关探测：online / 显存 / 队列，前端引擎页与状态灯共用。"""
+    try:
+        req = urllib.request.Request(gw_url() + "/health")
+        with urllib.request.urlopen(req, timeout=4) as r:
+            st = json.load(r)
+    except Exception as exc:
+        return {"online": False, "host": gw_url(),
+                "detail": "网关没启动或不可达（%s）" % str(exc)[:80]}
+    comfy = st.get("comfyui") or {}
+    online = bool(st.get("gateway")) and comfy.get("reachable", False)
+    return {"online": online, "host": gw_url(),
+            "device": comfy.get("device", ""),
+            "vramFreeMB": int(comfy.get("vram_free_mb") or 0),
+            "queue": int(st.get("queue") or 0),
+            "current": st.get("current") or "",
+            "detail": "" if online else "网关在，但 ComfyUI 不可达"}
 
 
 def h3_image_status():
@@ -201,7 +227,7 @@ def engine_config_save(payload):
         raise ValueError("参数格式不对")
     with ENGINE_LOCK:
         doc = dict(_engine_doc())
-        for k, limit in (("comfyHost", 300), ("comfyModel", 160), ("qwenUrl", 300),
+        for k, limit in (("gwUrl", 300), ("comfyHost", 300), ("comfyModel", 160), ("qwenUrl", 300),
                          ("qwenModel", 120), ("qwenSize", 20),
                          ("h3Url", 300), ("h3Model", 120), ("h3Size", 24)):
             if k in payload:

@@ -124,6 +124,20 @@ import E from "./engine.js";
   function uploadProjectRef(body) {
     return post("projects/upload-ref", body, 120000);
   }
+  // ---- 视频（本地网关 /v1/videos）：分镜镜头逐镜生成，首帧可缺省 ----
+  function videoStart(body) {
+    return post("video/start", body, 60000);
+  }
+  function videoJob(id) {
+    return fetch(url("video/job?id=" + encodeURIComponent(id)), { cache: "no-store" })
+      .then(function (r) {
+        return r.json().then(function (j) {
+          if (!r.ok) throw new Error(j.detail || ("任务查询失败 " + r.status));
+          return j;
+        });
+      });
+  }
+
   function comfyJob(id, full) {
     return fetch(url("comfy/job?id=" + encodeURIComponent(id) + (full ? "&full=1" : "")),
       { cache: "no-store" }).then(function (r) {
@@ -422,6 +436,7 @@ export const AIStudio = {
   assets: assets, frames: frames, exportZip: exportZip,
   fillAsset: fillAsset, comfyStatus: comfyStatus,
   comfyGenerate: comfyGenerate, comfyJob: comfyJob, comfyPrompt: comfyPrompt,
+  videoStart: videoStart, videoJob: videoJob,
   uploadProjectRef: uploadProjectRef,
   adaptNovel: adaptNovel, isNovelScript: isNovelScript, importDocx: importDocx,
   localEpisodes: E.localEpisodes,

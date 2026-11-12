@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """ShortPlay Studio · 启动入口（薄壳，刻意不实现任何逻辑）。
 

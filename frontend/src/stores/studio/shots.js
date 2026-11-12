@@ -335,3 +335,67 @@ export function exportZip() {
     toast("打包失败：" + err.message, "err");
   });
 }
+
+/* =========================================================================
+ * 镜头视频（本地网关 /v1/videos）：后端缺首帧时自动文生一张再 i2v，
+ * 保证画面与分镜一致；任务状态写 shot.videoJob（不进撤销栈），
+ * 产物 URL 写 shot.video，随项目持久化。
+ * ========================================================================= */
+const VIDEO_POLLS = {};
+
+export function startShotVideo(shotId, opts) {
+  const shot = S.shots.find((x) => x.id === shotId);
+  if (!shot) { toast("找不到这个镜头", "warn"); return; }
+  if (VIDEO_POLLS[shotId]) { toast("这一镜的视频正在生成", "warn"); return; }
+  const o = opts || {};
+  const d = E.normalizeDetail(shot.detail);
+  // 静态画面要素出首帧，运动要素配视频：提示词分工来自导演台字段设计
+  const framePrompt = o.framePrompt
+    || [d.subject, d.composition, d.light, d.mood].filter(Boolean).join("。")
+    || shot.visual || "";
+  const motion = o.motionPrompt
+    || [d.subject, d.action, d.camera, d.mood, d.sound].filter(Boolean).join("。")
+    || shot.visual || "";
+  if (!motion.trim()) { toast("这一镜没有画面描述，先补一句再生成视频", "warn"); return; }
+  shot.videoJob = { status: "queued", stage: "排队中", progress: 0, error: "" };
+  save();
+  AI.videoStart({
+    shotId: shotId,
+    framePrompt: framePrompt,
+    motionPrompt: motion,
+    quality: o.quality || "standard",
+    duration: o.duration || "5s",
+    frameFile: shot.frameImage || ""
+  }).then((r) => { pollVideo(shotId, r.jobId); }).catch((e) => {
+    shot.videoJob = { status: "failed", stage: "", progress: 0,
+      error: String(e.message || e).slice(0, 160) };
+    save();
+  });
+}
+
+function pollVideo(shotId, jobId) {
+  VIDEO_POLLS[shotId] = setInterval(() => {
+    AI.videoJob(jobId).then((j) => {
+      const s = S.shots.find((x) => x.id === shotId);
+      if (!s) { stopVideoPoll(shotId); return; }
+      s.videoJob = { status: j.status, stage: j.stage || "",
+        progress: j.progress || 0, error: j.error || "" };
+      if (j.status === "done") {
+        s.video = j.url;
+        if (j.frameFile) s.frameImage = j.frameFile;
+        stopVideoPoll(shotId);
+        save();
+        toast("这一镜的视频出好了", "ok");
+      } else if (j.status === "failed") {
+        stopVideoPoll(shotId);
+        save();
+        toast("视频生成失败：" + (j.error || "未知原因"), "warn");
+      }
+    }).catch(() => { /* 轮询瞬断，下一拍再试 */ });
+  }, 3000);
+}
+
+function stopVideoPoll(shotId) {
+  clearInterval(VIDEO_POLLS[shotId]);
+  delete VIDEO_POLLS[shotId];
+}

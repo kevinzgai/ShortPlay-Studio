@@ -8,13 +8,12 @@ import time
 import urllib.error
 import urllib.request
 
-from app.config.engine_store import (comfy_model, comfy_unet_names,
+from app.config.engine_store import (
                                      _mask_key, qwen_image_key,
                                      qwen_image_model)
 from app.config.llm_store import _llm_doc, llm_bootstrap
 from app.infra.coerce import s
-from app.services.comfy import (comfy_arch_error, comfy_arch_info,
-                                comfy_missing_files, comfy_status)
+from app.services.comfy import comfy_arch_info, comfy_status
 
 def llm_probe(base, key, model, timeout=25):
     """真发一次最小请求：这是唯一能证明「地址 + Key + 模型名」三件都对的办法。"""
@@ -104,30 +103,10 @@ def engine_probe(kind):
     st = comfy_status()
     if not st.get("online"):
         return {"ok": False, "kind": "comfy", "host": st.get("host", ""),
-                "detail": st.get("detail") or "连不上 ComfyUI"}
-    want = comfy_model()
-    names = comfy_unet_names()
-    match = None if not names else (want in names)
+                "detail": st.get("detail") or "连不上本地网关"}
     info = comfy_arch_info()
-    # 【架构先于名字】「unet 存在」不等于「能出图」：视频模型（fl2va 之类）走的是
-    # fl2v 链路 + audio VAE，拿它出定妆图必然在采样器里报维度不匹配。
-    # 以前这里只校验 want in names，所以「测试连接」对不可用模型也会假通过。
-    if not info["usable"]:
-        return {"ok": False, "kind": "comfy", "host": st.get("host"),
-                "version": st.get("version"), "model": want, "arch": info["arch"],
-                "modelMatch": match, "models": names[:40],
-                "detail": comfy_arch_error()}
-    missing = comfy_missing_files()
-    if missing:
-        return {"ok": False, "kind": "comfy", "host": st.get("host"),
-                "version": st.get("version"), "model": want, "arch": info["arch"],
-                "modelMatch": match, "models": names[:40], "missing": missing,
-                "detail": ("模型在，但 %s 依赖的 %s 没放进 ComfyUI，出图会在提交时"
-                           "校验失败。按上面的文件名补齐后重试"
-                           % (info["label"], "、".join(missing)))}
+    # 网关模式：模型/工作流都由网关管理，这里只确认「网关 + ComfyUI 双在线」。
     return {"ok": True, "kind": "comfy", "host": st.get("host"),
-            "version": st.get("version"), "model": want, "arch": info["arch"],
-            "archLabel": info["label"], "steps": info["steps"],
-            "modelMatch": match, "models": names[:40],
-            "detail": "" if match is not False else
-                      ("ComfyUI 里没有 %s，从下面换一个可用的" % want)}
+            "arch": info["arch"], "archLabel": info["label"], "steps": info["steps"],
+            "vramFreeMB": st.get("vramFreeMB"), "queue": st.get("queue", 0),
+            "detail": ""}

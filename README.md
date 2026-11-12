@@ -179,17 +179,9 @@ py tools/gen_first_frame.py --indices 0,40    :: 本地 ComfyUI Flux 出起始�
 
 资产卡头部多了 **「✦ AI 补形象」**：只把剧本里提到这个角色 / 场景的行（±2 行）发给模型，补脸型 / 瑕疵 / 服装记忆点 / 固定关键词串与**英文关键词**；手填过的非空字段保留，改动进撤销栈。
 
-资产面板顶部是**本地出图工具条**（需本机 ComfyUI 跑在 `8188`）：选范围（当前资产 / P0 / 本栏全部）→ 勾素材类型（角色：三视图 / 面部四视图 / 定妆半身；场景：概念图 / 宽幕建立镜；道具：静物）→ 点「✦ 一键生成 N 张」。进度条实时刷新，一次最多 12 张。出的图回挂到对应资产，第一张自动设为主参考图，原图落 `examples/assets/`。
+资产面板顶部是**本地出图工具条**（需本机网关跑在 `8000`，见 `comfyui-h3-demo` 的 `start_all.ps1`）：选范围（当前资产 / P0 / 本栏全部）→ 勾素材类型（角色：三视图 / 面部四视图 / 定妆半身；场景：概念图 / 宽幕建立镜；道具：静物）→ 点「✦ 一键生成 N 张」。进度条实时刷新，一次最多 12 张。出的图回挂到对应资产，第一张自动设为主参考图，原图落 `examples/assets/`。
 
-**出图模型不再只有 Flux**：`models/unet/` 里常同时躺着几个不同架构的模型，工作流完全不是同一套，所以后端按模型名分派（`comfy_arch()`），界面把三个模型平铺成可点的 chip 并标出架构与默认步数：
-
-| 模型 | 架构 | 工作流 | 能否出定妆 / 道具图 |
-|---|---|---|---|
-| `flux1-schnell-fp8` | Flux | `DualCLIPLoader`(clip_l + t5xxl) + `FluxGuidance` + 4 步 euler | ✅ 默认 |
-| `minimax_h3_image_*` | MiniMax H3-Image | `CLIPLoader(type=minimax, qwen3vl_32b)` + `MiniMaxH3ImageConditioning` + 6 步 euler | ✅ |
-| `minimax_h3_fl2va_*` | H3 视频 | fl2v 视频链路（含 audio VAE） | ❌ 界面置灰，提交前直接拦 |
-
-H3-Image 的节点图逐字对齐本机 `8000` 网关的 `/v1/images`（连 6 步、`simple`/`euler` 都不改），所以两边出的图口径可比。**「unet 存在」不等于「能跑」**：H3-Image 还要 `qwen3vl_32b_minimax_h3_nvfp4_awq` 的 CLIP 与 `minimax_h3_image_vae_fp16` 的 VAE，少一个就会在提交时节点校验失败；现在「测试连接」会按架构把这些依赖文件逐个查一遍，缺什么直接点名，不再只报「模型名不匹配」。同理，选了视频模型时「测试连接」会明确失败，而不是以前那样假通过。
+**2026-11-12 起出图走本地网关**：studio 不再直连 ComfyUI（8188），出图 / 出视频统一交给 `comfyui-h3-demo` 的网关（`http://127.0.0.1:8000`，可在设置里改 `gwUrl`，环境变量 `SHORTPLAY_GW_URL`）。理由：24G 显存装不下 H3(20G)+SeedVR2(8.2G) 两套模型，网关有单线程队列排队，studio 直连等于绕过排队互相挤爆显存。工作流模板只维护网关一份，studio 只保留提示词层。设置页的引擎面板只留网关地址 + 显存 / 队列状态；模型选择、`comfyHost` 已删。
 
 **看大图**：点任意一张生成图进全屏预览（`←` `→` 切图、`Esc` 或点空白处关闭），可复制该张的英文 Flux 提示词、下载原图、直接设为主参考图。预览读的是落盘**原图**，不是 512px 缩略 dataURI —— 缩略图只用于卡片显示，分辨率不跟着涨，否则 `localStorage` 会被撑爆。卡片按每张图的真实画幅铺开，不再统一裁成 4:3：三视图 **1152×1152（1:1，H3-Image）/ 1024×672（Flux）**、面部四视图 1152×768 / 1024×672、定妆 768×1024（3:4）、概念图 1152×640（16:9）、宽幕 1216×512（2.375:1）、静物 896×896。三视图与面部四视图的画幅**按当前模型架构取**（`VARIANT_SIZE_BY_ARCH`），因为两个模型对"一张图里并排多个全身"的控制力差得很远，见坑八。
 
@@ -207,10 +199,13 @@ H3-Image 的节点图逐字对齐本机 `8000` 网关的 `/v1/images`（连 6 �
 | 接口 | 作用 |
 |---|---|
 | `POST /api/ai/asset-fill` | 单项形象补全，不重跑整剧本分解 |
-| `GET /api/comfy/status` | 探测 ComfyUI / 模型 / 变体表 |
+| `GET /api/comfy/status` | 探测本地网关（在线 / 显卡 / 显存空闲 / 队列） |
 | `POST /api/comfy/generate` | 提交批量任务（可带 `styleEn` 剧本风格英文锚），秒回 `jobId` |
 | `GET /api/comfy/job?id=…[&full=1]` | 轮询进度 / 取回缩略图 |
 | `GET /api/comfy/image?f=…` | 查看落盘原图 |
+| `POST /api/video/start` | **分镜逐镜生视频**：`shotId` + 首帧 / 运动提示词 + `quality`(fast/standard/high) + `duration`(5s/8s/10s)，秒回 `jobId`；缺首帧会先用网关出一张再走 i2v |
+| `GET /api/video/job?id=…` | 轮询视频任务（stage / progress / `url`） |
+| `GET /v1/videos/file/{filename}` | 视频产物自托管（studio 落 `backend/outputs/video/`，`inline` 播放） |
 | `POST /v1/images` | **同步出图**：一次请求等到出完，直接回 `url`（给脚本 / 其它模块调） |
 | `GET /v1/images/file/{filename}` | 同步接口回的 `url` 由这里供图（`inline`，浏览器直显） |
 | `GET /api/projects` | 项目列表（只回摘要：名称 / 更新时间 / 集数镜数资产数 / 生成图数） |
@@ -239,7 +234,7 @@ H3-Image 的节点图逐字对齐本机 `8000` 网关的 `/v1/images`（连 6 �
 
 > 坑十一：**三张图三张脸，靠改提示词永远修不好**。三视图 / 面部四视图 / 定妆半身原来是三次独立文生图，三个种子各自从零「想象」一个人 —— 提示词只能约束「同一类长相」，约束不了同一张脸。真正的解是 H3-Image 的参考图通道：同一个 checkpoint，**接上 `image_1` 就是编辑模式、不接就是文生图**（官方原话），最多 16 张，提示词里按输入顺序称 `Picture 1` / `Picture 2`。两个必须踩准的点：① **锚点选脸最大的那张，不是最先出的那张** —— 拿三视图（每格脸约 100px）当锚去生成 400px 的半身特写，源里没有细节可抄，模型只能再编一张，等于多绕一圈；所以顺序排成「定妆半身 → 面部四视图 → 三视图」。② **`image_1` 是「被编辑的图」，模型会倾向沿用它的构图和背景**，而我们要的是「同一张脸、换构图」，所以 `IDENTITY_REF_PREFIX` 必须写在提示词最前面，明确「只抄脸，别抄 framing / pose / background」。另外：槽位名不要写死，H3-Image 的 ComfyUI 原生支持 2026-11-10 才合（v0.45.0+），靠 `/object_info/MiniMaxH3ImageConditioning` 现读 `image_N` 才靠谱；Flux 没有这条通道，架构不是 H3-Image 时一律退回纯文生图，别往提示词里塞 `Picture 1`。
 
-**同步出图 `POST /v1/images`**（与上面 `jobId` 轮询并存，两条路共用 `comfy_workflow()`，设置里换的 `comfyHost` / `comfyModel` 对两边同时生效）：
+**同步出图 `POST /v1/images`**（与上面 `jobId` 轮询并存，两条路都走网关；`width/height` 自动向下对齐 16 的倍数，带 `refs` 时走 `/v1/images/edits` 参考图通道）：
 
 ```bash
 curl -X POST http://127.0.0.1:8177/v1/images \
@@ -249,7 +244,19 @@ curl -X POST http://127.0.0.1:8177/v1/images \
 #  "filename":"4b234b0336c1_00001_.png","url":"/v1/images/file/4b234b0336c1_00001_.png"}
 ```
 
-字段口径对齐本机 8000 的 H3 + SeedVR2 Gateway，但图片由本服务自己托管，不依赖那个 Gateway 是否常驻。可选 `steps`（默认 4，Flux-schnell 用 4 就够）、`timeout`（默认 600s）；`width` / `height` 限 256–2048，`seed` 不传就随机。
+字段口径对齐本机 8000 的 H3 + SeedVR2 Gateway，但图片由本服务自己托管。可选 `steps`（H3-Image 固定 6 步）、`timeout`（默认 600s）；`width` / `height` 自动向下对齐 16 的倍数，`seed` 不传就随机。
+
+### 分镜逐镜生视频（走网关 i2v）
+
+分镜卡的操作区有 **▶ 按钮**：提交后 studio 先确保首帧（没有就用网关按 `quality` 尺寸现出一张），再把首帧 + 运动提示词（主体 + 动作 + 运镜 + 氛围）以 **multipart/form-data** 发到网关 `POST /v1/videos` 的 i2v 模式，3 秒一轮询 `GET /v1/jobs/{id}`，产物下载落 `backend/outputs/video/`，卡片里直接内嵌 `<video>` 播放。注意网关这个接口的 `image` 是**二进制文件上传**（openapi 实测），不是 data URI 字符串——发 JSON 会被直接掐连接。
+
+```bash
+curl -X POST http://127.0.0.1:8177/api/video/start -H "Content-Type: application/json" \
+  -d '{"shotId":"s1","framePrompt":"a lighthouse at dusk","motionPrompt":"slow push in","quality":"fast","duration":"5s","seed":11}'
+# {"jobId":"v1794454992_1","status":"queued"}   → 轮询 /api/video/job?id=…，done 后 url=/v1/videos/file/….mp4
+```
+
+任务队列只留最近 10 个（内存态，重启 8177 即清空）；quality 档位：`fast` 864×480 / `standard` 1024×576 / `high` 1344×768。
 
 ### 剧本怎么写（混用也行）
 

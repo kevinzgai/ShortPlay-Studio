@@ -38,7 +38,7 @@ from app.paths import WEB_ROOT
 from app.web.agent_routes import (AGENT_GET_PATHS, AGENT_POST_PATHS, agent_get,
                                   agent_post)
 from app.web.responses import Response, Sink, read_body
-from app.web.routes_get import GET_ROUTES, v1_image_file
+from app.web.routes_get import GET_ROUTES, v1_image_file, v1_video_file
 from app.web.routes_post import UNMATCHED
 from app.web.routes_post import dispatch as post_dispatch
 from app.web.routes_post import known_paths as known_post_paths
@@ -99,6 +99,13 @@ async def v1_images(request: Request):
     out = await anyio.to_thread.run_sync(
         lambda: post_dispatch(sink, "/v1/images", payload))
     return to_starlette(out)
+
+
+@app.get("/v1/videos/file/{filename}")
+def v1_video(filename: str, request: Request):
+    """视频产物自托管：分镜视频任务 done 后的 url 指到这里。"""
+    return to_starlette(v1_video_file(_sink_for(request), filename))
+
 
 
 @app.get("/v1/images/file/{filename}")

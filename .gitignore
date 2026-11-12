@@ -20,6 +20,9 @@ __pycache__/
 dist/
 frontend/node_modules/
 projects/
+backend/outputs/
+backend/server.*.log
+backend/video_start.json
 .tts/
 .workbuddy/
 .venv/

@@ -21,6 +21,7 @@ from app.services.agents import AgentDisabledError, agent_system
 from app.services.assets import build_asset_pack, build_frame_prompts, fill_asset_with_ai
 from app.services.comfy import (comfy_job_start, comfy_prompt_rows, comfy_status,
                                 sync_image)
+from app.services.shot_video import video_start
 from app.services.diagnostics import engine_probe, llm_test
 from app.services.export_zip import build_export_zip
 from app.services.llm_json import call_llm_json
@@ -164,6 +165,14 @@ def _comfy_prompt(h, payload):
             payload.get("variants") if isinstance(payload.get("variants"), dict) else {},
             _as(payload.get("styleEn"), "", 240)))
     except (ValueError, TypeError) as exc:
+        return json_response(h, {"detail": str(exc)[:220]}, 400)
+
+
+def _video_start(h, payload):
+    """分镜镜头 → 视频：缺首帧自动文生一张，再 i2v；网关排队串行。"""
+    try:
+        return json_response(h, video_start(payload.get("shotId"), payload))
+    except (ValueError, RuntimeError) as exc:
         return json_response(h, {"detail": str(exc)[:220]}, 400)
 
 
@@ -339,6 +348,7 @@ POST_ROUTES = {
     "/api/llm/test": _llm_test,
     "/api/engine/config": _engine_config_save,
     "/api/engine/test": _engine_test,
+    "/api/video/start": _video_start,
     "/api/comfy/prompt": _comfy_prompt,
     "/api/comfy/generate": _comfy_generate,
 }

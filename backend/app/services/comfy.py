@@ -1,41 +1,33 @@
-"""本地 ComfyUI 出图：提示词拼装、工作流提交、轮询等待、下载与缩略。
+"""本地出图（H3 + SeedVR2 网关版）：提示词拼装、网关调用、批量任务与缩略。
 
 设计要点：
+  · 出图全部走本地网关（gwUrl，默认 127.0.0.1:8000）——网关有单线程队列，
+    studio 不再直连 ComfyUI 抢显存；工作流模板只维护网关一份。
   · 走「提交即返回 jobId + 后台线程串行跑 + 前端轮询」，避免多张图把 HTTP 拖超时；
   · 原图落 examples/assets/，回给前端的是 512px JPEG 缩略 dataURI，
     直接复用 refImage / 撤销栈 / localStorage / zip 导出链路；
-  · 地址与 unet 名不是模块常量，由 comfy_host() / comfy_model() 现读，
-    界面改完立即生效（换 Flux 版本不用改代码）。"""
+  · 网关地址由 engine_store.gw_url() 现读，界面改完立即生效。
+
+旧直连实现（工作流注入 / 参考图上传 / history 轮询 / 下载）已删除，
+由 app.services.gateway 承担；本文件保留提示词层与任务管理层。
+"""
 
 import base64
-import hashlib
-import http.client
 import io
-import json
 import random
 import re
 import sys
 import threading
 import time
-import urllib.parse
-import urllib.request
 
-from app.config.engine_store import (comfy_host, comfy_model,
-                                     h3_image_model, h3_image_status,
+from app.config.engine_store import (gw_url, h3_image_model, h3_image_status,
                                      qwen_image_model, qwen_image_status)
 from app.constants import STYLE_ANCHOR_EN_DEFAULT
 from app.infra.coerce import _as, s
 from app.paths import ROOT
+from app.services import gateway
 from app.services.minimax_image import h3_image_generate
 from app.services.qwen_image import qwen_image_generate
-
-# ComfyUI 一定在本机（127.0.0.1:8188），必须绕过代理。
-# macOS 上 urllib 会读系统代理设置，且系统代理优先级高于 NO_PROXY 环境变量：
-# 用户开了 Clash/Surge 之类工具时，连 127.0.0.1 的请求会被转到代理端口
-# （实测被转到 127.0.0.1:18900 后 ECONNREFUSED），表现为出图全部失败，
-# 而界面上状态灯却是绿的（状态探测同样失败时会被判成 offline，更难查）。
-# 用空 ProxyHandler 明确声明「不走代理」，与是否设置环境变量无关。
-_LOCAL_OPENER = urllib.request.build_opener(urllib.request.ProxyHandler({}))
 
 
 STYLE_ANCHOR_EN_OBJECT = ("photorealistic, 35mm film grain, "
@@ -159,47 +151,30 @@ COMFY_SUFFIX_OBJECT = ("highly detailed, sharp focus, no text, no watermark, "
 
 
 # --------------------------------------------------------------------------
-# 模型架构识别：同一个 ComfyUI 的 models/unet/ 里混着不同架构的模型，
-# UNETLoader 不分架构全列出来，但工作流是完全不同的三套。
+# 模型架构：出图已全部走本地网关，网关只部署了 MiniMax H3-Image 一套模板，
+# arch 概念收敛为固定值。常量与函数保留是因为 routes / diagnostics / 前端
+# 都按旧口径读 arch 字段，接口形状不变、语义收紧。
 # --------------------------------------------------------------------------
 COMFY_ARCH_FLUX = "flux"
 COMFY_ARCH_H3_IMAGE = "h3-image"
 COMFY_ARCH_H3_VIDEO = "h3-video"
 
 COMFY_ARCH_LABEL = {
-    COMFY_ARCH_FLUX: "Flux 文生图",
-    COMFY_ARCH_H3_IMAGE: "MiniMax H3-Image",
-    COMFY_ARCH_H3_VIDEO: "H3 视频（不能出静帧）",
+    COMFY_ARCH_H3_IMAGE: "MiniMax H3-Image（本地网关）",
+    COMFY_ARCH_FLUX: "Flux 文生图（已下线，统一走网关）",
+    COMFY_ARCH_H3_VIDEO: "H3 视频（走网关 /v1/videos）",
 }
 
-# Flux-schnell 蒸馏过，4 步就够；H3-Image 官方口径是 6 步，少给了会糊。
-COMFY_DEFAULT_STEPS = {COMFY_ARCH_FLUX: 4, COMFY_ARCH_H3_IMAGE: 6,
+COMFY_DEFAULT_STEPS = {COMFY_ARCH_H3_IMAGE: 6, COMFY_ARCH_FLUX: 4,
                        COMFY_ARCH_H3_VIDEO: 6}
 
 
 def comfy_arch(unet=None):
-    """按 unet 文件名判断走哪条工作流。不传就用当前 comfyModel。
-
-    认名字而不是去 /object_info 查节点组合：文件名是稳定线索，而 object_info
-    只能告诉你「这个 unet 存在」，告诉不了「它该配哪个 CLIP」。认不出来按
-    flux 处理 —— 保持旧行为，不能让用户配了个自定义 Flux 微调就出不了图。
-    """
-    n = (unet if unet is not None else comfy_model() or "").lower()
-    if "minimax_h3_image" in n:
-        return COMFY_ARCH_H3_IMAGE
-    if "minimax_h3" in n:      # fl2va 等：视频链路，出不了静帧
-        return COMFY_ARCH_H3_VIDEO
-    return COMFY_ARCH_FLUX
+    """网关模式下恒为 h3-image：网关只部署了 H3-Image 一条工作流。"""
+    return COMFY_ARCH_H3_IMAGE
 
 
-# --- 同一变体按架构给画幅 -------------------------------------------------
-# 三视图这种「一张图里并排三个全身」的任务对模型的构图控制要求很高：
-# · H3-Image（6 步）：1152² 方形能稳定出「正 / 侧 / 背 + 足底对齐 + 白底」，
-#   每格头高约 100px，三张脸认得出是同一人；
-# · Flux-schnell（4 步蒸馏）：方形画布控制不住，实测 1152² 会把第三个人
-#   裁出画面（只剩两个半），1344×896 更糟（只剩两个人）。它唯一能保住的
-#   是旧口径 1024×672 —— 虽然会画成半身，但至少三个人都在、不会丢内容。
-# 所以这里不改 Flux 的既有行为，只让 H3-Image 拿到它撑得住的画幅。
+# --- 同一变体按架构给画幅（保留旧表；网关恒为 h3-image，走变体默认值） ---
 VARIANT_SIZE_BY_ARCH = {
     ("turnaround", COMFY_ARCH_FLUX): (1024, 672),
     ("faceSheet", COMFY_ARCH_FLUX): (1024, 672),
@@ -212,115 +187,53 @@ def comfy_variant_size(v):
 
 
 def comfy_arch_info(unet=None):
-    """给前端的一句话说明：这个模型能不能用来出定妆 / 道具图。"""
-    a = comfy_arch(unet)
-    name = unet if unet is not None else comfy_model()
+    """给前端的一句话说明：网关出图恒可用（H3-Image 6 步）。"""
     return {
-        "arch": a, "label": COMFY_ARCH_LABEL.get(a, a),
-        "usable": a != COMFY_ARCH_H3_VIDEO,
-        "steps": COMFY_DEFAULT_STEPS.get(a, 4),
-        "model": name or "",
+        "arch": COMFY_ARCH_H3_IMAGE,
+        "label": COMFY_ARCH_LABEL[COMFY_ARCH_H3_IMAGE],
+        "usable": True, "steps": 6, "model": "MiniMax-H3-Image",
     }
 
 
 def comfy_arch_error():
-    """不可用模型的一句话原因（可用时返回空串）。
-
-    同步接口、批量任务、测试连接三处**共用这一句**：同一个问题在三个地方
-    说法不一致时，用户会以为是三个不同的毛病。
-    """
-    info = comfy_arch_info()
-    if info["usable"]:
-        return ""
-    return ("当前 comfyModel 是视频模型（%s）：它走 fl2v 视频链路（含 audio VAE），"
-            "出不了静帧。定妆 / 道具图请换成 flux1-schnell-fp8 或 minimax_h3_image"
-            % info["model"])
-
-
-def _object_options(node, field):
-    """读 /object_info/<node> 里某输入字段的候选值。
-
-    返回 None = 探测失败（连不上 / 节点不存在），**不要当成「文件缺失」**——
-    否则 ComfyUI 没起来时诊断会报一堆假缺失。
-    """
-    try:
-        with _LOCAL_OPENER.open(comfy_host() + "/object_info/" + node, timeout=6) as r:
-            info = json.load(r)
-        inp = ((info or {}).get(node) or {}).get("input") or {}
-        spec = (inp.get("required") or {}).get(field) or (inp.get("optional") or {}).get(field)
-        if isinstance(spec, list) and spec:
-            head = spec[0]
-            if isinstance(head, list):
-                return [str(x) for x in head]
-            if isinstance(head, dict):
-                return [str(x) for x in (head.get("options") or [])]
-        if isinstance(spec, dict):
-            return [str(x) for x in (spec.get("options") or [])]
-    except Exception:
-        return None
-    return []
-
-
-def comfy_required_files():
-    """当前架构的工作流要 ComfyUI 里真实存在哪些 clip / vae 文件。
-
-    【为什么要单独查】「unet 存在」不等于「能跑」：H3-Image 要的是
-    qwen3vl_32b（type=minimax）+ minimax_h3_image_vae，Flux 要 clip_l +
-    t5xxl + ae。少一个，提交时报的是节点校验失败，界面只会显示「出图失败」，
-    用户根本看不出是缺文件。测试连接时先查一遍，能把话说清楚。
-    """
-    if comfy_arch() == COMFY_ARCH_H3_IMAGE:
-        return [("CLIPLoader", "clip_name", "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors"),
-                ("VAELoader", "vae_name", "minimax_h3_image_vae_fp16.safetensors")]
-    return [("DualCLIPLoader", "clip_name1", "clip_l.safetensors"),
-            ("DualCLIPLoader", "clip_name2", "t5xxl_fp8_e4m3fn_scaled.safetensors"),
-            ("VAELoader", "vae_name", "ae.safetensors")]
+    """恒返回空串：网关模式下没有「选错模型」一说了（模型由网关管）。"""
+    return ""
 
 
 def comfy_missing_files():
-    """缺哪些依赖文件。空列表 = 齐了，或探测不到（探测不到不算缺）。"""
-    missing = []
-    for node, field, want in comfy_required_files():
-        opts = _object_options(node, field)
-        if opts and want not in opts:
-            missing.append(want)
-    return missing
+    """兼容保留：文件齐不齐由网关 /health 兜底，这里恒返回空。"""
+    return []
 
 
-# 探测失败后的负缓存窗口（秒）。见 comfy_status() 的说明。
 STATUS_OFFLINE_TTL = 3.0
 _STATUS_OFFLINE_UNTIL = 0.0
 
 
 def comfy_status():
-    """探测本机 ComfyUI；不在线时前端把出图按钮置灰并给出明确原因。
+    """探测本地网关（含 ComfyUI 可达性与显存）；离线负缓存策略不变。
 
-    【离线负缓存】探测超时 4 秒，而这一步被十来个接口和每次页面加载同步调用。
-    ComfyUI 一断（隧道抖动、机器重启），用户看到的是「整站卡住」而不是「出图不可用」：
-    开一个页面并发五六个请求，每个都干等 4 秒。所以只缓存**失败**结果 ——
-    在线时行为一个字没变（套件切模型后立刻读 status 仍然即时），断开期间只有第一个
-    请求付 4 秒代价，3 秒后自动重探，恢复后立刻回到在线。
+    网关 /health 在加载模型时也不阻塞（返回 busy），比旧直连 /system_stats 更稳。
+    字段与旧版兼容：前端 AssetPanel / EngineDiagnostics 读 online / version /
+    vramFreeMB / arch；version 与 model 恒为空串（模型由网关管理）。
     """
     global _STATUS_OFFLINE_UNTIL
     if time.time() < _STATUS_OFFLINE_UNTIL:
-        return {"online": False, "host": comfy_host(),
-                "detail": "刚探测失败（ComfyUI 未启动或隧道断开），%.0f 秒后自动重试"
+        return {"online": False, "host": gw_url(),
+                "detail": "刚探测失败（网关未启动），%.0f 秒后自动重试"
                           % max(0.0, _STATUS_OFFLINE_UNTIL - time.time()),
                 "qwen": qwen_image_status(), "h3": h3_image_status()}
     try:
-        with _LOCAL_OPENER.open(comfy_host() + "/system_stats", timeout=4) as r:
-            st = json.load(r)
-        dev = (st.get("devices") or [{}])[0]
+        h = gateway.gw_health()
+        comfy = h.get("comfyui") or {}
+        if not (bool(h.get("gateway")) and comfy.get("reachable", False)):
+            raise RuntimeError("网关在，但 ComfyUI 不可达")
         return {
-            "online": True, "host": comfy_host(),
-            "version": ((st.get("system") or {}).get("comfyui_version") or ""),
-            "device": dev.get("name", ""),
-            "vramFreeMB": int(dev.get("vram_free", 0) / (1024 * 1024)),
-            "model": comfy_model(),
-            # 架构决定走哪条工作流；usable=false 时前端要把出图按钮置灰并说明原因
-            "arch": comfy_arch_info(),
-            "qwen": qwen_image_status(),
-            "h3": h3_image_status(),
+            "online": True, "host": gw_url(), "gateway": True,
+            "version": "", "device": str(comfy.get("device", "")),
+            "vramFreeMB": int(comfy.get("vram_free_mb") or 0),
+            "queue": int(h.get("queue") or 0),
+            "model": "", "arch": comfy_arch_info(),
+            "qwen": qwen_image_status(), "h3": h3_image_status(),
             "variants": {k: [{"key": v["key"], "label": v["label"],
                               "w": comfy_variant_size(v)[0],
                               "h": comfy_variant_size(v)[1]}
@@ -328,7 +241,7 @@ def comfy_status():
         }
     except Exception as exc:
         _STATUS_OFFLINE_UNTIL = time.time() + STATUS_OFFLINE_TTL
-        return {"online": False, "host": comfy_host(), "detail": str(exc)[:160],
+        return {"online": False, "host": gw_url(), "detail": str(exc)[:160],
                 "qwen": qwen_image_status(), "h3": h3_image_status()}
 
 
@@ -477,126 +390,27 @@ def comfy_prompt_rows(assets, variants, style_en=""):
     return {"rows": rows, "styleEn": _as(style_en, "", 240) or STYLE_ANCHOR_EN_DEFAULT}
 
 
-H3_REF_SLOTS_CACHE = {"at": 0.0, "names": None}
+_URI_CACHE = {}
 
-H3_REF_SLOTS_TTL = 120
-
-
-def h3_ref_slots():
-    """问 ComfyUI「MiniMaxH3ImageConditioning 到底有几个参考图槽、叫什么」。
-
-    【为什么不把 image_1..image_16 写死】
-    参考图通道的 object_info 声明至少有三种形态（本机 v0.45.0 实测走 a）：
-     a) COMFY_AUTOGROW_V3 动态槽：optional.images 带 {"template": {"prefix": "image_"}}。
-        提交时键名是 `images`，值是编号字典 {"1": [LoadImage节点, 0], ...} ——
-        实测顶层写 image_1 会被 execute() 拒收（unexpected keyword argument），
-        单连线 tensor 会在节点内 sorted(images or {}) 处炸
-        （Boolean value of Tensor with more than one value is ambiguous）。
-        编号字典的键序即提示词里 Picture 1/2/… 的顺序。
-     b) 静态展开多槽：image_1 / image_2 …（每槽一图）。
-     c) 单批量槽 images（类型 IMAGE）：多图需 ImageBatch 拼接。
-    写死一个猜来的名字，出错时表征是 /prompt 校验失败或节点执行炸、
-    报一坨 node_errors / tensor 异常，排查起来像工作流坏了。直接读
-    object_info 拿真实定义，缺通道时能给出「你的 ComfyUI 太旧」这种结论。
-
-    返回形态标记列表；节点不存在或没有任何图片输入时返回 []。
-    形态 a 返回 ["autogrow"]；形态 b 返回 ["image_1", "image_2", ...]；
-    形态 c 返回 ["images"]。
-    """
-    now = time.time()
-    if H3_REF_SLOTS_CACHE["names"] is not None and now - H3_REF_SLOTS_CACHE["at"] < H3_REF_SLOTS_TTL:
-        return H3_REF_SLOTS_CACHE["names"]
-    url = comfy_host() + "/object_info/MiniMaxH3ImageConditioning"
-    try:
-        with _LOCAL_OPENER.open(url, timeout=20) as r:
-            info = json.load(r)
-    except Exception:
-        # 拿不到就当没有：调用方会退成纯文生图，不会把出图整个打挂
-        return []
-    node = (info or {}).get("MiniMaxH3ImageConditioning") or {}
-    spec = node.get("input") or {}
-
-    # 三种槽位形态都认（object_info 实测于本机 v0.45.0）：
-    #  a) COMFY_AUTOGROW_V3 动态槽：optional.images 的类型是 "COMFY_AUTOGROW_V3"，
-    #     带 {"template": {"prefix": "image_", "min": 0, "max": 100}} —— 提交工作流时
-    #     直接写 image_1 / image_2 …（每槽一图），与官方文档一致。tooltip 写明
-    #     「<Picture n> in the prompt; image_1 is the picture to edit」。
-    #  b) 展开后的静态多槽：image_1 / image_2 …（每槽一图，某些版本直接展开）。
-    #  c) 单批量槽 images：类型 "IMAGE"（若存在，多图需 ImageBatch 拼接）。
-    names = []
-    autogrow = False
-    for group in ("required", "optional"):
-        for key, decl in (spec.get(group) or {}).items():
-            kind = decl[0] if isinstance(decl, (list, tuple)) and decl else decl
-            if kind == "COMFY_AUTOGROW_V3" or (isinstance(decl, dict) and decl.get("template")):
-                autogrow = True
-                continue
-            if str(key) == "images" and kind == "IMAGE":
-                names.append(key)
-                continue
-            if not re.fullmatch(r"image_\d+", str(key)):
-                continue
-            if kind == "IMAGE":
-                names.append(key)
-    if autogrow:
-        names = ["autogrow"]
-    names.sort(key=lambda k: 0 if k == "images" else (1 if k == "autogrow" else int(k.split("_")[1])))
-    H3_REF_SLOTS_CACHE["names"] = names
-    H3_REF_SLOTS_CACHE["at"] = now
-    return names
-
-
-def comfy_upload_image(png, filename=""):
-    """把本地 PNG 推进 ComfyUI 的 input/，返回 LoadImage 能直接用的名字。
-
-    LoadImage 只认服务端 input/ 目录，喂不了本地绝对路径，所以必须走 /upload/image。
-    文件名取内容 sha1：同一张锚图在一个批次里会被 N 个变体引用，按内容命名
-    天然只上传一次；重跑同一张也是幂等覆盖，不会在对方 input/ 里攒垃圾。
-    """
-    digest = hashlib.sha1(png).hexdigest()[:16]
-    name = "sp_ref_%s.png" % digest
-    boundary = "----spostudio" + digest
-    lines = []
-    lines.append(("--%s\r\nContent-Disposition: form-data; name=\"image\"; "
-                  "filename=\"%s\"\r\nContent-Type: image/png\r\n\r\n" % (boundary, name)).encode("utf-8"))
-    lines.append(png)
-    for k, v in (("type", "input"), ("overwrite", "true")):
-        lines.append(("\r\n--%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s"
-                      % (boundary, k, v)).encode("utf-8"))
-    lines.append(("\r\n--%s--\r\n" % boundary).encode("utf-8"))
-    body = b"".join(lines)
-    req = urllib.request.Request(
-        comfy_host() + "/upload/image", data=body,
-        headers={"Content-Type": "multipart/form-data; boundary=" + boundary})
-    with _LOCAL_OPENER.open(req, timeout=60) as r:
-        out = json.load(r)
-    got = out.get("name") or name
-    sub = (out.get("subfolder") or "").strip()
-    return (sub + "/" + got) if sub else got
-
-
-_UPLOADED = {}
-
-_UPLOADED_LOCK = threading.Lock()
+_URI_LOCK = threading.Lock()
 
 
 def comfy_ref_name(local_name):
-    """本地资产图 → ComfyUI input/ 里的名字，进程内按文件名缓存。
+    """本地资产图 → data URI（网关 /v1/images/edits 的 image_url 直接吃）。
 
-    同一批里「三视图 + 四视图 + 半身」会反复引用同一张锚图，缓存让上传只发生一次；
-    /v1/images 外部调用也可能指同一张，重跑不重复推 1MB 的 PNG 过去。
+    旧直连时代这里把 PNG 推进 ComfyUI 的 input/；改走网关后参考图以
+    base64 塞进 JSON 即可，不再有上传步骤。进程内按文件名缓存：
+    同一批里「三视图 + 四视图 + 半身」反复引用同一张锚图时只编码一次。
     """
-    key = str(local_name or "")
+    key = str(local_name or "").strip()
     if not key:
         return ""
-    with _UPLOADED_LOCK:
-        hit = _UPLOADED.get(key)
+    with _URI_LOCK:
+        hit = _URI_CACHE.get(key)
     if hit:
         return hit
-    # 只认 examples/assets/ 里的单層文件名，`../` 一律挡掉。
-    # 容错：调用方常把完整相对路径（file 字段就是 "examples/assets/x.png" 格式）
-    # 直接塞进来，前端是 split("/").pop() 剥过的，后端也剥一次 —— 拒绝报错
-    # 不如直接收下，反正最终只落到这一个目录，路径穿越照样被白名单挡死。
+    # 只认 examples/assets/ 里的单层文件名，`../` 一律挡掉（与旧口径一致）。
+    # 容错：调用方常把完整相对路径直接塞进来，剥一次头（拒绝不如收下）。
     if key.startswith("examples/assets/"):
         key = key[len("examples/assets/"):]
     if not ASSET_IMG_NAME.match(key) or "/" in key or "\\" in key:
@@ -604,216 +418,21 @@ def comfy_ref_name(local_name):
     path = ASSET_IMG_DIR / key
     if not path.is_file():
         raise ValueError("参考图不在本地：%s" % key[:60])
-    got = comfy_upload_image(path.read_bytes(), key)
-    with _UPLOADED_LOCK:
-        _UPLOADED[key] = got
-    return got
+    uri = gateway.image_to_data_uri(path.read_bytes())
+    with _URI_LOCK:
+        _URI_CACHE[key] = uri
+    return uri
 
 
-def comfy_workflow(prompt, w, h, seed, steps=0, refs=()):
-    """按 comfyModel 的架构出对应工作流。steps=0 表示「用该架构的默认步数」。
-
-    refs 是已上传到 ComfyUI 的参考图文件名列表，只对 H3-Image 有效
-    （Flux 没有参考图通道，忽略即可，不报错）。
-
-    【为什么不再写死 Flux.1-schnell】
-    `unet_name` 候选里一直混着三个模型，其中两个是 MiniMax H3 系（图像 / 视频），
-    而旧实现只会拼 Flux 链路（DualCLIPLoader clip_l+t5xxl / FluxGuidance /
-    EmptySD3LatentImage）。选了 minimax_h3_image 会一路 `mat1 and mat2 shapes
-    cannot be multiplied (256x4096 and 5120x5376)` —— 因为 H3 的 CLIP 是
-    qwen3vl_32b（5120 维），Flux 的 t5xxl 是 5376 维，接不上。
-    现在按模型名分派：flux 走原链路，H3-Image 走 CLIPLoader(type=minimax) +
-    MiniMaxH3ImageConditioning（该节点同时吐 conditioning 和 latent）。
-
-    两条链路共用同一套参数（prompt / w / h / seed / steps），上游「资产 × 变体」
-    的批量任务与 /v1/images 同步接口都不用关心用的是哪个架构。
-    """
-    arch = comfy_arch()
-    n = int(steps) if steps else COMFY_DEFAULT_STEPS.get(arch, 4)
-    if arch == COMFY_ARCH_H3_VIDEO:
-        raise ValueError(comfy_arch_error())
-    if arch == COMFY_ARCH_H3_IMAGE:
-        return _workflow_h3_image(prompt, w, h, seed, n, refs)
-    return _workflow_flux(prompt, w, h, seed, n)
-
-
-def _workflow_flux(prompt, w, h, seed, steps):
-    """Flux.1-schnell fp8 / 4 步 / euler，与 tools/gen_first_frame.py 完全一致。"""
-    return {
-        "1": {"class_type": "UNETLoader",
-              "inputs": {"unet_name": comfy_model(), "weight_dtype": "default"}},
-        "2": {"class_type": "DualCLIPLoader",
-              "inputs": {"clip_name1": "clip_l.safetensors",
-                         "clip_name2": "t5xxl_fp8_e4m3fn_scaled.safetensors",
-                         "type": "flux", "device": "default"}},
-        "3": {"class_type": "CLIPTextEncode", "inputs": {"text": prompt, "clip": ["2", 0]}},
-        "4": {"class_type": "FluxGuidance", "inputs": {"conditioning": ["3", 0], "guidance": 0}},
-        "5": {"class_type": "EmptySD3LatentImage",
-              "inputs": {"width": w, "height": h, "batch_size": 1}},
-        "6": {"class_type": "BasicScheduler",
-              "inputs": {"model": ["1", 0], "scheduler": "simple", "steps": steps, "denoise": 1}},
-        "7": {"class_type": "KSamplerSelect", "inputs": {"sampler_name": "euler"}},
-        "8": {"class_type": "RandomNoise", "inputs": {"noise_seed": seed}},
-        "9": {"class_type": "BasicGuider", "inputs": {"model": ["1", 0], "conditioning": ["4", 0]}},
-        "10": {"class_type": "SamplerCustomAdvanced",
-               "inputs": {"noise": ["8", 0], "guider": ["9", 0],
-                          "sampler": ["7", 0], "sigmas": ["6", 0], "latent_image": ["5", 0]}},
-        "11": {"class_type": "VAEDecode", "inputs": {"samples": ["10", 0], "vae": ["12", 0]}},
-        "12": {"class_type": "VAELoader", "inputs": {"vae_name": "ae.safetensors"}},
-        "13": {"class_type": "SaveImage",
-               "inputs": {"images": ["11", 0], "filename_prefix": "sp_asset"}},
-    }
-
-
-def _workflow_h3_image(prompt, w, h, seed, steps, refs=()):
-    """MiniMax H3-Image：CLIPLoader(type=minimax) + MiniMaxH3ImageConditioning。
-
-    节点图逐字照抄本机 8000 网关（h3+seedvr2-gateway）的 /v1/images 工作流，
-    连默认步数 6 和 filename_prefix 的 `apiimg/` 子目录都不改 —— 两边出的图
-    要在同一条 ComfyUI 队列里排队、同一套 VAE，出图口径才可比。
-    唯一区别：prefix 换成 sp_asset，别把我们的图和网关的产物混在一个目录里。
-
-    【refs 一接上就变编辑模式】
-    同一个 checkpoint，接图 = 参考编辑，不接 = 文生图（官方原话：
-    "A run with images connected is an image edit workflow"）。
-    节点已经接了 vae，官方文档说这时参考图会「既进文本编码器、又被锚成 latent」，
-    所以身份保持是节点内部的事，不用我们手搓 img2img 的 denoise。
-    宽高我们显式传，不跟着参考图走 —— 否则出三视图会被拉成参考图的画幅。
-    """
-    nodes = {
-        "1": {"class_type": "UNETLoader",
-              "inputs": {"unet_name": comfy_model(), "weight_dtype": "default"}},
-        "2": {"class_type": "CLIPLoader",
-              "inputs": {"clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
-                         "type": "minimax", "device": "default"}},
-        "3": {"class_type": "VAELoader",
-              "inputs": {"vae_name": "minimax_h3_image_vae_fp16.safetensors"}},
-        # 这个节点一次吐两个东西：[0] conditioning 给 BasicGuider，[1] latent 给采样器
-        "5": {"class_type": "MiniMaxH3ImageConditioning",
-              "inputs": {"clip": ["2", 0], "vae": ["3", 0],
-                         "prompt": prompt, "width": w, "height": h}},
-        "6": {"class_type": "KSamplerSelect", "inputs": {"sampler_name": "euler"}},
-        "7": {"class_type": "RandomNoise", "inputs": {"noise_seed": seed}},
-        "8": {"class_type": "BasicScheduler",
-              "inputs": {"model": ["1", 0], "scheduler": "simple",
-                         "steps": steps, "denoise": 1.0}},
-        "9": {"class_type": "BasicGuider",
-              "inputs": {"model": ["1", 0], "conditioning": ["5", 0]}},
-        "10": {"class_type": "SamplerCustomAdvanced",
-               "inputs": {"noise": ["7", 0], "guider": ["9", 0], "sampler": ["6", 0],
-                          "sigmas": ["8", 0], "latent_image": ["5", 1]}},
-        "11": {"class_type": "VAEDecode", "inputs": {"samples": ["10", 0], "vae": ["3", 0]}},
-        "12": {"class_type": "SaveImage",
-               "inputs": {"images": ["11", 0], "filename_prefix": "sp_asset"}},
-    }
-    if refs:
-        slots = h3_ref_slots()
-        if not slots:
-            raise ValueError("当前 ComfyUI 的 MiniMaxH3ImageConditioning 没有参考图输入，"
-                             "接不了身份参考（需要 ComfyUI v0.45.0+ 的 H3-Image 原生支持）")
-        if slots[0] == "autogrow":
-            # 动态槽（本机 v0.45.0 实测）：提交键名是 images，值是编号字典
-            # {"1": [LoadImage, 0], "2": ...}。键序即提示词里 Picture 1/2/… 的顺序。
-            # 顶层写 image_1 会被 execute() 拒收，单连线 tensor 会在节点内炸。
-            for i, rname in enumerate(refs):
-                nid = str(20 + i)
-                nodes[nid] = {"class_type": "LoadImage", "inputs": {"image": rname}}
-                nodes["5"]["inputs"].setdefault("images", {})[str(i + 1)] = [nid, 0]
-        elif slots[0] == "images":
-            # 单批量槽形态：一个槽收一个 IMAGE batch，一个输入不能挂两条线 ——
-            # 多张参考图必须先 ImageBatch 逐级拼接。
-            prev = ""
-            for i, rname in enumerate(refs):
-                nid = str(20 + i)
-                nodes[nid] = {"class_type": "LoadImage", "inputs": {"image": rname}}
-                if prev:
-                    bid = str(30 + i)
-                    nodes[bid] = {"class_type": "ImageBatch",
-                                  "inputs": {"image1": [prev, 0], "image2": [nid, 0]}}
-                    prev = bid
-                else:
-                    prev = nid
-            nodes["5"]["inputs"]["images"] = [prev, 0]
-        else:
-            # 静态多槽形态（image_1..N）：一槽一线，按序对应 Picture N
-            if len(refs) > len(slots):
-                raise ValueError("参考图最多 %d 张，这次给了 %d 张" % (len(slots), len(refs)))
-            for i, rname in enumerate(refs):
-                nid = str(20 + i)
-                nodes[nid] = {"class_type": "LoadImage", "inputs": {"image": rname}}
-                nodes["5"]["inputs"][slots[i]] = [nid, 0]
-    return nodes
-
-
-def comfy_submit(prompt, w, h, seed, steps=0, refs=()):
-    """steps=0 交给 comfy_workflow 按架构取默认值（Flux 4 / H3-Image 6）。"""
-    body = json.dumps({"prompt": comfy_workflow(prompt, w, h, seed, steps, refs),
-                       "client_id": "shortplay-assets"}).encode("utf-8")
-    req = urllib.request.Request(comfy_host() + "/prompt", data=body,
-                                 headers={"Content-Type": "application/json"})
-    with _LOCAL_OPENER.open(req, timeout=30) as r:
-        out = json.load(r)
-    if out.get("node_errors"):
-        raise RuntimeError("ComfyUI 工作流校验失败：" + json.dumps(out["node_errors"], ensure_ascii=False)[:220])
-    return out["prompt_id"]
-
-
-def comfy_wait(pid, timeout=300):
-    t0 = time.time()
-    while True:
-        time.sleep(1.2)
-        try:
-            with _LOCAL_OPENER.open(comfy_host() + "/history/" + pid, timeout=20) as r:
-                hist = json.load(r)
-        except Exception:
-            if time.time() - t0 > timeout:
-                raise RuntimeError("等待 ComfyUI 出图超时（%ds）" % timeout)
-            continue
-        if pid in hist:
-            h = hist[pid]
-            st = h.get("status", {})
-            if st.get("status_str") != "success":
-                raise RuntimeError("ComfyUI 生成失败：" + json.dumps(st, ensure_ascii=False)[:300])
-            imgs = []
-            for _node, out in (h.get("outputs") or {}).items():
-                imgs.extend(out.get("images") or [])
-            return imgs
-        if time.time() - t0 > timeout:
-            raise RuntimeError("等待 ComfyUI 出图超时（%ds）" % timeout)
-
-
-def comfy_download(info, attempts=2):
-    """从 ComfyUI 取回生成的 PNG 原图。
-
-    【为什么带重试】本机回环本该一跳直达，但实测偶发短读：
-    Content-Length 说 620KB、实际只收到 480KB 连接就断了，`urlopen().read()`
-    抛 `IncompleteRead(491520 bytes read, 128724 more expected)`，整张已经出好的图
-    被丢掉，界面显示「出图失败」——用户只能重跑，白等十几秒 GPU。
-    成因在 ComfyUI 侧（并发写盘 / 内存吃紧时提前关连接），不是我们的请求有问题；
-    图已经落在它的 output/ 里，重取是幂等的，成本远低于重跑。
-
-    只对「短读 / 连接被重置 / 读超时」重试；HTTPError（404 之类）不重试，那是真错。
-    """
-    q = urllib.parse.urlencode({"filename": info["filename"],
-                                "subfolder": info.get("subfolder", ""),
-                                "type": info.get("type", "output")})
-    url = comfy_host() + "/view?" + q
-    retryable = (http.client.HTTPException, ConnectionResetError, TimeoutError)
-    last = None
-    for i in range(max(1, attempts)):
-        try:
-            with _LOCAL_OPENER.open(url, timeout=60) as r:
-                body = r.read()
-                want = r.headers.get("Content-Length", "")
-                # read() 少数情况下不抛而是静默短读，这里补一道长度校验
-                if want.isdigit() and len(body) != int(want):
-                    raise http.client.IncompleteRead(body, int(want) - len(body))
-                return body
-        except retryable as exc:
-            last = exc
-            if i + 1 < attempts:
-                time.sleep(0.4 * (i + 1))
-    raise last if last is not None else RuntimeError("图片下载失败")
+def _gw_png_from_data(d):
+    """网关 edits 响应的一项（url / b64_json）→ PNG 原始字节。"""
+    d = d or {}
+    if d.get("b64_json"):
+        return base64.b64decode(d["b64_json"])
+    name = str(d.get("url") or "").rsplit("/", 1)[-1]
+    if not name:
+        raise RuntimeError("网关结果里没有图片地址：" + repr(d)[:120])
+    return gateway.gw_image_bytes(name)
 
 
 def thumb_datauri(png):
@@ -863,10 +482,9 @@ def comfy_job_start(assets, variants, style_en="", fixed_seed=0, engine="comfy",
         if err:
             raise ValueError(err)
     seq_n = max(1, min(int(seq_n or 1), 4)) if engine in ("qwen", "h3") else 1
-    # 参考图通道只有本地 H3-Image 有：Flux 无此输入，云端两家的接口也没接图。
+    # 参考图通道：网关 H3-Image 恒支持（官方 ref 语义）；云端两家的接口没接图。
     # 不支持时不能往提示词里塞「Picture 1」——那会让模型凭空描述一张不存在的参考图。
-    arch = comfy_arch() if engine == "comfy" else ""
-    ref_ok = arch == COMFY_ARCH_H3_IMAGE
+    ref_ok = engine == "comfy"
     plan = []
     for a in assets[:24]:
         kind = _as(a.get("kind"), "character", 16)
@@ -903,7 +521,7 @@ def comfy_job_start(assets, variants, style_en="", fixed_seed=0, engine="comfy",
         job = {"id": jid, "status": "running", "total": total_images, "done": 0,
                "current": "", "items": [], "errors": [], "startedAt": time.time(),
                "finishedAt": 0, "engine": engine,
-               "model": (comfy_model() if engine == "comfy"
+               "model": ("MiniMax-H3-Image（网关）" if engine == "comfy"
                          else qwen_image_model() if engine == "qwen" else h3_image_model())}
         COMFY_JOBS[jid] = job
         # 只保留最近 10 个任务，避免长时间运行内存堆积
@@ -960,11 +578,20 @@ def comfy_worker(jid, plan, engine="comfy"):
             elif engine == "h3":
                 pngs = h3_image_generate(t["prompt"], n)
             else:
-                pid = comfy_submit(prompt, t["w"], t["h"], t["seed"], refs=refs)
-                imgs = comfy_wait(pid)
-                if not imgs:
-                    raise RuntimeError("ComfyUI 没有返回图片")
-                pngs = [comfy_download(imgs[0])]
+                # 本地网关：有参考图走 /v1/images/edits（ref 语义，不传 denoise，
+                # 与旧直连 PH3_IMAGE_EDIT 同口径；denoise 是 img2img 重绘，
+                # 0.5~0.65 才保脸，会把提示词里的三视图构图冲掉，不适合批量定妆）。
+                size = "%dx%d" % (t["w"], t["h"])
+                if refs:
+                    out = gateway.gw_i2i(prompt, refs, size=size,
+                                         seed=t["seed"], n=n)
+                    pngs = [_gw_png_from_data(d) for d in (out.get("data") or [])]
+                else:
+                    pngs = []
+                    for k in range(n):
+                        one = gateway.gw_t2i(prompt, t["w"], t["h"], steps=0,
+                                             seed=t["seed"] + k)
+                        pngs.append(gateway.gw_image_bytes(one["filename"]))
             for i, png in enumerate(pngs[:n]):
                 variant = t["variant"] if len(pngs) == 1 else "%s_s%d" % (t["variant"], i + 1)
                 label = (t["variantLabel"] if len(pngs) == 1
@@ -1017,32 +644,33 @@ def _v1_int(v, default, lo, hi, label):
     return v
 
 
+
 def sync_image(body):
-    """阻塞式文生图：提交 → 等 ComfyUI → 下载原图 → 落盘 → 回 URL。
+    """阻塞式出图：提交本地网关 → 等结果 → 落盘 → 回 URL。
 
-    与 comfy_job_start() 的异步 job 并存，两条路共用 comfy_workflow()，
-    所以「系统设置 · 出图引擎」里换的 comfyHost / comfyModel 对两边同时生效。
-    界面批量出资产仍走异步 job（jobId + 轮询 + 缩略图 dataURI），互不影响。
-
-    返回字段对齐本机 8000 的 H3 + SeedVR2 Gateway：
+    纯文生图走 POST /v1/images/generations；ref_images 给了参考图
+    （填本接口返回过的 filename）走 POST /v1/images/edits（官方 ref 语义，
+    传 denoise 则是 img2img 重绘）。返回字段与旧版兼容：
         prompt_id / seed / status / elapsed / filename / url
-    差异：本接口恒同步（Gateway 的 wait=false + job 轮询不在这里实现），
-    图片由本项目自己托管在 V1_IMAGE_URL_PREFIX 下，不依赖 8000 是否常驻。
+    图片由本项目自己托管在 V1_IMAGE_URL_PREFIX 下，不依赖网关是否常驻。
     """
     if not isinstance(body, dict):
         raise ValueError("请求体要是 JSON 对象")
     prompt = str(body.get("prompt") or "").strip()[:4000]
     if not prompt:
         raise ValueError("prompt 不能为空")
-    err = comfy_arch_error()
-    if err:
-        raise ValueError(err)
     w = _v1_int(body.get("width"), 1024, 256, 2048, "width")
     h = _v1_int(body.get("height"), 1024, 256, 2048, "height")
-    # 0 = 不指定，按模型架构取默认（Flux 4 步 / H3-Image 6 步），
-    # 避免调用方为了「默认值」还得知道后端挂的是哪个模型。
+    w -= w % 16
+    h -= h % 16  # 网关要求 16 的整数倍；非对齐尺寸自动向下取整
     steps = _v1_int(body.get("steps"), 0, 0, 50, "steps")
     timeout = _v1_int(body.get("timeout"), 600, 30, 1800, "timeout")
+    denoise = body.get("denoise")
+    if denoise is not None:
+        try:
+            denoise = min(1.0, max(0.05, float(denoise)))
+        except (TypeError, ValueError):
+            raise ValueError("denoise 要在 0.05–1.0 之间")
     seed = body.get("seed")
     if seed is None:
         seed = random.randint(1, 2 ** 31 - 1)
@@ -1058,34 +686,30 @@ def sync_image(body):
         raise ValueError("ref_images 要是数组")
     if len(raw_refs) > 8:
         raise ValueError("ref_images 最多 8 张")
-    info = comfy_arch_info()
-    refs = []
-    if raw_refs:
-        if info["arch"] != COMFY_ARCH_H3_IMAGE:
-            raise ValueError("参考图只在 H3-Image 架构下可用（当前是 %s）" % info["arch"])
-        slots = h3_ref_slots()
-        if not slots:
-            raise ValueError("当前 ComfyUI 的 H3 节点没有参考图输入，需要 v0.45.0+")
-        for x in raw_refs:
-            refs.append(comfy_ref_name(str(x or "").strip()))
+    refs = [comfy_ref_name(str(x or "").strip()) for x in raw_refs if str(x or "").strip()]
 
     t0 = time.time()
-    pid = comfy_submit(prompt, w, h, seed, steps, refs)
-    imgs = comfy_wait(pid, timeout=timeout)
-    if not imgs:
-        raise RuntimeError("ComfyUI 没有返回图片")
-    png = comfy_download(imgs[0])
+    size = "%dx%d" % (w, h)
+    if refs:
+        out = gateway.gw_i2i(prompt, refs, size=size, denoise=denoise,
+                             seed=seed, timeout=timeout)
+        png = _gw_png_from_data((out.get("data") or [{}])[0])
+        steps_used = int(out.get("steps") or 6)
+    else:
+        out = gateway.gw_t2i(prompt, w, h, steps=steps, seed=seed, timeout=timeout)
+        png = gateway.gw_image_bytes(out["filename"])
+        steps_used = int(out.get("steps") or steps or 6)
     ASSET_IMG_DIR.mkdir(parents=True, exist_ok=True)
     # 12 位十六进制 + _00001_.png，与 Gateway 返回的文件名同款，天然满足
-    # ASSET_IMG_NAME 白名单；不用 ComfyUI 的原始文件名，杜绝路径穿越。
+    # ASSET_IMG_NAME 白名单；不用网关的原始文件名，杜绝路径穿越。
     filename = "%012x_00001_.png" % random.getrandbits(48)
     (ASSET_IMG_DIR / filename).write_bytes(png)
     return {
-        "prompt_id": pid, "seed": seed, "status": "succeeded",
+        "prompt_id": out.get("prompt_id") or out.get("request_id") or "",
+        "seed": seed, "status": "succeeded",
         "elapsed": round(time.time() - t0, 2),
-        # 实际用的步数与模型都回传：换过架构后排查「为什么 6 步还是糊」不用猜
-        "steps": int(steps) if steps else COMFY_DEFAULT_STEPS.get(info["arch"], 4),
-        "width": w, "height": h, "model": info["model"], "arch": info["arch"],
-        "refs": len(refs),
+        "steps": steps_used, "width": w, "height": h,
+        "model": "MiniMax-H3-Image", "arch": COMFY_ARCH_H3_IMAGE,
+        "refs": len(refs), "denoise": denoise,
         "filename": filename, "url": V1_IMAGE_URL_PREFIX + filename,
     }

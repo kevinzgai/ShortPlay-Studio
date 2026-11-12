@@ -10,7 +10,7 @@ import {
 const engTab = ref("comfy");
 
 const form = reactive({
-  comfyHost: "", comfyModel: "", qwenUrl: "", qwenModel: "", qwenSize: "2K",
+  gwUrl: "", comfyHost: "", comfyModel: "", qwenUrl: "", qwenModel: "", qwenSize: "2K",
   qwenKey: "", clearQwenKey: false,
   h3Url: "", h3Model: "", h3Size: "2720x1536",
   h3Key: "", clearH3Key: false
@@ -21,6 +21,7 @@ const SRC_LABEL = { file: "界面配置", env: "环境变量", default: "内置�
 function fill() {
   const c = ui.engine.config || {};
   const v = (k, d) => (c[k] && c[k].value) || d || "";
+  form.gwUrl = v("gwUrl", "http://127.0.0.1:8000");
   form.comfyHost = v("comfyHost", "http://127.0.0.1:8188");
   form.comfyModel = v("comfyModel");
   form.qwenUrl = v("qwenUrl");
@@ -67,7 +68,7 @@ const modelTitle = (m) => {
 function pickModel(m) { form.comfyModel = m; }
 
 const engTabs = computed(() => [
-  { k: "comfy", label: "本地 ComfyUI", on: !!ui.comfy.online,
+  { k: "comfy", label: "本地网关（生图 / 生视频）", on: !!ui.comfy.online,
     badge: ui.comfy.online ? "在线" : "离线" },
   { k: "qwen", label: "通义万相", on: keySet.value,
     badge: keySet.value ? (keyMask.value || "已配置") : "未配置" },
@@ -77,6 +78,7 @@ const engTabs = computed(() => [
 
 function save() {
   saveEngine({
+    gwUrl: form.gwUrl,
     comfyHost: form.comfyHost, comfyModel: form.comfyModel,
     qwenUrl: form.qwenUrl, qwenModel: form.qwenModel, qwenSize: form.qwenSize,
     qwenKey: form.qwenKey, clearQwenKey: form.clearQwenKey,
@@ -108,56 +110,20 @@ function testH3() { testEngine("h3"); }
     <!-- 本地 ComfyUI -->
     <section v-if="engTab === 'comfy'" class="es-block" data-eng-panel="comfy">
       <p class="es-note">
-        本机出图，图不出门、不产生调用费。三视图、概念图、组图都走它。
-        <span v-if="curArch" class="es-sub">
-          当前 {{ curArch.label }} · {{ curArch.steps }} 步
-        </span>
+        本机出图与出视频，图不出门、不产生调用费。三视图、概念图、组图、镜头视频都走它。
+        出图不再直连 ComfyUI，统一交给本地网关排队（24G 显存装不下两套模型，必须串行）。
+        <span v-if="curArch" class="es-sub">当前 {{ curArch.label }} · {{ curArch.steps }} 步</span>
         <span v-if="ui.comfy.online" class="es-sub">
-          v{{ ui.comfy.version || "?" }} · {{ ui.comfy.vramFreeMB }}MB 可用显存
+          {{ ui.comfy.vramFreeMB }}MB 可用显存 · 队列 {{ ui.comfy.queue || 0 }}
         </span>
       </p>
 
       <div class="es-f">
-        <label>服务地址<span v-if="srcText('comfyHost')" class="es-src">{{ srcText("comfyHost") }}</span></label>
-        <input v-model="form.comfyHost" data-eng="comfy-host" placeholder="http://127.0.0.1:8188">
-      </div>
-      <div class="es-f">
-        <label>Diffusion 模型（unet）<span v-if="srcText('comfyModel')" class="es-src">{{ srcText("comfyModel") }}</span></label>
-        <div class="es-row">
-          <input v-model="form.comfyModel" data-eng="comfy-model" list="comfy-unets"
-            placeholder="flux1-schnell-fp8.safetensors">
-          <button class="btn sm quiet" data-eng="reload-models" :disabled="ui.engine.modelsBusy"
-            @click="loadComfyModels(true)">{{ ui.engine.modelsBusy ? "读取中…" : "读可用列表" }}</button>
-        </div>
-        <datalist id="comfy-unets">
-          <option v-for="m in comfyModels" :key="m" :value="m"></option>
-        </datalist>
-        <!-- 平铺成可点的一排并标出架构：同一目录里混着 flux / h3-image / h3-video，
-             只给文件名的话用户得试一次才知道哪个能出定妆图 -->
-        <div v-if="comfyModels.length" data-eng-models>
-          <div class="es-models">
-            <button v-for="m in comfyModels" :key="m" type="button"
-              class="es-model" :class="{ on: form.comfyModel === m, bad: archOf(m) && !archOf(m).usable }"
-              :data-eng-model="m" :title="modelTitle(m)" @click="pickModel(m)">
-              <b>{{ m }}</b>
-              <em v-if="archOf(m)">{{ archOf(m).label }} · {{ archOf(m).steps }} 步</em>
-            </button>
-          </div>
-          <span class="es-hint">
-            ComfyUI 里现有 {{ comfyModels.length }} 个，点一个即可切换；
-            <b>虚线框</b>是视频模型，出不了定妆 / 道具图。
-          </span>
-        </div>
-        <span v-else-if="!ui.comfy.online" class="es-hint">
-          连上 ComfyUI 后可以在这里直接选现有模型，不用猜文件名。
-        </span>
-        <span v-if="curArch && !curArch.usable" class="es-hint warn" data-eng-arch-warn>
-          当前选的是视频模型（{{ curArch.label }}）：它走 fl2v 视频链路，出不了静帧。
-          换 flux1-schnell-fp8 或 minimax_h3_image 才能给定妆 / 道具出图。
-        </span>
-        <span v-else-if="curArch" class="es-hint" data-eng-arch-ok>
-          出图链路：{{ curArch.label }} · {{ curArch.steps }} 步
-          <template v-if="curArch.arch === 'h3-image'">（qwen3vl CLIP + H3 图像 VAE，与 8000 网关同一条工作流）</template>
+        <label>网关地址<span v-if="srcText('gwUrl')" class="es-src">{{ srcText("gwUrl") }}</span></label>
+        <input v-model="form.gwUrl" data-eng="gw-url" placeholder="http://127.0.0.1:8000">
+        <span class="es-hint">
+          H3 + SeedVR2 本地网关（comfyui-h3-demo），没启动时执行其 start_all.ps1；
+          模型与工作流模板由网关管理，这里不用选。
         </span>
       </div>
 
